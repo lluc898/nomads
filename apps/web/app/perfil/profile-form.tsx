@@ -7,6 +7,7 @@ import {
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { UserAvatar } from "@/components/user-avatar";
+import { useI18n } from "@/components/i18n-provider";
 
 import { type ProfileActionState, updateProfileAction } from "./actions";
 
@@ -25,6 +26,7 @@ const initialState: ProfileActionState = { status: "idle" };
 type UsernameAvailability = "idle" | "checking" | "available" | "taken";
 
 export function ProfileForm({ profile, callbackUrl }: ProfileFormProps) {
+  const { t } = useI18n();
   const [state, formAction, pending] = useActionState(
     updateProfileAction,
     initialState,
@@ -117,7 +119,7 @@ export function ProfileForm({ profile, callbackUrl }: ProfileFormProps) {
         <label
           htmlFor="photo"
           className="group relative shrink-0 cursor-pointer rounded-full outline-none has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-blue-200"
-          aria-label="Cambiar foto de perfil"
+          aria-label={t("changePhoto")}
         >
           <input
             key={state.imageUrl ?? "initial-photo"}
@@ -161,7 +163,7 @@ export function ProfileForm({ profile, callbackUrl }: ProfileFormProps) {
 
       <FormField
         id="username"
-        label="Nombre de usuario"
+        label={t("username")}
         hint={
           usernameIsFixed
             ? "Es tu identificador público y ya no se puede modificar."
@@ -221,8 +223,8 @@ export function ProfileForm({ profile, callbackUrl }: ProfileFormProps) {
 
       <FormField
         id="instagram"
-        label="Instagram"
-        hint="Opcional. Puedes escribir @usuario o pegar el enlace completo."
+        label={t("instagramOptional")}
+        hint="@usuario"
         errors={state.errors?.instagram}
       >
         <input
@@ -259,8 +261,8 @@ export function ProfileForm({ profile, callbackUrl }: ProfileFormProps) {
         {pending
           ? "Guardando…"
           : usernameIsFixed
-            ? "Guardar cambios"
-            : "Crear perfil"}
+            ? t("saveChanges")
+            : t("completeProfile")}
       </button>
     </form>
   );

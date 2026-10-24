@@ -3,12 +3,15 @@ import { Image, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HomeSearch } from "@/components/home-search";
+import { LanguageSelector } from "@/components/language-selector";
 import { TripCard } from "@/components/trip-card";
 import { useAuth } from "@/lib/auth-context";
 import { absoluteMediaUrl } from "@/lib/config";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function HomeScreen() {
   const { profile } = useAuth();
+  const { locale, t } = useI18n();
   const avatarUrl = absoluteMediaUrl(profile?.image ?? null);
 
   return (
@@ -25,33 +28,36 @@ export default function HomeScreen() {
                 Viajeros<Text className="text-brand-500">Hub</Text>
               </Text>
               <Text className="mt-1 text-sm text-slate-500">
-                ¿Dónde empieza tu próxima historia?
+                {t("homeQuestion")}
               </Text>
             </View>
-            {avatarUrl ? (
-              <Image
-                source={{ uri: avatarUrl }}
-                className="h-11 w-11 rounded-full bg-slate-200"
-              />
-            ) : (
-              <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-500">
-                <Text className="font-bold text-white">
-                  {profile?.name?.[0]?.toUpperCase() ?? "V"}
-                </Text>
-              </View>
-            )}
+            <View className="flex-row items-center gap-2">
+              <LanguageSelector />
+              {avatarUrl ? (
+                <Image
+                  source={{ uri: avatarUrl }}
+                  className="h-11 w-11 rounded-full bg-slate-200"
+                />
+              ) : (
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-500">
+                  <Text className="font-bold text-white">
+                    {profile?.name?.[0]?.toUpperCase() ?? "V"}
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
 
           <View className="pb-6 pt-8">
             <Text className="text-xs font-bold uppercase tracking-widest text-brand-600">
-              Viajar juntos empieza aquí
+              {t("homeEyebrow")}
             </Text>
             <Text className="mt-3 text-4xl font-extrabold leading-[44px] tracking-tight text-slate-950">
-              Encuentra gente para tu{" "}
-              <Text className="text-brand-500">próximo viaje</Text>
+              {t("homeTitle")}{" "}
+              <Text className="text-brand-500">{t("homeTitleAccent")}</Text>
             </Text>
             <Text className="mt-3 text-base leading-6 text-slate-600">
-              Descubre planes reales y conecta con viajeros afines.
+              {t("homeSubtitle")}
             </Text>
           </View>
 
@@ -62,19 +68,19 @@ export default function HomeScreen() {
           <View className="flex-row items-end justify-between">
             <View>
               <Text className="text-xs font-bold uppercase tracking-widest text-brand-600">
-                Ideas para empezar
+                {t("ideas")}
               </Text>
               <Text className="mt-1 text-2xl font-extrabold tracking-tight text-slate-950">
-                Viajes destacados
+                {t("featured")}
               </Text>
             </View>
-            <Text className="font-bold text-brand-600">Ver todos</Text>
+            <Text className="font-bold text-brand-600">{t("viewAll")}</Text>
           </View>
         </View>
 
         <View className="px-5">
           {featuredTrips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
+            <TripCard key={trip.id} trip={trip} locale={locale} />
           ))}
         </View>
       </ScrollView>

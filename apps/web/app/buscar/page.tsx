@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { translate } from "@viajeroshub/shared";
 
 import { SearchForm } from "@/components/search-form";
 import { SiteHeader } from "@/components/site-header";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 type SearchPageProps = {
   searchParams: Promise<{
@@ -14,6 +16,8 @@ type SearchPageProps = {
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
+  const locale = await getRequestLocale();
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   const hasSearch = Boolean(
     params.origen ||
     params.destino ||
@@ -30,11 +34,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             Encuentra tu grupo
           </p>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 md:text-4xl">
-            Buscar viajes
+            {t("searchTrips")}
           </h1>
-          <p className="mt-2 text-slate-600">
-            Busca por país o por un aeropuerto concreto.
-          </p>
+          <p className="mt-2 text-slate-600">{t("typeLocation")}</p>
           <div className="mt-7">
             <SearchForm />
           </div>
@@ -46,21 +48,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             ⌕
           </div>
           <h2 className="mt-5 text-2xl font-extrabold text-slate-950">
-            {hasSearch
-              ? "No hay viajes publicados para esta ruta"
-              : "Elige desde dónde quieres viajar"}
+            {hasSearch ? t("noTripsRoute") : t("countryAirport")}
           </h2>
           <p className="mx-auto mt-2 max-w-xl leading-6 text-slate-600">
-            {hasSearch
-              ? "El catálogo mundial ya está conectado. Puedes ser la primera persona en publicar este viaje."
-              : "Puedes seleccionar un país entero, un aeropuerto o Cualquier lugar como destino."}
+            {hasSearch ? t("noTripsHelp") : t("typeLocation")}
           </p>
           {hasSearch ? (
             <Link
               href="/crear"
               className="mt-6 inline-flex min-h-12 items-center rounded-xl bg-[#0B6EFD] px-6 font-bold text-white hover:bg-[#0857C9]"
             >
-              Crear este viaje
+              {t("createTrip")}
             </Link>
           ) : null}
         </div>

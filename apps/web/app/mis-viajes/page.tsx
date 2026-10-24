@@ -1,22 +1,30 @@
 import Link from "next/link";
+import { translate } from "@viajeroshub/shared";
 
+import { LanguageSelector } from "@/components/language-selector";
 import { Logo } from "@/components/logo";
 import { requireCompleteProfilePage } from "@/lib/auth/guards";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 export default async function MyTripsPage() {
   const { user } = await requireCompleteProfilePage("/mis-viajes");
+  const locale = await getRequestLocale();
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
 
   return (
     <main className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
           <Logo />
-          <Link
-            href="/crear"
-            className="rounded-xl bg-[#0B6EFD] px-4 py-3 text-sm font-bold text-white"
-          >
-            Crear viaje
-          </Link>
+          <div className="flex items-center gap-3">
+            <LanguageSelector />
+            <Link
+              href="/crear"
+              className="rounded-xl bg-[#0B6EFD] px-4 py-3 text-sm font-bold text-white"
+            >
+              {t("navCreate")}
+            </Link>
+          </div>
         </div>
       </header>
       <section className="mx-auto max-w-6xl px-5 py-12">
@@ -36,13 +44,13 @@ export default async function MyTripsPage() {
               href="/crear"
               className="rounded-xl bg-[#0B6EFD] px-5 py-3 font-bold text-white"
             >
-              Crear un viaje
+              {t("createTrip")}
             </Link>
             <Link
               href="/buscar"
               className="rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-700"
             >
-              Explorar viajes
+              {t("navExplore")}
             </Link>
           </div>
         </div>

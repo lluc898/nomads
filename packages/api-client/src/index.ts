@@ -1,5 +1,7 @@
 import {
+  isSupportedLocale,
   mobileProfileSchema,
+  type SupportedLocale,
   travelLocationSchema,
   tripCardSchema,
   type MobileProfile,
@@ -19,13 +21,21 @@ export function createApiClient({
   return {
     async searchLocations(
       query: string,
-      options: { includeAnywhere?: boolean } = {},
+      options: { includeAnywhere?: boolean; locale?: SupportedLocale } = {},
     ): Promise<TravelLocation[]> {
       const search = new URLSearchParams({ q: query });
       if (options.includeAnywhere) search.set("includeAnywhere", "true");
+      if (options.locale) search.set("locale", options.locale);
       const response = await fetcher(`${baseUrl}/locations?${search}`);
       if (!response.ok) throw await apiError(response);
       return travelLocationSchema.array().parse(await response.json());
+    },
+
+    async detectLocale(): Promise<SupportedLocale> {
+      const response = await fetcher(`${baseUrl}/locale`);
+      if (!response.ok) throw await apiError(response);
+      const payload = (await response.json()) as { locale?: unknown };
+      return isSupportedLocale(payload.locale) ? payload.locale : "en";
     },
 
     async listTrips(): Promise<TripCard[]> {

@@ -1,11 +1,14 @@
 import { Tabs } from "expo-router";
 import { Text, type ColorValue } from "react-native";
 
+import { useI18n } from "@/lib/i18n-context";
+
 const TabIcon = ({ symbol, color }: { symbol: string; color: ColorValue }) => (
   <Text style={{ color, fontSize: 19 }}>{symbol}</Text>
 );
 
 export default function TabsLayout() {
+  const { t } = useI18n();
   return (
     <Tabs
       screenOptions={{
@@ -24,28 +27,28 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Inicio",
+          title: t("navHome"),
           tabBarIcon: ({ color }) => <TabIcon symbol="⌂" color={color} />,
         }}
       />
       <Tabs.Screen
         name="create"
         options={{
-          title: "Crear",
+          title: t("navCreate"),
           tabBarIcon: ({ color }) => <TabIcon symbol="＋" color={color} />,
         }}
       />
       <Tabs.Screen
         name="trips"
         options={{
-          title: "Mis viajes",
+          title: t("navMyTrips"),
           tabBarIcon: ({ color }) => <TabIcon symbol="✈" color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Perfil",
+          title: t("navProfile"),
           tabBarIcon: ({ color }) => <TabIcon symbol="●" color={color} />,
         }}
       />

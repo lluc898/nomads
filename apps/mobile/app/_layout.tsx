@@ -4,15 +4,18 @@ import { useEffect } from "react";
 
 import { LoadingScreen } from "@/components/loading-screen";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
+import { I18nProvider } from "@/lib/i18n-context";
 
 import "../global.css";
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <StatusBar style="dark" />
-      <AuthGate />
-    </AuthProvider>
+    <I18nProvider>
+      <AuthProvider>
+        <StatusBar style="dark" />
+        <AuthGate />
+      </AuthProvider>
+    </I18nProvider>
   );
 }
 

@@ -1,4 +1,4 @@
-import { featuredTrips } from "@viajeroshub/shared";
+import { featuredTrips, translate } from "@viajeroshub/shared";
 import Link from "next/link";
 
 import {
@@ -12,6 +12,7 @@ import { Logo } from "@/components/logo";
 import { SearchForm } from "@/components/search-form";
 import { SiteHeader } from "@/components/site-header";
 import { TripCard } from "@/components/trip-card";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 const quickLinks = [
   "Desde Baleares",
@@ -20,7 +21,9 @@ const quickLinks = [
   "Últimos viajes",
 ];
 
-export default function Home() {
+export default async function Home() {
+  const locale = await getRequestLocale();
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   return (
     <main>
       <SiteHeader />
@@ -36,15 +39,14 @@ export default function Home() {
         <div className="relative mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/70 px-3 py-1.5 text-xs font-bold tracking-[.12em] text-[#0857C9] uppercase">
-              <SparklesIcon className="size-4" /> Viajar juntos empieza aquí
+              <SparklesIcon className="size-4" /> {t("homeEyebrow")}
             </p>
             <h1 className="text-4xl leading-[1.08] font-extrabold tracking-[-.045em] text-balance text-slate-950 md:text-6xl">
-              Encuentra gente para tu{" "}
-              <span className="text-[#0B6EFD]">próximo viaje</span>
+              {t("homeTitle")}{" "}
+              <span className="text-[#0B6EFD]">{t("homeTitleAccent")}</span>
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-7 text-pretty text-slate-600">
-              Descubre planes reales, conecta con viajeros afines y organiza la
-              aventura que llevas tiempo imaginando.
+              {t("homeSubtitle")}
             </p>
           </div>
           <div className="mx-auto mt-10 max-w-6xl">
@@ -69,26 +71,25 @@ export default function Home() {
           <div className="flex items-end justify-between gap-6">
             <div>
               <p className="text-sm font-bold tracking-[.14em] text-[#0B6EFD] uppercase">
-                Ideas para empezar
+                {t("ideas")}
               </p>
               <h2 className="mt-2 text-3xl font-extrabold tracking-[-.035em] text-slate-950 md:text-4xl">
-                Viajes que están tomando forma
+                {t("forming")}
               </h2>
               <p className="mt-3 max-w-2xl text-slate-600">
-                Personas reales buscando compañeros para compartir ruta, gastos
-                y buenos momentos.
+                {t("formingSubtitle")}
               </p>
             </div>
             <Link
               href="/buscar"
               className="hidden items-center gap-2 font-bold text-[#0857C9] md:flex"
             >
-              Ver todos <ArrowRightIcon className="size-4" />
+              {t("viewAll")} <ArrowRightIcon className="size-4" />
             </Link>
           </div>
           <div className="mt-9 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {featuredTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} />
+              <TripCard key={trip.id} trip={trip} locale={locale} />
             ))}
           </div>
         </div>

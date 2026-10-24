@@ -72,6 +72,7 @@ packages/ui
 - Debe funcionar la búsqueda por mes completo.
 - La búsqueda no pide cantidad de viajeros: cada cuenta busca una plaza para sí misma.
 - En la app móvil, el buscador vive en Inicio y no tiene una pestaña independiente.
+- La interfaz comparte i18n para `es`, `en`, `ca`, `fr`, `de`, `it`, `pt` y `nl`; la selección manual persistida prevalece sobre la detección inicial por país/IP.
 - Usa índices PostgreSQL y consultas eficientes.
 - Devuelve resultados paginados con filtros y orden.
 - Origen y destino reutilizan el catálogo `countries`/`airports`; el origen exige país o aeropuerto y el destino admite además `anywhere` ("Cualquier lugar").

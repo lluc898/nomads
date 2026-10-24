@@ -2,11 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getUserProfileById } from "@viajeroshub/database";
+import { translate } from "@viajeroshub/shared";
 
 import { auth, authCapabilities, signIn } from "@/auth";
 import { Logo } from "@/components/logo";
+import { LanguageSelector } from "@/components/language-selector";
 import { getProfileSetupUrl, getSafeCallbackUrl } from "@/lib/auth/redirects";
 import { getDatabase } from "@/lib/database";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 type AccessPageProps = {
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
@@ -22,6 +25,8 @@ const errorMessages: Record<string, string> = {
 
 export default async function AccessPage({ searchParams }: AccessPageProps) {
   const session = await auth();
+  const locale = await getRequestLocale();
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   const params = await searchParams;
   const callbackUrl = getSafeCallbackUrl(params.callbackUrl);
 
@@ -50,7 +55,7 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
         </Link>
         <div className="relative max-w-xl">
           <p className="text-sm font-bold tracking-[.14em] text-blue-100 uppercase">
-            Tu próxima historia empieza aquí
+            {t("accessTitle")}
           </p>
           <h1 className="mt-4 text-5xl leading-[1.08] font-extrabold tracking-[-.045em]">
             Viajar es mejor cuando encuentras a las personas adecuadas.
@@ -65,10 +70,14 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
         </p>
       </section>
 
-      <section className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-12">
+      <section className="relative flex min-h-screen items-center justify-center bg-slate-50 px-5 py-12">
+        <div className="absolute top-6 right-6 hidden lg:block">
+          <LanguageSelector />
+        </div>
         <div className="w-full max-w-md">
-          <div className="mb-10 lg:hidden">
+          <div className="mb-10 flex items-center justify-between lg:hidden">
             <Logo />
+            <LanguageSelector />
           </div>
           <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,.08)] sm:p-10">
             <p className="text-sm font-bold text-[#0B6EFD]">Bienvenido</p>
@@ -104,7 +113,7 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
                   className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 font-bold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
                 >
                   <GoogleIcon />
-                  Continuar con Google
+                  {t("continueGoogle")}
                 </button>
               </form>
             ) : (
@@ -120,8 +129,7 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
             )}
 
             <p className="mt-6 text-center text-xs leading-5 text-slate-500">
-              Al continuar aceptas las condiciones de uso y la política de
-              privacidad de ViajerosHub.
+              {t("terms")}
             </p>
           </div>
           <Link

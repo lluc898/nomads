@@ -3,22 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 
 import { CalendarIcon } from "./icons";
-
-const weekdays = ["L", "M", "X", "J", "V", "S", "D"];
-const months = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
+import { useI18n } from "./i18n-provider";
 
 type DateMode = "exact" | "flexible";
 
@@ -33,13 +18,13 @@ function monthKey(year: number, month: number) {
   return `${year}-${String(month + 1).padStart(2, "0")}`;
 }
 
-function formatShortDate(value: string) {
+function formatShortDate(value: string, locale: string) {
   const [year, month, day] = value.split("-").map(Number) as [
     number,
     number,
     number,
   ];
-  return new Intl.DateTimeFormat("es-ES", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     ...(year !== new Date().getFullYear() ? { year: "numeric" } : {}),
@@ -51,17 +36,24 @@ function CalendarGrid({
   departureDate,
   returnDate,
   onSelect,
+  locale,
 }: {
   visibleMonth: Date;
   departureDate: string;
   returnDate: string;
   onSelect: (date: string) => void;
+  locale: string;
 }) {
   const year = visibleMonth.getFullYear();
   const month = visibleMonth.getMonth();
   const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = toIsoDate(new Date());
+  const weekdays = Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(
+      new Date(2026, 0, 5 + index),
+    ),
+  );
   const cells = Array.from(
     { length: Math.ceil((firstWeekday + daysInMonth) / 7) * 7 },
     (_, index) => {
@@ -94,7 +86,7 @@ function CalendarGrid({
               type="button"
               disabled={disabled}
               onClick={() => onSelect(value)}
-              aria-label={new Intl.DateTimeFormat("es-ES", {
+              aria-label={new Intl.DateTimeFormat(locale, {
                 dateStyle: "full",
               }).format(new Date(year, month, day))}
               aria-pressed={endpoint || inRange}
@@ -116,6 +108,7 @@ function CalendarGrid({
 }
 
 export function TravelDatePicker() {
+  const { locale, t } = useI18n();
   const panelId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const today = new Date();
@@ -128,6 +121,11 @@ export function TravelDatePicker() {
   const [returnDate, setReturnDate] = useState("");
   const [flexibleYear, setFlexibleYear] = useState(today.getFullYear());
   const [flexibleMonth, setFlexibleMonth] = useState("");
+  const months = Array.from({ length: 12 }, (_, index) =>
+    new Intl.DateTimeFormat(locale, { month: "long" }).format(
+      new Date(2026, index, 1),
+    ),
+  );
 
   useEffect(() => {
     function closeOnOutsideClick(event: MouseEvent) {
@@ -152,12 +150,12 @@ export function TravelDatePicker() {
     mode === "flexible"
       ? flexibleMonth
         ? `${months[Number(flexibleMonth.slice(5)) - 1]} ${flexibleMonth.slice(0, 4)}`
-        : "Elige un mes"
+        : t("chooseMonth")
       : departureDate && returnDate
-        ? `${formatShortDate(departureDate)} – ${formatShortDate(returnDate)}`
+        ? `${formatShortDate(departureDate, locale)} – ${formatShortDate(returnDate, locale)}`
         : departureDate
-          ? `${formatShortDate(departureDate)} – Elige vuelta`
-          : "Elige ida y vuelta";
+          ? `${formatShortDate(departureDate, locale)} – ${t("chooseReturn")}`
+          : t("chooseDates");
 
   function selectExactDate(value: string) {
     if (!departureDate || returnDate) {
@@ -205,7 +203,7 @@ export function TravelDatePicker() {
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-xs font-semibold text-slate-500">
-            Cuándo
+            {t("when")}
           </span>
           <span
             className={`mt-0.5 block truncate text-[15px] ${
@@ -238,7 +236,7 @@ export function TravelDatePicker() {
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                {option === "exact" ? "Fechas exactas" : "Mes flexible"}
+                {option === "exact" ? t("exactDates") : t("flexibleMonth")}
               </button>
             ))}
           </div>
@@ -248,7 +246,7 @@ export function TravelDatePicker() {
               <div className="mb-4 flex items-center justify-between">
                 <button
                   type="button"
-                  aria-label="Mes anterior"
+                  aria-label={t("previousMonth")}
                   disabled={!canGoToPreviousMonth}
                   onClick={() => moveMonth(-1)}
                   className="grid size-10 place-items-center rounded-lg text-xl text-slate-700 hover:bg-slate-100 disabled:text-slate-300"
@@ -260,7 +258,7 @@ export function TravelDatePicker() {
                 </p>
                 <button
                   type="button"
-                  aria-label="Mes siguiente"
+                  aria-label={t("nextMonth")}
                   onClick={() => moveMonth(1)}
                   className="grid size-10 place-items-center rounded-lg text-xl text-slate-700 hover:bg-slate-100"
                 >
@@ -272,11 +270,12 @@ export function TravelDatePicker() {
                 departureDate={departureDate}
                 returnDate={returnDate}
                 onSelect={selectExactDate}
+                locale={locale}
               />
               <p className="mt-3 text-center text-xs text-slate-500">
                 {departureDate && !returnDate
-                  ? "Ahora elige la fecha de vuelta"
-                  : "Selecciona primero la ida y después la vuelta"}
+                  ? t("nowChooseReturn")
+                  : t("chooseDepartureThenReturn")}
               </p>
             </div>
           ) : (
@@ -284,7 +283,7 @@ export function TravelDatePicker() {
               <div className="mb-4 flex items-center justify-between">
                 <button
                   type="button"
-                  aria-label="Año anterior"
+                  aria-label={t("previousYear")}
                   disabled={flexibleYear <= today.getFullYear()}
                   onClick={() => setFlexibleYear((year) => year - 1)}
                   className="grid size-10 place-items-center rounded-lg text-xl text-slate-700 hover:bg-slate-100 disabled:text-slate-300"
@@ -294,7 +293,7 @@ export function TravelDatePicker() {
                 <p className="font-extrabold text-slate-900">{flexibleYear}</p>
                 <button
                   type="button"
-                  aria-label="Año siguiente"
+                  aria-label={t("nextYear")}
                   onClick={() => setFlexibleYear((year) => year + 1)}
                   className="grid size-10 place-items-center rounded-lg text-xl text-slate-700 hover:bg-slate-100"
                 >
@@ -331,7 +330,7 @@ export function TravelDatePicker() {
                 })}
               </div>
               <p className="mt-3 text-center text-xs text-slate-500">
-                Verás viajes que salgan en cualquier fecha del mes.
+                {t("wholeMonthHelp")}
               </p>
             </div>
           )}

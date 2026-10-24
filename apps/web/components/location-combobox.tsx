@@ -4,6 +4,7 @@ import type { TravelLocation } from "@viajeroshub/shared";
 import { useEffect, useRef, useState } from "react";
 
 import { MapPinIcon } from "@/components/icons";
+import { useI18n } from "@/components/i18n-provider";
 
 type LocationComboboxProps = {
   label: string;
@@ -18,6 +19,7 @@ export function LocationCombobox({
   placeholder,
   includeAnywhere = false,
 }: LocationComboboxProps) {
+  const { locale, t } = useI18n();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<TravelLocation | null>(null);
   const [results, setResults] = useState<TravelLocation[]>([]);
@@ -35,7 +37,7 @@ export function LocationCombobox({
     const timeout = setTimeout(async () => {
       setLoading(true);
       try {
-        const search = new URLSearchParams({ q: query });
+        const search = new URLSearchParams({ q: query, locale });
         if (includeAnywhere) search.set("includeAnywhere", "true");
         const response = await fetch(`/api/locations?${search}`, {
           signal: controller.signal,
@@ -59,7 +61,7 @@ export function LocationCombobox({
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [includeAnywhere, open, query, selected]);
+  }, [includeAnywhere, locale, open, query, selected]);
 
   function choose(location: TravelLocation) {
     setSelected(location);
@@ -128,7 +130,7 @@ export function LocationCombobox({
         >
           {loading ? (
             <p className="px-3 py-4 text-sm text-slate-500">
-              Buscando ubicaciones…
+              {t("searchingLocations")}
             </p>
           ) : results.length ? (
             results.map((location, index) => (
@@ -160,9 +162,7 @@ export function LocationCombobox({
             ))
           ) : (
             <p className="px-3 py-4 text-sm text-slate-500">
-              {query.trim()
-                ? "No hemos encontrado países ni aeropuertos."
-                : "Escribe un país, ciudad, IATA o aeropuerto."}
+              {query.trim() ? t("noLocations") : t("typeLocation")}
             </p>
           )}
         </div>

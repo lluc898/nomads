@@ -18,10 +18,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/lib/auth-context";
 import { absoluteMediaUrl, API_URL } from "@/lib/config";
+import { useI18n } from "@/lib/i18n-context";
+import { LanguageSelector } from "@/components/language-selector";
 
 type Availability = "idle" | "checking" | "available" | "taken" | "invalid";
 
 export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
+  const { t } = useI18n();
   const { profile, saveProfile, signOut } = useAuth();
   const [username, setUsername] = useState(profile?.username ?? "");
   const [instagram, setInstagram] = useState(profile?.instagramUrl ?? "");
@@ -158,22 +161,24 @@ export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
           keyboardShouldPersistTaps="handled"
         >
           <View className="pb-5 pt-3">
-            <Text className="text-xs font-bold uppercase tracking-widest text-brand-600">
-              {mandatory ? "Primer paso" : "Tu cuenta"}
-            </Text>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-xs font-bold uppercase tracking-widest text-brand-600">
+                {mandatory ? t("firstStep") : t("yourAccount")}
+              </Text>
+              <LanguageSelector />
+            </View>
             <Text className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">
-              {mandatory ? "Completa tu perfil" : "Edita tu perfil"}
+              {mandatory ? t("completeProfile") : t("editProfile")}
             </Text>
             <Text className="mt-2 leading-6 text-slate-600">
-              Tu foto y tu nombre ayudan a que otros viajeros sepan con quién
-              compartirán el viaje.
+              {t("profileIntro")}
             </Text>
           </View>
 
           <View className="items-center rounded-3xl border border-slate-200 bg-white p-6">
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Cambiar foto de perfil"
+              accessibilityLabel={t("changePhoto")}
               onPress={pickPhoto}
               className="relative h-32 w-32"
             >
@@ -194,14 +199,14 @@ export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
               </View>
             </Pressable>
             <Text className="mt-3 text-sm font-semibold text-brand-600">
-              Pulsa la foto para cambiarla
+              {t("tapPhoto")}
             </Text>
             <FieldError messages={fieldErrors.photo} />
           </View>
 
           <View className="mt-4 rounded-3xl border border-slate-200 bg-white p-5">
             <Text className="text-sm font-bold text-slate-800">
-              Nombre de usuario
+              {t("username")}
             </Text>
             <View className="mt-2 flex-row items-center rounded-xl border border-slate-300 bg-white px-4">
               <Text className="text-base text-slate-500">@</Text>
@@ -227,7 +232,7 @@ export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
             </View>
             {usernameIsFixed ? (
               <Text className="mt-2 text-xs leading-5 text-slate-500">
-                Este nombre es definitivo y no se puede cambiar.
+                {t("usernameFixed")}
               </Text>
             ) : (
               <AvailabilityMessage value={availability} />
@@ -235,7 +240,7 @@ export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
             <FieldError messages={fieldErrors.username} />
 
             <Text className="mt-5 text-sm font-bold text-slate-800">
-              Instagram (opcional)
+              {t("instagramOptional")}
             </Text>
             <TextInput
               value={instagram}
@@ -269,7 +274,7 @@ export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
               <ActivityIndicator color="white" />
             ) : (
               <Text className="text-base font-bold text-white">
-                {mandatory ? "Guardar y continuar" : "Guardar cambios"}
+                {mandatory ? t("saveContinue") : t("saveChanges")}
               </Text>
             )}
           </Pressable>
@@ -280,7 +285,7 @@ export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
               onPress={signOut}
               className="mt-3 h-12 items-center justify-center rounded-xl"
             >
-              <Text className="font-bold text-red-600">Cerrar sesión</Text>
+              <Text className="font-bold text-red-600">{t("navSignOut")}</Text>
             </Pressable>
           ) : null}
         </ScrollView>

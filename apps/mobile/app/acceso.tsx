@@ -2,10 +2,13 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { LanguageSelector } from "@/components/language-selector";
 import { useAuth } from "@/lib/auth-context";
+import { useI18n } from "@/lib/i18n-context";
 
 export default function AccessScreen() {
   const { signIn } = useAuth();
+  const { t } = useI18n();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,18 +31,20 @@ export default function AccessScreen() {
   return (
     <SafeAreaView className="flex-1 justify-between bg-slate-50 px-6 pb-8 pt-10">
       <View>
-        <Text className="text-2xl font-extrabold tracking-tight text-slate-950">
-          Viajeros<Text className="text-brand-500">Hub</Text>
-        </Text>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-2xl font-extrabold tracking-tight text-slate-950">
+            Viajeros<Text className="text-brand-500">Hub</Text>
+          </Text>
+          <LanguageSelector />
+        </View>
         <View className="mt-14 h-16 w-16 items-center justify-center rounded-2xl bg-brand-500">
           <Text className="text-3xl text-white">✦</Text>
         </View>
         <Text className="mt-7 text-4xl font-extrabold leading-[44px] tracking-tight text-slate-950">
-          Tu próxima historia empieza aquí
+          {t("accessTitle")}
         </Text>
         <Text className="mt-4 text-base leading-6 text-slate-600">
-          Encuentra compañeros, crea planes y organiza tus viajes en grupo desde
-          el móvil.
+          {t("accessSubtitle")}
         </Text>
       </View>
 
@@ -62,13 +67,12 @@ export default function AccessScreen() {
             <ActivityIndicator color="#0B6EFD" />
           ) : (
             <Text className="text-base font-bold text-slate-900">
-              Continuar con Google
+              {t("continueGoogle")}
             </Text>
           )}
         </Pressable>
         <Text className="mt-4 text-center text-xs leading-5 text-slate-500">
-          Al continuar aceptas las condiciones de uso y la política de
-          privacidad.
+          {t("terms")}
         </Text>
       </View>
     </SafeAreaView>

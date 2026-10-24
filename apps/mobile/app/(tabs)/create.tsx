@@ -1,9 +1,11 @@
 import { PlaceholderScreen } from "@/components/placeholder-screen";
+import { useI18n } from "@/lib/i18n-context";
 export default function CreateScreen() {
+  const { t } = useI18n();
   return (
     <PlaceholderScreen
-      title="Crear un viaje"
-      description="Publica tu ruta, fechas y plazas para encontrar compañeros de viaje."
+      title={t("createTrip")}
+      description={t("createTripDescription")}
     />
   );
 }

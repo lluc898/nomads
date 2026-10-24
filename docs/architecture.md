@@ -13,6 +13,8 @@
 - `packages/api-client` contiene el contrato HTTP tipado que consume Expo. La app nunca importa `packages/database` ni accede directamente a PostgreSQL.
 - El primer acceso nativo bloquea la navegación hasta guardar un `username` único y una foto. La subida usa el mismo servicio de validación, recorte WebP y almacenamiento que la web.
 - El catálogo geográfico usa una instantánea versionada de OurAirports: países y aeropuertos activos se importan de forma idempotente y se buscan mediante PostgreSQL `pg_trgm`. Los identificadores públicos (`country:ES`, `airport:123` y `anywhere`) son compartidos por búsqueda y creación de viajes.
+- Web y móvil comparten catálogos i18n para español, inglés, catalán, francés, alemán, italiano, portugués y neerlandés. La preferencia se persiste en cookie web o SecureStore móvil.
+- El idioma inicial se resuelve por cabeceras de país o IP mediante `country.is`, con `Accept-Language` como respaldo; la elección manual siempre prevalece.
 
 ## Próximos cortes verticales
 

@@ -2,21 +2,7 @@ import type { TripDateSelection } from "@viajeroshub/shared";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
-const weekdays = ["L", "M", "X", "J", "V", "S", "D"];
-const months = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-];
+import { useI18n } from "@/lib/i18n-context";
 
 type DateMode = "exact" | "flexible";
 
@@ -31,13 +17,13 @@ function monthKey(year: number, month: number) {
   return `${year}-${String(month + 1).padStart(2, "0")}`;
 }
 
-function shortDate(value: string) {
+function shortDate(value: string, locale: string) {
   const [year, month, day] = value.split("-").map(Number) as [
     number,
     number,
     number,
   ];
-  return new Intl.DateTimeFormat("es-ES", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
   }).format(new Date(year, month - 1, day));
@@ -48,6 +34,7 @@ export function TravelDatePicker({
 }: {
   onChange: (selection: TripDateSelection | null) => void;
 }) {
+  const { locale, t } = useI18n();
   const today = new Date();
   const [expanded, setExpanded] = useState(false);
   const [mode, setMode] = useState<DateMode>("exact");
@@ -58,6 +45,16 @@ export function TravelDatePicker({
   const [returnDate, setReturnDate] = useState("");
   const [flexibleYear, setFlexibleYear] = useState(today.getFullYear());
   const [flexibleMonth, setFlexibleMonth] = useState("");
+  const months = Array.from({ length: 12 }, (_, index) =>
+    new Intl.DateTimeFormat(locale, { month: "long" }).format(
+      new Date(2026, index, 1),
+    ),
+  );
+  const weekdays = Array.from({ length: 7 }, (_, index) =>
+    new Intl.DateTimeFormat(locale, { weekday: "narrow" }).format(
+      new Date(2026, 0, 5 + index),
+    ),
+  );
 
   const year = visibleMonth.getFullYear();
   const month = visibleMonth.getMonth();
@@ -73,12 +70,12 @@ export function TravelDatePicker({
     mode === "flexible"
       ? flexibleMonth
         ? `${months[Number(flexibleMonth.slice(5)) - 1]} ${flexibleMonth.slice(0, 4)}`
-        : "Elige un mes completo"
+        : t("chooseMonth")
       : departureDate && returnDate
-        ? `${shortDate(departureDate)} – ${shortDate(returnDate)}`
+        ? `${shortDate(departureDate, locale)} – ${shortDate(returnDate, locale)}`
         : departureDate
-          ? `${shortDate(departureDate)} – Elige vuelta`
-          : "Elige ida y vuelta";
+          ? `${shortDate(departureDate, locale)} – ${t("chooseReturn")}`
+          : t("chooseDates");
 
   function changeMode(nextMode: DateMode) {
     setMode(nextMode);
@@ -117,7 +114,7 @@ export function TravelDatePicker({
 
   return (
     <View>
-      <Text className="mb-2 text-sm font-bold text-slate-800">Cuándo</Text>
+      <Text className="mb-2 text-sm font-bold text-slate-800">{t("when")}</Text>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Fechas del viaje: ${label}`}
@@ -128,7 +125,7 @@ export function TravelDatePicker({
         <Text className="mr-3 text-xl text-brand-500">▣</Text>
         <View className="flex-1">
           <Text className="text-xs font-semibold text-slate-500">
-            {mode === "exact" ? "Fechas exactas" : "Mes flexible"}
+            {mode === "exact" ? t("exactDates") : t("flexibleMonth")}
           </Text>
           <Text
             className={`mt-0.5 ${
@@ -161,7 +158,7 @@ export function TravelDatePicker({
                     mode === option ? "text-brand-600" : "text-slate-600"
                   }`}
                 >
-                  {option === "exact" ? "Fechas exactas" : "Mes flexible"}
+                  {option === "exact" ? t("exactDates") : t("flexibleMonth")}
                 </Text>
               </Pressable>
             ))}
@@ -172,7 +169,7 @@ export function TravelDatePicker({
               <View className="mb-3 flex-row items-center justify-between">
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Mes anterior"
+                  accessibilityLabel={t("previousMonth")}
                   disabled={visibleMonth <= earliestMonth}
                   onPress={() => moveMonth(-1)}
                   className="h-11 w-11 items-center justify-center rounded-xl active:bg-slate-200 disabled:opacity-30"
@@ -184,7 +181,7 @@ export function TravelDatePicker({
                 </Text>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Mes siguiente"
+                  accessibilityLabel={t("nextMonth")}
                   onPress={() => moveMonth(1)}
                   className="h-11 w-11 items-center justify-center rounded-xl active:bg-slate-200"
                 >
@@ -255,8 +252,8 @@ export function TravelDatePicker({
               </View>
               <Text className="mt-2 text-center text-xs text-slate-500">
                 {departureDate && !returnDate
-                  ? "Ahora elige la fecha de vuelta"
-                  : "Selecciona primero la ida y después la vuelta"}
+                  ? t("nowChooseReturn")
+                  : t("chooseDepartureThenReturn")}
               </Text>
             </View>
           ) : (
@@ -264,7 +261,7 @@ export function TravelDatePicker({
               <View className="mb-3 flex-row items-center justify-between">
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Año anterior"
+                  accessibilityLabel={t("previousYear")}
                   disabled={flexibleYear <= today.getFullYear()}
                   onPress={() => setFlexibleYear((current) => current - 1)}
                   className="h-11 w-11 items-center justify-center rounded-xl active:bg-slate-200 disabled:opacity-30"
@@ -276,7 +273,7 @@ export function TravelDatePicker({
                 </Text>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Año siguiente"
+                  accessibilityLabel={t("nextYear")}
                   onPress={() => setFlexibleYear((current) => current + 1)}
                   className="h-11 w-11 items-center justify-center rounded-xl active:bg-slate-200"
                 >
@@ -326,7 +323,7 @@ export function TravelDatePicker({
                 })}
               </View>
               <Text className="mt-2 text-center text-xs text-slate-500">
-                Verás viajes que salgan en cualquier fecha del mes.
+                {t("wholeMonthHelp")}
               </Text>
             </View>
           )}

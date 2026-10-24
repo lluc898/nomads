@@ -44,10 +44,20 @@ if (!databaseUrl)
   throw new Error("DATABASE_URL es obligatoria para importar ubicaciones.");
 
 const database = createDatabase(databaseUrl);
-const displayNames = new Intl.DisplayNames(["es"], { type: "region" });
-const countryNames = new Map<string, { name: string; nameEs: string }>();
+const catalogLocales = ["es", "en", "ca", "fr", "de", "it", "pt", "nl"];
+const displayNames = new Map(
+  catalogLocales.map((locale) => [
+    locale,
+    new Intl.DisplayNames([locale], { type: "region" }),
+  ]),
+);
+const countryNames = new Map<
+  string,
+  { name: string; nameEs: string; localizedNames: string[] }
+>();
 
 const checksum = createHash("sha256")
+  .update("i18n-v1")
   .update(await readFile(`${dataDirectory}countries.csv`))
   .update(await readFile(`${dataDirectory}airports.csv`))
   .digest("hex");
@@ -67,8 +77,11 @@ async function seedCountries() {
   for await (const row of readCsv<CountryCsvRow>(
     `${dataDirectory}countries.csv`,
   )) {
-    const nameEs = displayNames.of(row.code) ?? row.name;
-    countryNames.set(row.code, { name: row.name, nameEs });
+    const localizedNames = [...displayNames.values()].map(
+      (names) => names.of(row.code) ?? row.name,
+    );
+    const nameEs = localizedNames[0] ?? row.name;
+    countryNames.set(row.code, { name: row.name, nameEs, localizedNames });
     values.push({
       code: row.code,
       name: row.name,
@@ -76,7 +89,7 @@ async function seedCountries() {
       continentCode: row.continent,
       keywords: emptyToNull(row.keywords),
       searchText: normalizeSearchText(
-        `${row.code} ${row.name} ${nameEs} ${row.keywords}`,
+        `${row.code} ${row.name} ${localizedNames.join(" ")} ${row.keywords}`,
       ),
       airportCount: 0,
     });
@@ -137,8 +150,7 @@ async function seedAirports() {
           icaoCode,
           row.name,
           row.municipality,
-          country.name,
-          country.nameEs,
+          ...country.localizedNames,
           row.keywords,
         ]
           .filter(Boolean)

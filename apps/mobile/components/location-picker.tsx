@@ -9,6 +9,7 @@ import {
 } from "react-native";
 
 import { api } from "@/lib/api";
+import { useI18n } from "@/lib/i18n-context";
 
 type LocationPickerProps = {
   label: string;
@@ -25,6 +26,7 @@ export function LocationPicker({
   value,
   onChange,
 }: LocationPickerProps) {
+  const { locale, t } = useI18n();
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,7 +38,7 @@ export function LocationPicker({
     const currentRequest = ++requestId.current;
     const timeout = setTimeout(() => {
       api
-        .searchLocations(query, { includeAnywhere })
+        .searchLocations(query, { includeAnywhere, locale })
         .then((locations) => {
           if (requestId.current === currentRequest) setResults(locations);
         })
@@ -48,7 +50,7 @@ export function LocationPicker({
         });
     }, 220);
     return () => clearTimeout(timeout);
-  }, [focused, includeAnywhere, query, value]);
+  }, [focused, includeAnywhere, locale, query, value]);
 
   if (value) {
     return (
@@ -75,7 +77,7 @@ export function LocationPicker({
               {value.subtitle}
             </Text>
           </View>
-          <Text className="ml-2 font-bold text-brand-600">Cambiar</Text>
+          <Text className="ml-2 font-bold text-brand-600">{t("change")}</Text>
         </Pressable>
       </View>
     );
@@ -110,7 +112,7 @@ export function LocationPicker({
         <View className="mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white">
           {!loading && !results.length ? (
             <Text className="p-4 text-sm text-slate-500">
-              No hemos encontrado países ni aeropuertos.
+              {t("noLocations")}
             </Text>
           ) : (
             results.map((location) => (
