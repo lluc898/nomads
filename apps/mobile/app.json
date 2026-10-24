@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "ViajerosHub",
+    "slug": "viajeroshub",
+    "owner": "lluckaicen",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "viajeroshub",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.llucbosch.viajeroshub"
+    },
+    "android": {
+      "package": "com.llucbosch.viajeroshub",
+      "adaptiveIcon": {
+        "backgroundColor": "#EAF3FF"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-web-browser",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3cae2b68-68a6-43c4-8c96-f3c72c9acf13"
+      }
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

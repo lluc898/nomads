@@ -17,7 +17,7 @@ Trabaja como un desarrollador senior full-stack: prioriza código simple, tipado
 
 - **Monorepo:** Turborepo + pnpm.
 - **Web:** Next.js 15+ con App Router, TypeScript, Tailwind CSS v4 y shadcn/ui.
-- **Móvil:** Expo + React Native + Expo Router + TypeScript + NativeWind.
+- **Móvil:** Expo SDK 58 + React Native 0.88 + Expo Router + TypeScript + NativeWind.
 - **Backend inicial:** Next.js Route Handlers y Server Actions.
 - **Base de datos:** PostgreSQL con Drizzle ORM.
 - **Validación:** Zod.
@@ -52,6 +52,7 @@ packages/
 8. Usa transacciones para operaciones que afecten a varias tablas.
 9. Evita lógica de negocio en componentes React; colócala en `packages/shared`, servicios o repositorios.
 10. No introduzcas microservicios hasta que haya una necesidad real de escalado.
+11. Implementa cada módulo de producto en web y móvil dentro de la misma iteración, salvo excepción acordada explícitamente. Comparte contratos y validaciones; no dupliques lógica de negocio.
 
 ## Modelo de datos base
 
@@ -169,5 +170,6 @@ pnpm db:studio
 - Permisos comprobados en servidor.
 - Migración de base de datos incluida si cambia el esquema.
 - Estados de carga, error y vacío implementados.
+- Paridad funcional comprobada en web y app móvil cuando el módulo tenga interfaz en ambas plataformas.
 - Accesible en teclado y móvil.
 - Sin secretos ni datos sensibles en el código.

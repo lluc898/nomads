@@ -11,7 +11,7 @@ El objetivo del negocio es generar ingresos por comisiones de afiliados, no vend
 - Turborepo + pnpm
 - Next.js 15+ / React 19 / TypeScript
 - Tailwind CSS v4 + shadcn/ui
-- Expo + React Native + Expo Router + NativeWind
+- Expo SDK 58 + React Native 0.88 + Expo Router + NativeWind
 - PostgreSQL + Drizzle ORM
 - Zod
 - Redis + BullMQ
@@ -30,6 +30,7 @@ El objetivo del negocio es generar ingresos por comisiones de afiliados, no vend
 8. Guarda URL original y URL de afiliado por separado.
 9. Registra clics de afiliado para analítica y detección de fraude.
 10. No añadas dependencias sin justificarlo.
+11. Cada módulo de producto se desarrolla en web y en la app móvil durante la misma iteración, compartiendo contratos y validaciones. Una excepción debe acordarse explícitamente.
 
 ## Estructura esperada
 
@@ -91,10 +92,23 @@ packages/ui
 - No registres datos personales innecesarios.
 - Cumple RGPD: consentimiento de cookies, política de privacidad y minimización de datos.
 
+## Perfil de viajero
+
+- Cada viajero elige un `username` público, único y en minúsculas.
+- El `username` queda fijado en el primer guardado y no se puede cambiar desde producto.
+- Tras el primer inicio de sesión, el viajero debe completar obligatoriamente el perfil antes de acceder a las áreas privadas; como mínimo debe reservar un `username` disponible.
+- La disponibilidad del `username` se muestra durante la edición, pero la restricción única de PostgreSQL es la garantía definitiva frente a condiciones de carrera.
+- Un perfil completo requiere `username` y foto; esta condición se comprobará antes de crear o unirse a un viaje.
+- La foto parte de la cuenta de Google y puede sustituirse subiendo JPEG, PNG o WebP desde el dispositivo.
+- Las fotos subidas se validan por contenido, se convierten a WebP cuadrado sin metadatos y se guardan en almacenamiento persistente.
+- Instagram es opcional, se normaliza en servidor y es el único enlace social del perfil MVP.
+- El correo nunca forma parte del perfil público.
+
 ## Criterios de aceptación
 
 - `pnpm typecheck`, `pnpm lint` y `pnpm test` pasan.
 - La funcionalidad funciona en desktop y móvil.
+- La interfaz web y la interfaz nativa consumen el mismo contrato de API y cubren el mismo flujo de producto cuando sea aplicable.
 - Los estados de carga, error, vacío y éxito están cubiertos.
 - La autorización está implementada en servidor.
 - Si cambia el esquema, hay migración y datos de prueba coherentes.

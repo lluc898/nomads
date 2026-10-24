@@ -1,0 +1,9 @@
+CLAUDE.md
+codex.md
+design.md
+node_modules/
+.next/
+.expo/
+dist/
+coverage/
+.turbo/

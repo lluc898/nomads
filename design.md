@@ -221,6 +221,15 @@ Tab bar con cinco pestañas:
 - Botón flotante para crear viaje.
 - Deep links a viajes: `tuviaje.com/viajes/:slug`.
 
+### Perfil de viajero
+
+- Muestra foto, nombre visible, `@username` fijo e Instagram opcional.
+- La foto se edita pulsando directamente sobre el avatar, que muestra un botón superpuesto con icono de lápiz; permite elegir una foto del dispositivo, previsualizarla y reemplazarla sin introducir URLs manualmente.
+- La ficha pública debe ser breve y transmitir confianza antes de unirse a un grupo.
+- No muestra correo, proveedor de autenticación ni otros datos privados.
+- En la edición se avisa antes del primer guardado de que el `username` será definitivo.
+- El primer acceso conduce a una configuración obligatoria del perfil sin enlaces de salida hasta reservar un `username` único.
+
 ## Accesibilidad
 
 - Contraste mínimo 4.5:1 para texto normal.

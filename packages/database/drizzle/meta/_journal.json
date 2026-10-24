@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792687390150,
+      "tag": "0000_open_roughhouse",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792690244910,
+      "tag": "0001_plain_darwin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792850156392,
+      "tag": "0002_skinny_sally_floyd",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "viajeroshub",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.18.3",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:web": "pnpm --filter @viajeroshub/web dev",
+    "dev:mobile": "pnpm --filter @viajeroshub/mobile start",
+    "db:generate": "pnpm --filter @viajeroshub/database db:generate",
+    "db:migrate": "pnpm --filter @viajeroshub/database db:migrate",
+    "db:studio": "pnpm --filter @viajeroshub/database db:studio",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "pnpm": "10.18.3",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "turbo": "^2.11.10",
+    "typescript": "^5.9.3"
+  }
+}
