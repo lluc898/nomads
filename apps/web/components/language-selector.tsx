@@ -8,6 +8,9 @@ export function LanguageSelector({ compact = false }: { compact?: boolean }) {
   const { locale, setLocale, t } = useI18n();
   return (
     <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+      <span aria-hidden="true" className="text-lg leading-none">
+        🌐
+      </span>
       <span className={compact ? "sr-only" : "hidden lg:inline"}>
         {t("language")}
       </span>

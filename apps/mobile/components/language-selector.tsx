@@ -13,8 +13,11 @@ export function LanguageSelector() {
         accessibilityRole="button"
         accessibilityLabel={t("language")}
         onPress={() => setOpen(true)}
-        className="h-11 min-w-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 active:bg-slate-100"
+        className="h-11 min-w-11 flex-row items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 active:bg-slate-100"
       >
+        <Text aria-hidden className="text-base">
+          🌐
+        </Text>
         <Text className="text-xs font-extrabold uppercase text-slate-700">
           {locale}
         </Text>
