@@ -1,7 +1,9 @@
 import {
   mobileProfileSchema,
+  travelLocationSchema,
   tripCardSchema,
   type MobileProfile,
+  type TravelLocation,
   type TripCard,
 } from "@viajeroshub/shared";
 
@@ -15,6 +17,17 @@ export function createApiClient({
   fetcher = fetch,
 }: ApiClientOptions) {
   return {
+    async searchLocations(
+      query: string,
+      options: { includeAnywhere?: boolean } = {},
+    ): Promise<TravelLocation[]> {
+      const search = new URLSearchParams({ q: query });
+      if (options.includeAnywhere) search.set("includeAnywhere", "true");
+      const response = await fetcher(`${baseUrl}/locations?${search}`);
+      if (!response.ok) throw await apiError(response);
+      return travelLocationSchema.array().parse(await response.json());
+    },
+
     async listTrips(): Promise<TripCard[]> {
       const response = await fetcher(`${baseUrl}/trips`);
       if (!response.ok) {

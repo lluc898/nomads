@@ -1,7 +1,5 @@
-import { createApiClient } from "@viajeroshub/api-client";
 import type { MobileProfile } from "@viajeroshub/shared";
 import * as Crypto from "expo-crypto";
-import { fetch as expoFetch } from "expo/fetch";
 import * as Linking from "expo-linking";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
@@ -16,17 +14,13 @@ import {
   type ReactNode,
 } from "react";
 
-import { API_URL, WEB_URL } from "@/lib/config";
+import { api } from "@/lib/api";
+import { WEB_URL } from "@/lib/config";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const SESSION_KEY = "viajeroshub.mobile-session";
 const PENDING_VERIFIER_KEY = "viajeroshub.pkce-verifier";
-const api = createApiClient({
-  baseUrl: API_URL,
-  fetcher: expoFetch as typeof fetch,
-});
-
 type AuthContextValue = {
   status: "loading" | "signedOut" | "signedIn";
   profile: MobileProfile | null;

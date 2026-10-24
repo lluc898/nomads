@@ -1,4 +1,5 @@
-import { CalendarIcon, MapPinIcon, SearchIcon, UsersIcon } from "./icons";
+import { LocationCombobox } from "./location-combobox";
+import { CalendarIcon, SearchIcon, UsersIcon } from "./icons";
 
 const Field = ({
   icon,
@@ -13,7 +14,7 @@ const Field = ({
 }) => (
   <label className="group flex min-h-[68px] flex-1 items-center gap-3 border-b border-slate-200 px-4 py-3 transition hover:bg-slate-50 md:border-r md:border-b-0">
     <span className="text-[#0B6EFD]">{icon}</span>
-    <span className="min-w-0">
+    <span className="min-w-0 flex-1">
       <span className="block text-xs font-semibold text-slate-500">
         {label}
       </span>
@@ -30,19 +31,18 @@ export function SearchForm() {
   return (
     <form
       action="/buscar"
-      className="overflow-hidden rounded-2xl border border-white/60 bg-white shadow-[0_18px_50px_rgba(15,23,42,.18)] md:flex md:items-stretch"
+      className="rounded-2xl border border-white/60 bg-white shadow-[0_18px_50px_rgba(15,23,42,.18)] md:flex md:items-stretch"
     >
-      <Field
-        icon={<MapPinIcon />}
+      <LocationCombobox
         label="Desde"
         name="origen"
-        placeholder="Ciudad de origen"
+        placeholder="País o aeropuerto"
       />
-      <Field
-        icon={<MapPinIcon />}
+      <LocationCombobox
         label="Hacia"
         name="destino"
-        placeholder="Cualquier destino"
+        placeholder="Cualquier lugar"
+        includeAnywhere
       />
       <Field
         icon={<CalendarIcon />}

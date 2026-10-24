@@ -1,5 +1,8 @@
 import {
+  boolean,
   date,
+  doublePrecision,
+  index,
   integer,
   numeric,
   pgEnum,
@@ -99,6 +102,50 @@ export const verificationTokens = pgTable(
   (token) => [primaryKey({ columns: [token.identifier, token.token] })],
 );
 
+export const countries = pgTable("countries", {
+  code: varchar("code", { length: 2 }).primaryKey(),
+  name: varchar("name", { length: 120 }).notNull(),
+  nameEs: varchar("name_es", { length: 120 }).notNull(),
+  continentCode: varchar("continent_code", { length: 2 }).notNull(),
+  keywords: text("keywords"),
+  searchText: text("search_text").notNull(),
+  airportCount: integer("airport_count").default(0).notNull(),
+});
+
+export const locationCatalogImports = pgTable("location_catalog_imports", {
+  dataset: varchar("dataset", { length: 64 }).primaryKey(),
+  checksum: varchar("checksum", { length: 64 }).notNull(),
+  importedAt: timestamp("imported_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const airports = pgTable(
+  "airports",
+  {
+    id: integer("id").primaryKey(),
+    ident: varchar("ident", { length: 16 }).notNull().unique(),
+    type: varchar("type", { length: 32 }).notNull(),
+    name: varchar("name", { length: 200 }).notNull(),
+    municipality: varchar("municipality", { length: 160 }),
+    countryCode: varchar("country_code", { length: 2 })
+      .notNull()
+      .references(() => countries.code, { onDelete: "restrict" }),
+    iataCode: varchar("iata_code", { length: 3 }),
+    icaoCode: varchar("icao_code", { length: 4 }),
+    latitude: doublePrecision("latitude").notNull(),
+    longitude: doublePrecision("longitude").notNull(),
+    scheduledService: boolean("scheduled_service").default(false).notNull(),
+    keywords: text("keywords"),
+    searchText: text("search_text").notNull(),
+    priority: integer("priority").default(0).notNull(),
+  },
+  (airport) => [
+    index("airports_country_code_idx").on(airport.countryCode),
+    index("airports_iata_code_idx").on(airport.iataCode),
+  ],
+);
+
 export const geoPlaces = pgTable("geo_places", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 160 }).notNull(),
@@ -118,6 +165,17 @@ export const trips = pgTable("trips", {
   destinationPlaceId: uuid("destination_place_id").references(
     () => geoPlaces.id,
   ),
+  originCountryCode: varchar("origin_country_code", { length: 2 }).references(
+    () => countries.code,
+  ),
+  originAirportId: integer("origin_airport_id").references(() => airports.id),
+  destinationCountryCode: varchar("destination_country_code", {
+    length: 2,
+  }).references(() => countries.code),
+  destinationAirportId: integer("destination_airport_id").references(
+    () => airports.id,
+  ),
+  destinationAnywhere: boolean("destination_anywhere").default(false).notNull(),
   departureDate: date("departure_date"),
   returnDate: date("return_date"),
   flexibleMonth: date("flexible_month"),

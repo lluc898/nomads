@@ -72,6 +72,8 @@ packages/ui
 - Debe funcionar la búsqueda por mes completo.
 - Usa índices PostgreSQL y consultas eficientes.
 - Devuelve resultados paginados con filtros y orden.
+- Origen y destino reutilizan el catálogo `countries`/`airports`; el origen exige país o aeropuerto y el destino admite además `anywhere` ("Cualquier lugar").
+- La fuente mundial inicial es OurAirports. Se incluyen aeropuertos activos grandes, medianos, pequeños e hidroaeropuertos; no se muestran instalaciones cerradas, helipuertos ni balloonports.
 
 ## Estilo de código
 

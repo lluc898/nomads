@@ -12,6 +12,7 @@
 - La app nativa inicia Google OAuth en el navegador mediante Auth.js y recibe un código de un solo uso protegido con PKCE. Lo canjea por una sesión móvil opaca de 30 días, cuyo token se guarda en SecureStore y cuyo hash es lo único persistido en PostgreSQL.
 - `packages/api-client` contiene el contrato HTTP tipado que consume Expo. La app nunca importa `packages/database` ni accede directamente a PostgreSQL.
 - El primer acceso nativo bloquea la navegación hasta guardar un `username` único y una foto. La subida usa el mismo servicio de validación, recorte WebP y almacenamiento que la web.
+- El catálogo geográfico usa una instantánea versionada de OurAirports: países y aeropuertos activos se importan de forma idempotente y se buscan mediante PostgreSQL `pg_trgm`. Los identificadores públicos (`country:ES`, `airport:123` y `anywhere`) son compartidos por búsqueda y creación de viajes.
 
 ## Próximos cortes verticales
 

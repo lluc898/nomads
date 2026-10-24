@@ -25,7 +25,7 @@ RUN pnpm --filter @viajeroshub/web build
 FROM dependencies AS migrator
 
 COPY . .
-CMD ["pnpm", "--filter", "@viajeroshub/database", "db:migrate"]
+CMD ["pnpm", "--filter", "@viajeroshub/database", "db:deploy"]
 
 FROM node:22-alpine AS runner
 

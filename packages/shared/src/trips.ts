@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { originLocationIdSchema, selectedLocationIdSchema } from "./locations";
+
 export const tripVisibilitySchema = z.enum(["public", "private"]);
 export const tripStatusSchema = z.enum([
   "draft",
@@ -9,8 +11,8 @@ export const tripStatusSchema = z.enum([
 ]);
 
 export const searchTripsSchema = z.object({
-  origin: z.string().trim().max(120).optional(),
-  destination: z.string().trim().max(120).optional(),
+  origin: originLocationIdSchema.optional(),
+  destination: selectedLocationIdSchema.optional(),
   month: z
     .string()
     .regex(/^\d{4}-\d{2}$/)
