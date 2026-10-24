@@ -1,11 +1,14 @@
 import { getUserProfileByUsername } from "@viajeroshub/database";
+import { translate } from "@viajeroshub/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Logo } from "@/components/logo";
+import { LanguageSelector } from "@/components/language-selector";
 import { UserAvatar } from "@/components/user-avatar";
 import { getDatabase } from "@/lib/database";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 type PublicProfilePageProps = {
   params: Promise<{ username: string }>;
@@ -21,12 +24,8 @@ export async function generateMetadata({
   );
 
   return {
-    title: profile
-      ? `@${profile.username} | ViajerosHub`
-      : "Viajero no encontrado | ViajerosHub",
-    description: profile
-      ? `Conoce el perfil de @${profile.username} en ViajerosHub.`
-      : undefined,
+    title: profile ? `@${profile.username} | ViajerosHub` : "ViajerosHub",
+    description: profile ? `@${profile.username} · ViajerosHub` : undefined,
   };
 }
 
@@ -34,6 +33,8 @@ export default async function PublicProfilePage({
   params,
 }: PublicProfilePageProps) {
   const { username } = await params;
+  const locale = await getRequestLocale();
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   const profile = await getUserProfileByUsername(
     getDatabase(),
     username.toLowerCase(),
@@ -48,12 +49,15 @@ export default async function PublicProfilePage({
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
           <Logo />
-          <Link
-            href="/buscar"
-            className="text-sm font-bold text-[#0B6EFD] hover:text-[#0857C9]"
-          >
-            Explorar viajes
-          </Link>
+          <div className="flex items-center gap-3">
+            <LanguageSelector />
+            <Link
+              href="/buscar"
+              className="text-sm font-bold text-[#0B6EFD] hover:text-[#0857C9]"
+            >
+              {t("navExplore")}
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -82,11 +86,11 @@ export default async function PublicProfilePage({
                   rel="noreferrer"
                   className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 font-bold text-slate-700 transition hover:border-[#0B6EFD] hover:text-[#0B6EFD]"
                 >
-                  Ver Instagram ↗
+                  {t("viewInstagram")}
                 </a>
               ) : (
                 <span className="inline-flex min-h-11 items-center rounded-xl bg-slate-100 px-4 text-sm font-semibold text-slate-500">
-                  Sin Instagram público
+                  {t("noPublicInstagram")}
                 </span>
               )}
             </div>

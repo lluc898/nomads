@@ -63,6 +63,25 @@ const es = {
   formingSubtitle:
     "Personas reales buscando compañeros para compartir ruta, gastos y buenos momentos.",
   viewAll: "Ver todos",
+  quickFromBaleares: "Desde Baleares",
+  quickSummer: "Verano",
+  quickNoDestination: "Sin destino",
+  quickLatest: "Últimos viajes",
+  howEyebrow: "Así de sencillo",
+  howTitle: "Tu viaje, con la compañía adecuada",
+  stepFindTitle: "Encuentra tu plan",
+  stepFindDescription:
+    "Busca por origen, destino o mes. También puedes dejarte sorprender.",
+  stepConnectTitle: "Conecta con el grupo",
+  stepConnectDescription:
+    "Conoce el plan y solicita unirte de forma clara y segura.",
+  stepBookTitle: "Reserva con confianza",
+  stepBookDescription:
+    "Accede a los proveedores y reserva siempre directamente con ellos.",
+  ctaEyebrow: "¿Tienes un viaje en mente?",
+  ctaTitle: "Publica tu plan y encuentra a tu grupo.",
+  ctaSubtitle: "Crear un viaje te llevará menos de dos minutos.",
+  footerTagline: "Viaja acompañado, reserva por tu cuenta.",
   from: "Desde",
   to: "Hacia",
   when: "Cuándo",
@@ -123,6 +142,16 @@ const es = {
   instagramOptional: "Instagram (opcional)",
   saveContinue: "Guardar y continuar",
   saveChanges: "Guardar cambios",
+  backHome: "Volver al inicio",
+  usernameRequirements:
+    "Usa entre 3 y 24 letras minúsculas, números o guiones bajos.",
+  checkingAvailability: "Comprobando disponibilidad…",
+  usernameAvailable: "Nombre de usuario disponible.",
+  usernameTaken: "Ese nombre de usuario ya está en uso.",
+  viewInstagram: "Ver Instagram ↗",
+  noPublicInstagram: "Sin Instagram público",
+  tripTo: "Viaje a {destination}",
+  createdBy: "Creado por {name}",
 } as const;
 
 type TranslationKey = keyof typeof es;
@@ -151,6 +180,25 @@ const en: Messages = {
   formingSubtitle:
     "Real people looking for companions to share routes, costs and great moments.",
   viewAll: "View all",
+  quickFromBaleares: "From the Balearic Islands",
+  quickSummer: "Summer",
+  quickNoDestination: "Any destination",
+  quickLatest: "Latest trips",
+  howEyebrow: "It is that simple",
+  howTitle: "Your trip, with the right company",
+  stepFindTitle: "Find your plan",
+  stepFindDescription:
+    "Search by origin, destination or month, or let yourself be surprised.",
+  stepConnectTitle: "Connect with the group",
+  stepConnectDescription:
+    "Explore the plan and ask to join clearly and safely.",
+  stepBookTitle: "Book with confidence",
+  stepBookDescription:
+    "Open trusted providers and always book directly with them.",
+  ctaEyebrow: "Have a trip in mind?",
+  ctaTitle: "Publish your plan and find your group.",
+  ctaSubtitle: "Creating a trip takes less than two minutes.",
+  footerTagline: "Travel together, book independently.",
   from: "From",
   to: "To",
   when: "When",
@@ -209,6 +257,16 @@ const en: Messages = {
   instagramOptional: "Instagram (optional)",
   saveContinue: "Save and continue",
   saveChanges: "Save changes",
+  backHome: "Back to home",
+  usernameRequirements:
+    "Use 3 to 24 lowercase letters, numbers or underscores.",
+  checkingAvailability: "Checking availability…",
+  usernameAvailable: "Username available.",
+  usernameTaken: "That username is already in use.",
+  viewInstagram: "View Instagram ↗",
+  noPublicInstagram: "No public Instagram",
+  tripTo: "Trip to {destination}",
+  createdBy: "Created by {name}",
 };
 
 const ca: Messages = {
@@ -235,6 +293,25 @@ const ca: Messages = {
   formingSubtitle:
     "Persones reals que busquen companys per compartir ruta, despeses i bons moments.",
   viewAll: "Veure-ho tot",
+  quickFromBaleares: "Des de les Balears",
+  quickSummer: "Estiu",
+  quickNoDestination: "Sense destinació",
+  quickLatest: "Últims viatges",
+  howEyebrow: "Així de senzill",
+  howTitle: "El teu viatge, amb la companyia adequada",
+  stepFindTitle: "Troba el teu pla",
+  stepFindDescription:
+    "Cerca per origen, destinació o mes. També et pots deixar sorprendre.",
+  stepConnectTitle: "Connecta amb el grup",
+  stepConnectDescription:
+    "Coneix el pla i demana unir-t'hi de manera clara i segura.",
+  stepBookTitle: "Reserva amb confiança",
+  stepBookDescription:
+    "Accedeix als proveïdors i reserva sempre directament amb ells.",
+  ctaEyebrow: "Tens un viatge en ment?",
+  ctaTitle: "Publica el teu pla i troba el teu grup.",
+  ctaSubtitle: "Crear un viatge et durà menys de dos minuts.",
+  footerTagline: "Viatja en companyia, reserva pel teu compte.",
   from: "Des de",
   to: "Cap a",
   when: "Quan",
@@ -274,6 +351,16 @@ const ca: Messages = {
   instagramOptional: "Instagram (opcional)",
   saveContinue: "Desar i continuar",
   saveChanges: "Desar canvis",
+  backHome: "Tornar a l'inici",
+  usernameRequirements:
+    "Fes servir entre 3 i 24 lletres minúscules, números o guions baixos.",
+  checkingAvailability: "Comprovant disponibilitat…",
+  usernameAvailable: "Nom d'usuari disponible.",
+  usernameTaken: "Aquest nom d'usuari ja està en ús.",
+  viewInstagram: "Veure Instagram ↗",
+  noPublicInstagram: "Sense Instagram públic",
+  tripTo: "Viatge a {destination}",
+  createdBy: "Creat per {name}",
 };
 const fr: Messages = {
   ...en,
@@ -299,6 +386,25 @@ const fr: Messages = {
   formingSubtitle:
     "Des personnes réelles cherchent des compagnons pour partager itinéraires, frais et bons moments.",
   viewAll: "Tout voir",
+  quickFromBaleares: "Depuis les Baléares",
+  quickSummer: "Été",
+  quickNoDestination: "Sans destination",
+  quickLatest: "Derniers voyages",
+  howEyebrow: "C'est aussi simple que ça",
+  howTitle: "Votre voyage, avec la bonne compagnie",
+  stepFindTitle: "Trouvez votre projet",
+  stepFindDescription:
+    "Recherchez par origine, destination ou mois, ou laissez-vous surprendre.",
+  stepConnectTitle: "Rejoignez le groupe",
+  stepConnectDescription:
+    "Découvrez le projet et demandez à le rejoindre clairement et en sécurité.",
+  stepBookTitle: "Réservez en confiance",
+  stepBookDescription:
+    "Accédez aux prestataires et réservez toujours directement auprès d'eux.",
+  ctaEyebrow: "Un voyage en tête ?",
+  ctaTitle: "Publiez votre projet et trouvez votre groupe.",
+  ctaSubtitle: "Créer un voyage prend moins de deux minutes.",
+  footerTagline: "Voyagez accompagné, réservez de votre côté.",
   from: "De",
   to: "Vers",
   when: "Quand",
@@ -338,6 +444,16 @@ const fr: Messages = {
   instagramOptional: "Instagram (facultatif)",
   saveContinue: "Enregistrer et continuer",
   saveChanges: "Enregistrer",
+  backHome: "Retour à l'accueil",
+  usernameRequirements:
+    "Utilisez entre 3 et 24 lettres minuscules, chiffres ou tirets bas.",
+  checkingAvailability: "Vérification de la disponibilité…",
+  usernameAvailable: "Nom d'utilisateur disponible.",
+  usernameTaken: "Ce nom d'utilisateur est déjà utilisé.",
+  viewInstagram: "Voir Instagram ↗",
+  noPublicInstagram: "Aucun Instagram public",
+  tripTo: "Voyage à {destination}",
+  createdBy: "Créé par {name}",
 };
 const de: Messages = {
   ...en,
@@ -363,6 +479,24 @@ const de: Messages = {
   formingSubtitle:
     "Echte Menschen suchen Begleitung, um Routen, Kosten und schöne Momente zu teilen.",
   viewAll: "Alle anzeigen",
+  quickFromBaleares: "Ab den Balearen",
+  quickSummer: "Sommer",
+  quickNoDestination: "Ohne festes Ziel",
+  quickLatest: "Neueste Reisen",
+  howEyebrow: "So einfach geht es",
+  howTitle: "Deine Reise, mit der richtigen Begleitung",
+  stepFindTitle: "Finde deinen Plan",
+  stepFindDescription:
+    "Suche nach Abflugort, Ziel oder Monat oder lass dich überraschen.",
+  stepConnectTitle: "Vernetze dich mit der Gruppe",
+  stepConnectDescription:
+    "Sieh dir den Plan an und frage klar und sicher nach einem Platz.",
+  stepBookTitle: "Buche mit Vertrauen",
+  stepBookDescription: "Öffne die Anbieter und buche immer direkt bei ihnen.",
+  ctaEyebrow: "Du hast eine Reise im Sinn?",
+  ctaTitle: "Veröffentliche deinen Plan und finde deine Gruppe.",
+  ctaSubtitle: "Eine Reise zu erstellen dauert weniger als zwei Minuten.",
+  footerTagline: "Gemeinsam reisen, selbstständig buchen.",
   from: "Von",
   to: "Nach",
   when: "Wann",
@@ -402,6 +536,16 @@ const de: Messages = {
   instagramOptional: "Instagram (optional)",
   saveContinue: "Speichern und weiter",
   saveChanges: "Änderungen speichern",
+  backHome: "Zur Startseite",
+  usernameRequirements:
+    "Verwende 3 bis 24 Kleinbuchstaben, Zahlen oder Unterstriche.",
+  checkingAvailability: "Verfügbarkeit wird geprüft…",
+  usernameAvailable: "Benutzername verfügbar.",
+  usernameTaken: "Dieser Benutzername ist bereits vergeben.",
+  viewInstagram: "Instagram ansehen ↗",
+  noPublicInstagram: "Kein öffentliches Instagram",
+  tripTo: "Reise nach {destination}",
+  createdBy: "Erstellt von {name}",
 };
 const it: Messages = {
   ...en,
@@ -427,6 +571,25 @@ const it: Messages = {
   formingSubtitle:
     "Persone reali cercano compagni con cui condividere itinerari, spese e bei momenti.",
   viewAll: "Vedi tutti",
+  quickFromBaleares: "Dalle Baleari",
+  quickSummer: "Estate",
+  quickNoDestination: "Senza destinazione",
+  quickLatest: "Ultimi viaggi",
+  howEyebrow: "È così semplice",
+  howTitle: "Il tuo viaggio, con la compagnia giusta",
+  stepFindTitle: "Trova il tuo piano",
+  stepFindDescription:
+    "Cerca per origine, destinazione o mese, oppure lasciati sorprendere.",
+  stepConnectTitle: "Entra in contatto con il gruppo",
+  stepConnectDescription:
+    "Scopri il piano e chiedi di partecipare in modo chiaro e sicuro.",
+  stepBookTitle: "Prenota con fiducia",
+  stepBookDescription:
+    "Accedi ai fornitori e prenota sempre direttamente con loro.",
+  ctaEyebrow: "Hai in mente un viaggio?",
+  ctaTitle: "Pubblica il tuo piano e trova il tuo gruppo.",
+  ctaSubtitle: "Creare un viaggio richiede meno di due minuti.",
+  footerTagline: "Viaggia in compagnia, prenota in autonomia.",
   from: "Da",
   to: "Verso",
   when: "Quando",
@@ -465,6 +628,16 @@ const it: Messages = {
   instagramOptional: "Instagram (facoltativo)",
   saveContinue: "Salva e continua",
   saveChanges: "Salva modifiche",
+  backHome: "Torna alla home",
+  usernameRequirements:
+    "Usa da 3 a 24 lettere minuscole, numeri o trattini bassi.",
+  checkingAvailability: "Verifica disponibilità…",
+  usernameAvailable: "Nome utente disponibile.",
+  usernameTaken: "Questo nome utente è già in uso.",
+  viewInstagram: "Vedi Instagram ↗",
+  noPublicInstagram: "Nessun Instagram pubblico",
+  tripTo: "Viaggio a {destination}",
+  createdBy: "Creato da {name}",
 };
 const pt: Messages = {
   ...en,
@@ -490,6 +663,25 @@ const pt: Messages = {
   formingSubtitle:
     "Pessoas reais procuram companhia para partilhar rotas, despesas e bons momentos.",
   viewAll: "Ver tudo",
+  quickFromBaleares: "A partir das Baleares",
+  quickSummer: "Verão",
+  quickNoDestination: "Sem destino",
+  quickLatest: "Viagens recentes",
+  howEyebrow: "É assim tão simples",
+  howTitle: "A tua viagem, com a companhia certa",
+  stepFindTitle: "Encontra o teu plano",
+  stepFindDescription:
+    "Pesquisa por origem, destino ou mês, ou deixa-te surpreender.",
+  stepConnectTitle: "Liga-te ao grupo",
+  stepConnectDescription:
+    "Conhece o plano e pede para participar de forma clara e segura.",
+  stepBookTitle: "Reserva com confiança",
+  stepBookDescription:
+    "Acede aos fornecedores e reserva sempre diretamente com eles.",
+  ctaEyebrow: "Tens uma viagem em mente?",
+  ctaTitle: "Publica o teu plano e encontra o teu grupo.",
+  ctaSubtitle: "Criar uma viagem demora menos de dois minutos.",
+  footerTagline: "Viaja acompanhado, reserva por tua conta.",
   from: "De",
   to: "Para",
   when: "Quando",
@@ -529,6 +721,16 @@ const pt: Messages = {
   instagramOptional: "Instagram (opcional)",
   saveContinue: "Guardar e continuar",
   saveChanges: "Guardar alterações",
+  backHome: "Voltar ao início",
+  usernameRequirements:
+    "Usa entre 3 e 24 letras minúsculas, números ou underscores.",
+  checkingAvailability: "A verificar disponibilidade…",
+  usernameAvailable: "Nome de utilizador disponível.",
+  usernameTaken: "Esse nome de utilizador já está a ser usado.",
+  viewInstagram: "Ver Instagram ↗",
+  noPublicInstagram: "Sem Instagram público",
+  tripTo: "Viagem para {destination}",
+  createdBy: "Criado por {name}",
 };
 const nl: Messages = {
   ...en,
@@ -554,6 +756,25 @@ const nl: Messages = {
   formingSubtitle:
     "Echte mensen zoeken reisgenoten om routes, kosten en mooie momenten te delen.",
   viewAll: "Alles bekijken",
+  quickFromBaleares: "Vanaf de Balearen",
+  quickSummer: "Zomer",
+  quickNoDestination: "Zonder bestemming",
+  quickLatest: "Nieuwste reizen",
+  howEyebrow: "Zo eenvoudig is het",
+  howTitle: "Jouw reis, met het juiste gezelschap",
+  stepFindTitle: "Vind je plan",
+  stepFindDescription:
+    "Zoek op vertrekpunt, bestemming of maand, of laat je verrassen.",
+  stepConnectTitle: "Maak kennis met de groep",
+  stepConnectDescription:
+    "Bekijk het plan en vraag duidelijk en veilig om mee te gaan.",
+  stepBookTitle: "Boek met vertrouwen",
+  stepBookDescription:
+    "Ga naar de aanbieders en boek altijd rechtstreeks bij hen.",
+  ctaEyebrow: "Heb je een reis in gedachten?",
+  ctaTitle: "Publiceer je plan en vind je groep.",
+  ctaSubtitle: "Een reis maken duurt minder dan twee minuten.",
+  footerTagline: "Reis samen, boek zelfstandig.",
   from: "Van",
   to: "Naar",
   when: "Wanneer",
@@ -593,6 +814,16 @@ const nl: Messages = {
   instagramOptional: "Instagram (optioneel)",
   saveContinue: "Opslaan en doorgaan",
   saveChanges: "Wijzigingen opslaan",
+  backHome: "Terug naar home",
+  usernameRequirements:
+    "Gebruik 3 tot 24 kleine letters, cijfers of underscores.",
+  checkingAvailability: "Beschikbaarheid controleren…",
+  usernameAvailable: "Gebruikersnaam beschikbaar.",
+  usernameTaken: "Deze gebruikersnaam is al in gebruik.",
+  viewInstagram: "Instagram bekijken ↗",
+  noPublicInstagram: "Geen openbare Instagram",
+  tripTo: "Reis naar {destination}",
+  createdBy: "Gemaakt door {name}",
 };
 
 const translations: Record<SupportedLocale, Messages> = {

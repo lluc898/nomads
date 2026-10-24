@@ -14,16 +14,15 @@ import { SiteHeader } from "@/components/site-header";
 import { TripCard } from "@/components/trip-card";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
-const quickLinks = [
-  "Desde Baleares",
-  "Verano",
-  "Sin destino",
-  "Últimos viajes",
-];
-
 export default async function Home() {
   const locale = await getRequestLocale();
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+  const quickLinks = [
+    t("quickFromBaleares"),
+    t("quickSummer"),
+    t("quickNoDestination"),
+    t("quickLatest"),
+  ];
   return (
     <main>
       <SiteHeader />
@@ -99,28 +98,28 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="text-center">
             <p className="text-sm font-bold tracking-[.14em] text-[#0B6EFD] uppercase">
-              Así de sencillo
+              {t("howEyebrow")}
             </p>
             <h2 className="mt-2 text-3xl font-extrabold tracking-[-.035em] md:text-4xl">
-              Tu viaje, con la compañía adecuada
+              {t("howTitle")}
             </h2>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {[
               [
                 <SearchIcon key="search" />,
-                "Encuentra tu plan",
-                "Busca por origen, destino o mes. También puedes dejarte sorprender.",
+                t("stepFindTitle"),
+                t("stepFindDescription"),
               ],
               [
                 <UsersIcon key="users" />,
-                "Conecta con el grupo",
-                "Conoce el plan y solicita unirte de forma clara y segura.",
+                t("stepConnectTitle"),
+                t("stepConnectDescription"),
               ],
               [
                 <ShieldIcon key="shield" />,
-                "Reserva con confianza",
-                "Accede a los proveedores y reserva siempre directamente con ellos.",
+                t("stepBookTitle"),
+                t("stepBookDescription"),
               ],
             ].map(([icon, title, description], index) => (
               <div
@@ -147,20 +146,18 @@ export default async function Home() {
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-7 overflow-hidden rounded-3xl bg-slate-950 p-8 text-white md:flex-row md:items-center md:p-12">
           <div>
             <p className="text-sm font-bold tracking-[.14em] text-blue-300 uppercase">
-              ¿Tienes un viaje en mente?
+              {t("ctaEyebrow")}
             </p>
             <h2 className="mt-2 text-3xl font-extrabold tracking-tight">
-              Publica tu plan y encuentra a tu grupo.
+              {t("ctaTitle")}
             </h2>
-            <p className="mt-3 text-slate-300">
-              Crear un viaje te llevará menos de dos minutos.
-            </p>
+            <p className="mt-3 text-slate-300">{t("ctaSubtitle")}</p>
           </div>
           <Link
             href="/crear"
             className="flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-[#0B6EFD] px-6 font-bold transition hover:bg-blue-500"
           >
-            Crear viaje <ArrowRightIcon className="size-5" />
+            {t("navCreate")} <ArrowRightIcon className="size-5" />
           </Link>
         </div>
       </section>
@@ -168,7 +165,7 @@ export default async function Home() {
       <footer className="border-t border-slate-200 bg-white px-5 py-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-sm text-slate-500 md:flex-row">
           <Logo />
-          <p>© 2026 ViajerosHub. Viaja acompañado, reserva por tu cuenta.</p>
+          <p>© 2026 ViajerosHub. {t("footerTagline")}</p>
         </div>
       </footer>
     </main>

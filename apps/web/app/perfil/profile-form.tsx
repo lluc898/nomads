@@ -143,12 +143,12 @@ export function ProfileForm({ profile, callbackUrl }: ProfileFormProps) {
           </span>
         </label>
         <div>
-          <p className="font-bold text-slate-950">Tu foto pública</p>
+          <p className="font-bold text-slate-950">{t("changePhoto")}</p>
           <p
             id="photo-description"
             className="mt-1 text-sm leading-5 text-slate-600"
           >
-            Pulsa sobre la foto para cambiarla. JPEG, PNG o WebP, máximo 5 MB.
+            {t("tapPhoto")} · JPEG, PNG, WebP · 5 MB
           </p>
           {[
             ...(photoError ? [photoError] : []),
@@ -164,11 +164,7 @@ export function ProfileForm({ profile, callbackUrl }: ProfileFormProps) {
       <FormField
         id="username"
         label={t("username")}
-        hint={
-          usernameIsFixed
-            ? "Es tu identificador público y ya no se puede modificar."
-            : "Elígelo bien: después de guardarlo no se podrá cambiar."
-        }
+        hint={usernameIsFixed ? t("usernameFixed") : t("usernameRequirements")}
         errors={state.errors?.username}
       >
         <div className="relative">
@@ -213,10 +209,10 @@ export function ProfileForm({ profile, callbackUrl }: ProfileFormProps) {
             aria-live="polite"
           >
             {usernameAvailability === "checking"
-              ? "Comprobando disponibilidad…"
+              ? t("checkingAvailability")
               : usernameAvailability === "available"
-                ? "Nombre de usuario disponible."
-                : "Ese nombre de usuario ya está en uso."}
+                ? t("usernameAvailable")
+                : t("usernameTaken")}
           </p>
         ) : null}
       </FormField>

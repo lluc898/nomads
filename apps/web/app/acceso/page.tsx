@@ -58,16 +58,13 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
             {t("accessTitle")}
           </p>
           <h1 className="mt-4 text-5xl leading-[1.08] font-extrabold tracking-[-.045em]">
-            Viajar es mejor cuando encuentras a las personas adecuadas.
+            {t("accessTitle")}
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-8 text-blue-100">
-            Guarda tus planes, solicita unirte a grupos y conversa con tus
-            compañeros de viaje desde un único lugar.
+            {t("accessSubtitle")}
           </p>
         </div>
-        <p className="relative text-sm text-blue-100">
-          Reservas siempre directamente con el proveedor.
-        </p>
+        <p className="relative text-sm text-blue-100">{t("footerTagline")}</p>
       </section>
 
       <section className="relative flex min-h-screen items-center justify-center bg-slate-50 px-5 py-12">
@@ -80,13 +77,14 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
             <LanguageSelector />
           </div>
           <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,.08)] sm:p-10">
-            <p className="text-sm font-bold text-[#0B6EFD]">Bienvenido</p>
+            <p className="text-sm font-bold text-[#0B6EFD]">
+              {t("homeEyebrow")}
+            </p>
             <h2 className="mt-2 text-3xl font-extrabold tracking-[-.035em] text-slate-950">
-              Accede a ViajerosHub
+              {t("navSignIn")} · ViajerosHub
             </h2>
             <p className="mt-3 leading-6 text-slate-600">
-              Entra para crear viajes, unirte a grupos y hablar con otros
-              viajeros.
+              {t("accessSubtitle")}
             </p>
 
             {errorMessage ? (
@@ -136,7 +134,7 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
             href="/"
             className="mt-6 block text-center text-sm font-semibold text-slate-600 hover:text-[#0B6EFD]"
           >
-            ← Volver al inicio
+            ← {t("backHome")}
           </Link>
         </div>
       </section>

@@ -28,16 +28,14 @@ export default async function MyTripsPage() {
         </div>
       </header>
       <section className="mx-auto max-w-6xl px-5 py-12">
-        <p className="text-sm font-bold text-[#0B6EFD]">Tu espacio</p>
+        <p className="text-sm font-bold text-[#0B6EFD]">{t("yourAccount")}</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">
-          Hola, {user.name ?? "viajero"}
+          {t("myTrips")}: {user.name ?? "@viajeroshub"}
         </h1>
         <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-          <h2 className="text-xl font-bold text-slate-900">
-            Todavía no tienes viajes
-          </h2>
+          <h2 className="text-xl font-bold text-slate-900">{t("myTrips")}</h2>
           <p className="mx-auto mt-2 max-w-md leading-6 text-slate-600">
-            Crea tu primer plan o explora viajes publicados por otros viajeros.
+            {t("myTripsDescription")}
           </p>
           <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
             <Link

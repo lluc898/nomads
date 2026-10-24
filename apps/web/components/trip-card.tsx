@@ -47,7 +47,7 @@ export function TripCard({
           {t("from")} {trip.origin}
         </p>
         <h3 className="mt-1 text-xl font-bold tracking-[-.025em] text-slate-950">
-          Viaje a {trip.destination}
+          {t("tripTo", { destination: trip.destination })}
         </h3>
         <div className="mt-4 space-y-2 text-sm text-slate-600">
           <p className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export function TripCard({
           <span className="grid size-7 place-items-center rounded-full bg-slate-900 font-bold text-white">
             {trip.creator.initials}
           </span>
-          Creado por {trip.creator.name} · {trip.publishedLabel}
+          {t("createdBy", { name: trip.creator.name })} · {trip.publishedLabel}
         </div>
       </div>
     </article>

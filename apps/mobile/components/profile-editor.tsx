@@ -235,7 +235,7 @@ export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
                 {t("usernameFixed")}
               </Text>
             ) : (
-              <AvailabilityMessage value={availability} />
+              <AvailabilityMessage value={availability} t={t} />
             )}
             <FieldError messages={fieldErrors.username} />
 
@@ -294,34 +294,40 @@ export function ProfileEditor({ mandatory = false }: { mandatory?: boolean }) {
   );
 }
 
-function AvailabilityMessage({ value }: { value: Availability }) {
+function AvailabilityMessage({
+  value,
+  t,
+}: {
+  value: Availability;
+  t: ReturnType<typeof useI18n>["t"];
+}) {
   if (value === "idle")
     return (
       <Text className="mt-2 text-xs text-slate-500">
-        Entre 3 y 24 caracteres; letras, números y guion bajo.
+        {t("usernameRequirements")}
       </Text>
     );
   if (value === "checking")
     return (
       <Text className="mt-2 text-xs text-slate-500">
-        Comprobando disponibilidad…
+        {t("checkingAvailability")}
       </Text>
     );
   if (value === "available")
     return (
       <Text className="mt-2 text-xs font-semibold text-green-700">
-        Nombre disponible.
+        {t("usernameAvailable")}
       </Text>
     );
   if (value === "taken")
     return (
       <Text className="mt-2 text-xs font-semibold text-red-700">
-        Ese nombre ya está ocupado.
+        {t("usernameTaken")}
       </Text>
     );
   return (
     <Text className="mt-2 text-xs text-red-700">
-      Usa entre 3 y 24 letras minúsculas, números o guiones bajos.
+      {t("usernameRequirements")}
     </Text>
   );
 }

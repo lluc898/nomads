@@ -47,7 +47,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
               </Link>
             ) : (
               <span className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-[#0857C9]">
-                Configuración obligatoria
+                {t("firstStep")}
               </span>
             )}
           </div>
@@ -55,7 +55,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
       </header>
 
       <section className="mx-auto max-w-3xl px-5 py-10 sm:py-14">
-        <p className="text-sm font-bold text-[#0B6EFD]">Tu identidad viajera</p>
+        <p className="text-sm font-bold text-[#0B6EFD]">{t("yourAccount")}</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-[-.035em] text-slate-950 sm:text-4xl">
           {profile.username ? t("editProfile") : t("completeProfile")}
         </h1>

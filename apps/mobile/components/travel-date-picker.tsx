@@ -117,7 +117,7 @@ export function TravelDatePicker({
       <Text className="mb-2 text-sm font-bold text-slate-800">{t("when")}</Text>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Fechas del viaje: ${label}`}
+        accessibilityLabel={`${t("when")}: ${label}`}
         accessibilityState={{ expanded }}
         onPress={() => setExpanded((current) => !current)}
         className="min-h-14 flex-row items-center rounded-xl border border-slate-300 bg-white px-4 active:bg-slate-50"
