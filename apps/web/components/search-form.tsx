@@ -1,31 +1,6 @@
 import { LocationCombobox } from "./location-combobox";
-import { CalendarIcon, SearchIcon, UsersIcon } from "./icons";
-
-const Field = ({
-  icon,
-  label,
-  name,
-  placeholder,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  name: string;
-  placeholder: string;
-}) => (
-  <label className="group flex min-h-[68px] flex-1 items-center gap-3 border-b border-slate-200 px-4 py-3 transition hover:bg-slate-50 md:border-r md:border-b-0">
-    <span className="text-[#0B6EFD]">{icon}</span>
-    <span className="min-w-0 flex-1">
-      <span className="block text-xs font-semibold text-slate-500">
-        {label}
-      </span>
-      <input
-        name={name}
-        placeholder={placeholder}
-        className="mt-0.5 w-full bg-transparent text-[15px] font-semibold text-slate-900 outline-none placeholder:font-normal placeholder:text-slate-400"
-      />
-    </span>
-  </label>
-);
+import { TravelDatePicker } from "./travel-date-picker";
+import { SearchIcon } from "./icons";
 
 export function SearchForm() {
   return (
@@ -44,18 +19,7 @@ export function SearchForm() {
         placeholder="Cualquier lugar"
         includeAnywhere
       />
-      <Field
-        icon={<CalendarIcon />}
-        label="Cuándo"
-        name="fecha"
-        placeholder="Elige fechas o mes"
-      />
-      <Field
-        icon={<UsersIcon />}
-        label="Viajeros"
-        name="viajeros"
-        placeholder="1 viajero"
-      />
+      <TravelDatePicker />
       <div className="p-2.5 md:flex md:items-stretch">
         <button
           className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0B6EFD] px-5 font-bold text-white transition hover:bg-[#0857C9] md:w-auto"

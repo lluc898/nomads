@@ -4,12 +4,22 @@ import { SearchForm } from "@/components/search-form";
 import { SiteHeader } from "@/components/site-header";
 
 type SearchPageProps = {
-  searchParams: Promise<{ origen?: string; destino?: string }>;
+  searchParams: Promise<{
+    origen?: string;
+    destino?: string;
+    departureDate?: string;
+    flexibleMonth?: string;
+  }>;
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
-  const hasSearch = Boolean(params.origen || params.destino);
+  const hasSearch = Boolean(
+    params.origen ||
+    params.destino ||
+    params.departureDate ||
+    params.flexibleMonth,
+  );
 
   return (
     <main className="min-h-screen bg-slate-50">

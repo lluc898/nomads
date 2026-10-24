@@ -10,15 +10,34 @@ export const tripStatusSchema = z.enum([
   "archived",
 ]);
 
-export const searchTripsSchema = z.object({
+const isoDateSchema = z.iso.date();
+const isoMonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
+
+export const tripDateSelectionSchema = z.discriminatedUnion("dateMode", [
+  z
+    .object({
+      dateMode: z.literal("exact"),
+      departureDate: isoDateSchema,
+      returnDate: isoDateSchema,
+    })
+    .refine(({ departureDate, returnDate }) => returnDate >= departureDate, {
+      message: "La fecha de vuelta no puede ser anterior a la ida.",
+      path: ["returnDate"],
+    }),
+  z.object({
+    dateMode: z.literal("flexible"),
+    flexibleMonth: isoMonthSchema,
+  }),
+]);
+
+const searchLocationsSchema = z.object({
   origin: originLocationIdSchema.optional(),
   destination: selectedLocationIdSchema.optional(),
-  month: z
-    .string()
-    .regex(/^\d{4}-\d{2}$/)
-    .optional(),
-  travelers: z.coerce.number().int().min(1).max(20).default(1),
 });
+
+export const searchTripsSchema = searchLocationsSchema.and(
+  tripDateSelectionSchema,
+);
 
 export const tripCardSchema = z.object({
   id: z.uuid(),
@@ -40,6 +59,7 @@ export const tripCardSchema = z.object({
 });
 
 export type SearchTripsInput = z.infer<typeof searchTripsSchema>;
+export type TripDateSelection = z.infer<typeof tripDateSelectionSchema>;
 export type TripCard = z.infer<typeof tripCardSchema>;
 
 export const featuredTrips: TripCard[] = [

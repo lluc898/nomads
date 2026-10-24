@@ -1,13 +1,15 @@
-import type { TravelLocation } from "@viajeroshub/shared";
+import type { TravelLocation, TripDateSelection } from "@viajeroshub/shared";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { LocationPicker } from "@/components/location-picker";
+import { TravelDatePicker } from "@/components/travel-date-picker";
 
 export default function SearchScreen() {
   const [origin, setOrigin] = useState<TravelLocation | null>(null);
   const [destination, setDestination] = useState<TravelLocation | null>(null);
+  const [dates, setDates] = useState<TripDateSelection | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   return (
@@ -48,11 +50,17 @@ export default function SearchScreen() {
               setSubmitted(false);
             }}
           />
+          <TravelDatePicker
+            onChange={(selection) => {
+              setDates(selection);
+              setSubmitted(false);
+            }}
+          />
         </View>
 
         <Pressable
           accessibilityRole="button"
-          disabled={!origin || !destination}
+          disabled={!origin || !destination || !dates}
           onPress={() => setSubmitted(true)}
           className="mt-5 h-14 items-center justify-center rounded-xl bg-brand-500 active:bg-brand-600 disabled:opacity-40"
         >

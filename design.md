@@ -129,7 +129,7 @@ Estilo tipo Skyscanner:
 - Campo **Desde** con autocomplete.
 - Campo **Hacia** con autocomplete y opción “Cualquier destino”.
 - Selector de fechas: ida/vuelta o mes flexible.
-- Selector de viajeros.
+- La búsqueda siempre representa al viajero autenticado; no solicita cantidad de viajeros.
 - Botón grande **Buscar viajes**.
 - Filtros posteriores: presupuesto, duración, tipo de viaje, visibilidad, plazas y orden.
 
