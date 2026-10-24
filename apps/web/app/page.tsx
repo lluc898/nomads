@@ -25,9 +25,14 @@ export default function Home() {
     <main>
       <SiteHeader />
 
-      <section className="relative overflow-hidden bg-[#eaf3ff] px-5 pt-32 pb-16 md:pt-40 md:pb-24">
-        <div className="absolute top-24 left-[-8rem] size-80 rounded-full bg-blue-300/30 blur-3xl" />
-        <div className="absolute top-8 right-[-5rem] size-96 rounded-full bg-orange-200/30 blur-3xl" />
+      <section className="relative isolate z-10 bg-[#eaf3ff] px-5 pt-32 pb-16 md:pt-40 md:pb-24">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+        >
+          <div className="absolute top-24 left-[-8rem] size-80 rounded-full bg-blue-300/30 blur-3xl" />
+          <div className="absolute top-8 right-[-5rem] size-96 rounded-full bg-orange-200/30 blur-3xl" />
+        </div>
         <div className="relative mx-auto max-w-7xl">
           <div className="mx-auto max-w-3xl text-center">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/70 px-3 py-1.5 text-xs font-bold tracking-[.12em] text-[#0857C9] uppercase">
