@@ -59,6 +59,10 @@ local bloquee el descubrimiento. Requiere `EXPO_TOKEN` en `deploy/.env`. Un
 watchdog comprueba tanto Metro como el túnel público y reinicia el servicio si
 Expo devuelve errores 502 de forma continuada.
 
+En el servidor de desarrollo, `https://viajes.llucbosch.com/expo` redirige
+siempre al túnel activo. Esta URL permanece estable aunque Expo regenere la
+dirección interna después de una recuperación o un despliegue.
+
 ## Estructura
 
 - `apps/web`: web pública y API con Next.js App Router.

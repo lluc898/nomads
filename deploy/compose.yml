@@ -51,9 +51,11 @@ services:
       AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:-}
       AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}
       AVATAR_STORAGE_DIR: /app/data/avatars
+      EXPO_TUNNEL_FILE: /app/expo-state/tunnel-url
       NEXT_PUBLIC_APP_URL: https://viajes.llucbosch.com
     volumes:
       - avatar-data:/app/data/avatars
+      - expo-state:/app/expo-state:ro
     ports:
       - "127.0.0.1:3010:3000"
     depends_on:
@@ -93,6 +95,9 @@ services:
       EXPO_UNSTABLE_TUNNEL_V2: "1"
       REACT_NATIVE_PACKAGER_HOSTNAME: ${EXPO_PACKAGER_HOST:-192.168.1.200}
       EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-https://viajes.llucbosch.com/api}
+      EXPO_TUNNEL_FILE: /app/state/tunnel-url
+    volumes:
+      - expo-state:/app/state
     healthcheck:
       test: ["CMD", "node", "scripts/healthcheck.mjs"]
       interval: 20s
@@ -103,6 +108,7 @@ services:
 volumes:
   avatar-data:
   database-data:
+  expo-state:
 
 networks:
   internal:

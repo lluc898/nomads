@@ -11,7 +11,8 @@ const localResponse = await fetch("http://127.0.0.1:8081", {
 });
 if (!localResponse.ok) process.exit(1);
 
-const tunnelUrl = (await readFile("/tmp/expo-tunnel-url", "utf8")).trim();
+const tunnelFile = process.env.EXPO_TUNNEL_FILE ?? "/tmp/expo-tunnel-url";
+const tunnelUrl = (await readFile(tunnelFile, "utf8")).trim();
 if (!/^https:\/\/[a-z0-9.-]+\.on\.expo\.app$/.test(tunnelUrl)) process.exit(1);
 
 const tunnelResponse = await fetch(tunnelUrl, {

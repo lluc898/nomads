@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 
-const tunnelFile = "/tmp/expo-tunnel-url";
+const tunnelFile = process.env.EXPO_TUNNEL_FILE ?? "/tmp/expo-tunnel-url";
 const checkIntervalMs = 20_000;
 const maxFailures = 3;
 const startupDeadline = Date.now() + 120_000;
@@ -10,6 +10,8 @@ let tunnelUrl = null;
 let failures = 0;
 let outputBuffer = "";
 let stopping = false;
+
+await writeFile(tunnelFile, "");
 
 const expo = spawn(
   "pnpm",
