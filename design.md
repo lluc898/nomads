@@ -193,13 +193,12 @@ Formulario por pasos:
 
 ### Navegación
 
-Tab bar con cinco pestañas:
+Tab bar con cuatro pestañas:
 
-1. **Explorar**
-2. **Buscar**
-3. **Crear**
-4. **Mis viajes**
-5. **Perfil**
+1. **Inicio**, con el buscador principal integrado.
+2. **Crear**
+3. **Mis viajes**
+4. **Perfil**
 
 ### Pantallas prioritarias
 

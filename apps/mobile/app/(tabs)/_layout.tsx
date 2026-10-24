@@ -24,15 +24,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Explorar",
+          title: "Inicio",
           tabBarIcon: ({ color }) => <TabIcon symbol="⌂" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: "Buscar",
-          tabBarIcon: ({ color }) => <TabIcon symbol="⌕" color={color} />,
         }}
       />
       <Tabs.Screen

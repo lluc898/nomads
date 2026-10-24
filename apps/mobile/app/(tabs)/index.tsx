@@ -1,21 +1,24 @@
 import { featuredTrips } from "@viajeroshub/shared";
-import { Image, ScrollView, Text, TextInput, View } from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { HomeSearch } from "@/components/home-search";
 import { TripCard } from "@/components/trip-card";
 import { useAuth } from "@/lib/auth-context";
 import { absoluteMediaUrl } from "@/lib/config";
 
-export default function ExploreScreen() {
+export default function HomeScreen() {
   const { profile } = useAuth();
   const avatarUrl = absoluteMediaUrl(profile?.image ?? null);
+
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
       <ScrollView
         contentContainerClassName="pb-8"
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="px-5 pb-5 pt-3">
+        <View className="bg-brand-50 px-5 pb-8 pt-3">
           <View className="flex-row items-center justify-between">
             <View>
               <Text className="text-xl font-extrabold tracking-tight text-slate-950">
@@ -38,23 +41,25 @@ export default function ExploreScreen() {
               </View>
             )}
           </View>
-          <View className="mt-6 rounded-2xl bg-brand-500 p-5">
-            <Text className="text-2xl font-extrabold leading-8 text-white">
-              Encuentra tu próximo viaje en grupo
+
+          <View className="pb-6 pt-8">
+            <Text className="text-xs font-bold uppercase tracking-widest text-brand-600">
+              Viajar juntos empieza aquí
             </Text>
-            <Text className="mt-2 leading-5 text-blue-100">
-              Busca un destino o déjate sorprender.
+            <Text className="mt-3 text-4xl font-extrabold leading-[44px] tracking-tight text-slate-950">
+              Encuentra gente para tu{" "}
+              <Text className="text-brand-500">próximo viaje</Text>
             </Text>
-            <View className="h-13 mt-5 flex-row items-center rounded-xl bg-white px-4">
-              <Text className="mr-2 text-xl text-brand-500">⌕</Text>
-              <TextInput
-                placeholder="¿Adónde quieres ir?"
-                placeholderTextColor="#94A3B8"
-                className="h-13 flex-1 text-base text-slate-900"
-              />
-            </View>
+            <Text className="mt-3 text-base leading-6 text-slate-600">
+              Descubre planes reales y conecta con viajeros afines.
+            </Text>
           </View>
-          <View className="mt-6 flex-row items-end justify-between">
+
+          <HomeSearch />
+        </View>
+
+        <View className="px-5 pb-5 pt-8">
+          <View className="flex-row items-end justify-between">
             <View>
               <Text className="text-xs font-bold uppercase tracking-widest text-brand-600">
                 Ideas para empezar
@@ -66,6 +71,7 @@ export default function ExploreScreen() {
             <Text className="font-bold text-brand-600">Ver todos</Text>
           </View>
         </View>
+
         <View className="px-5">
           {featuredTrips.map((trip) => (
             <TripCard key={trip.id} trip={trip} />

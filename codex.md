@@ -71,6 +71,7 @@ packages/ui
 - Debe funcionar la búsqueda con destino vacío.
 - Debe funcionar la búsqueda por mes completo.
 - La búsqueda no pide cantidad de viajeros: cada cuenta busca una plaza para sí misma.
+- En la app móvil, el buscador vive en Inicio y no tiene una pestaña independiente.
 - Usa índices PostgreSQL y consultas eficientes.
 - Devuelve resultados paginados con filtros y orden.
 - Origen y destino reutilizan el catálogo `countries`/`airports`; el origen exige país o aeropuerto y el destino admite además `anywhere` ("Cualquier lugar").
