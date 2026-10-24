@@ -107,7 +107,11 @@ function CalendarGrid({
   );
 }
 
-export function TravelDatePicker() {
+export function TravelDatePicker({
+  exactOnly = false,
+}: {
+  exactOnly?: boolean;
+}) {
   const { locale, t } = useI18n();
   const panelId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -224,22 +228,24 @@ export function TravelDatePicker() {
           aria-label="Seleccionar fechas del viaje"
           className="absolute top-[calc(100%+8px)] right-0 z-40 w-[min(23rem,calc(100vw-2.5rem))] rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_50px_rgba(15,23,42,.2)]"
         >
-          <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1">
-            {(["exact", "flexible"] as const).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setMode(option)}
-                className={`min-h-10 rounded-lg px-3 text-sm font-bold transition ${
-                  mode === option
-                    ? "bg-white text-[#0857C9] shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                {option === "exact" ? t("exactDates") : t("flexibleMonth")}
-              </button>
-            ))}
-          </div>
+          {!exactOnly ? (
+            <div className="grid grid-cols-2 rounded-xl bg-slate-100 p-1">
+              {(["exact", "flexible"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setMode(option)}
+                  className={`min-h-10 rounded-lg px-3 text-sm font-bold transition ${
+                    mode === option
+                      ? "bg-white text-[#0857C9] shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {option === "exact" ? t("exactDates") : t("flexibleMonth")}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           {mode === "exact" ? (
             <div className="mt-4">

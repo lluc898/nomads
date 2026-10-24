@@ -1,4 +1,8 @@
-import type { MobileProfile } from "@viajeroshub/shared";
+import type {
+  CreateTripInput,
+  MobileProfile,
+  SupportedLocale,
+} from "@viajeroshub/shared";
 import * as Crypto from "expo-crypto";
 import * as Linking from "expo-linking";
 import * as SecureStore from "expo-secure-store";
@@ -29,6 +33,8 @@ type AuthContextValue = {
   signOut: () => Promise<void>;
   saveProfile: (formData: FormData) => Promise<MobileProfile>;
   refreshProfile: () => Promise<void>;
+  createTrip: (input: CreateTripInput) => Promise<void>;
+  listMyTrips: (locale?: SupportedLocale) => ReturnType<typeof api.listMyTrips>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -150,6 +156,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) await loadProfile(token);
   }, [loadProfile, token]);
 
+  const createTrip = useCallback(
+    async (input: CreateTripInput) => {
+      if (!token) throw new Error("Tu sesión ha caducado.");
+      await api.createTrip(token, input);
+    },
+    [token],
+  );
+
+  const listMyTrips = useCallback(
+    (locale?: SupportedLocale) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.listMyTrips(token, locale);
+    },
+    [token],
+  );
+
   const value = useMemo(
     () => ({
       status,
@@ -159,6 +181,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signOut,
       saveProfile,
       refreshProfile,
+      createTrip,
+      listMyTrips,
     }),
     [
       completeSignIn,
@@ -168,6 +192,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signOut,
       status,
+      createTrip,
+      listMyTrips,
     ],
   );
 

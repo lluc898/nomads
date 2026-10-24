@@ -21,6 +21,14 @@ export const tripStatus = pgEnum("trip_status", [
   "closed",
   "archived",
 ]);
+export const tripLinkType = pgEnum("trip_link_type", [
+  "flight",
+  "accommodation",
+]);
+export const affiliateLinkStatus = pgEnum("affiliate_link_status", [
+  "pending_review",
+  "monetized",
+]);
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -154,41 +162,100 @@ export const geoPlaces = pgTable("geo_places", {
   parentId: uuid("parent_id"),
 });
 
-export const trips = pgTable("trips", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  creatorId: uuid("creator_id")
-    .references(() => users.id)
-    .notNull(),
-  title: varchar("title", { length: 160 }).notNull(),
-  slug: varchar("slug", { length: 180 }).notNull().unique(),
-  originPlaceId: uuid("origin_place_id").references(() => geoPlaces.id),
-  destinationPlaceId: uuid("destination_place_id").references(
-    () => geoPlaces.id,
-  ),
-  originCountryCode: varchar("origin_country_code", { length: 2 }).references(
-    () => countries.code,
-  ),
-  originAirportId: integer("origin_airport_id").references(() => airports.id),
-  destinationCountryCode: varchar("destination_country_code", {
-    length: 2,
-  }).references(() => countries.code),
-  destinationAirportId: integer("destination_airport_id").references(
-    () => airports.id,
-  ),
-  destinationAnywhere: boolean("destination_anywhere").default(false).notNull(),
-  departureDate: date("departure_date"),
-  returnDate: date("return_date"),
-  flexibleMonth: date("flexible_month"),
-  visibility: tripVisibility("visibility").default("public").notNull(),
-  status: tripStatus("status").default("draft").notNull(),
-  maxParticipants: integer("max_participants"),
-  budget: numeric("budget", { precision: 12, scale: 2 }),
-  currency: varchar("currency", { length: 3 }).default("EUR").notNull(),
-  description: text("description").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
+export const trips = pgTable(
+  "trips",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    creatorId: uuid("creator_id")
+      .references(() => users.id)
+      .notNull(),
+    title: varchar("title", { length: 160 }).notNull(),
+    slug: varchar("slug", { length: 180 }).notNull().unique(),
+    originPlaceId: uuid("origin_place_id").references(() => geoPlaces.id),
+    destinationPlaceId: uuid("destination_place_id").references(
+      () => geoPlaces.id,
+    ),
+    originCountryCode: varchar("origin_country_code", { length: 2 }).references(
+      () => countries.code,
+    ),
+    originAirportId: integer("origin_airport_id").references(() => airports.id),
+    destinationCountryCode: varchar("destination_country_code", {
+      length: 2,
+    }).references(() => countries.code),
+    destinationAirportId: integer("destination_airport_id").references(
+      () => airports.id,
+    ),
+    destinationAnywhere: boolean("destination_anywhere")
+      .default(false)
+      .notNull(),
+    departureDate: date("departure_date"),
+    returnDate: date("return_date"),
+    flexibleMonth: date("flexible_month"),
+    visibility: tripVisibility("visibility").default("public").notNull(),
+    status: tripStatus("status").default("draft").notNull(),
+    maxParticipants: integer("max_participants"),
+    budget: numeric("budget", { precision: 12, scale: 2 }),
+    currency: varchar("currency", { length: 3 }).default("EUR").notNull(),
+    description: text("description").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (trip) => [
+    index("trips_creator_id_idx").on(trip.creatorId),
+    index("trips_status_departure_idx").on(trip.status, trip.departureDate),
+    index("trips_origin_country_idx").on(trip.originCountryCode),
+    index("trips_destination_country_idx").on(trip.destinationCountryCode),
+  ],
+);
+
+export const tripLinks = pgTable(
+  "trip_links",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 80 }).notNull(),
+    type: tripLinkType("type").notNull(),
+    originalUrl: text("original_url").notNull(),
+    affiliateUrl: text("affiliate_url"),
+    affiliateStatus: affiliateLinkStatus("affiliate_status")
+      .default("pending_review")
+      .notNull(),
+    position: integer("position").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (link) => [
+    index("trip_links_trip_id_position_idx").on(link.tripId, link.position),
+  ],
+);
+
+export const affiliateClicks = pgTable(
+  "affiliate_clicks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tripLinkId: uuid("trip_link_id")
+      .notNull()
+      .references(() => tripLinks.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    userAgent: varchar("user_agent", { length: 512 }),
+    ipHash: varchar("ip_hash", { length: 64 }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (click) => [
+    index("affiliate_clicks_link_created_idx").on(
+      click.tripLinkId,
+      click.createdAt,
+    ),
+  ],
+);

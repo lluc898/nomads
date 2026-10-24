@@ -109,6 +109,15 @@ packages/ui
 - Instagram es opcional, se normaliza en servidor y es el único enlace social del perfil MVP.
 - El correo nunca forma parte del perfil público.
 
+## Creación de viajes
+
+- Crear un viaje exige perfil completo, origen y destino del catálogo mundial y fechas exactas de ida y vuelta.
+- El título se deriva del destino; descripción, presupuesto, tamaño del grupo y privacidad son configurables.
+- Un viaje puede tener hasta 20 enlaces de reserva, cada uno con nombre y tipo `flight` o `accommodation`.
+- Solo se aceptan enlaces HTTPS sin credenciales. Se conserva la URL original y la URL afiliada por separado.
+- La interfaz nunca enlaza directamente al proveedor: usa `/go/:id`, comprueba acceso, registra el clic con IP hasheada y redirige.
+- Los viajes publicados se muestran en el buscador por las mismas claves de país/aeropuerto usadas al crearlos.
+
 ## Criterios de aceptación
 
 - `pnpm typecheck`, `pnpm lint` y `pnpm test` pasan.

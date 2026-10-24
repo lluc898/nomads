@@ -3,7 +3,9 @@ import {
   type SupportedLocale,
   type TripCard as TripCardData,
 } from "@viajeroshub/shared";
-import { Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
+
+import { WEB_URL } from "@/lib/config";
 
 const tones = {
   sea: "bg-cyan-600",
@@ -25,7 +27,8 @@ export function TripCard({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`Ver viaje a ${trip.destination}`}
+      accessibilityLabel={t("tripTo", { destination: trip.destination })}
+      onPress={() => Linking.openURL(`${WEB_URL}/viajes/${trip.slug}`)}
       className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white active:opacity-90"
     >
       <View className={`h-32 justify-end p-4 ${tones[trip.tone]}`}>

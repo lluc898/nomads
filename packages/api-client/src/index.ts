@@ -1,9 +1,12 @@
 import {
+  createdTripSchema,
+  createTripInputSchema,
   isSupportedLocale,
   mobileProfileSchema,
   type SupportedLocale,
   travelLocationSchema,
   tripCardSchema,
+  type CreateTripInput,
   type MobileProfile,
   type TravelLocation,
   type TripCard,
@@ -38,13 +41,50 @@ export function createApiClient({
       return isSupportedLocale(payload.locale) ? payload.locale : "en";
     },
 
-    async listTrips(): Promise<TripCard[]> {
-      const response = await fetcher(`${baseUrl}/trips`);
+    async listTrips(
+      options: {
+        origin?: string;
+        destination?: string;
+        departureDate?: string;
+        returnDate?: string;
+        flexibleMonth?: string;
+        locale?: SupportedLocale;
+      } = {},
+    ): Promise<TripCard[]> {
+      const search = new URLSearchParams();
+      Object.entries(options).forEach(([key, value]) => {
+        if (value) search.set(key, value);
+      });
+      const response = await fetcher(`${baseUrl}/trips?${search}`);
       if (!response.ok) {
         throw new Error(
           `No se pudieron cargar los viajes (${response.status})`,
         );
       }
+      return tripCardSchema.array().parse(await response.json());
+    },
+
+    async createTrip(token: string, input: CreateTripInput) {
+      const body = createTripInputSchema.parse(input);
+      const response = await fetcher(`${baseUrl}/trips`, {
+        method: "POST",
+        headers: {
+          ...authorization(token),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) throw await apiError(response);
+      return createdTripSchema.parse(await response.json());
+    },
+
+    async listMyTrips(token: string, locale?: SupportedLocale) {
+      const search = new URLSearchParams({ mine: "true" });
+      if (locale) search.set("locale", locale);
+      const response = await fetcher(`${baseUrl}/trips?${search}`, {
+        headers: authorization(token),
+      });
+      if (!response.ok) throw await apiError(response);
       return tripCardSchema.array().parse(await response.json());
     },
 

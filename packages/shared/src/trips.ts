@@ -10,6 +10,20 @@ export const tripStatusSchema = z.enum([
   "archived",
 ]);
 
+export const tripLinkTypeSchema = z.enum(["flight", "accommodation"]);
+
+export const tripLinkInputSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  type: tripLinkTypeSchema,
+  url: z
+    .url()
+    .max(2_000)
+    .refine((value) => {
+      const url = new URL(value);
+      return url.protocol === "https:" && !url.username && !url.password;
+    }, "El enlace debe usar HTTPS y no incluir credenciales."),
+});
+
 const isoDateSchema = z.iso.date();
 const isoMonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/);
 
@@ -39,6 +53,38 @@ export const searchTripsSchema = searchLocationsSchema.and(
   tripDateSelectionSchema,
 );
 
+export const createTripInputSchema = z
+  .object({
+    origin: originLocationIdSchema,
+    destination: originLocationIdSchema,
+    departureDate: isoDateSchema,
+    returnDate: isoDateSchema,
+    description: z.string().trim().max(3_000).default(""),
+    visibility: tripVisibilitySchema.default("public"),
+    budget: z
+      .number()
+      .finite()
+      .positive()
+      .max(1_000_000)
+      .nullable()
+      .default(null),
+    maxParticipants: z.number().int().min(2).max(50).nullable().default(null),
+    links: z.array(tripLinkInputSchema).max(20).default([]),
+  })
+  .refine(({ departureDate, returnDate }) => returnDate >= departureDate, {
+    message: "La fecha de vuelta no puede ser anterior a la ida.",
+    path: ["returnDate"],
+  })
+  .refine(({ origin, destination }) => origin !== destination, {
+    message: "El origen y el destino deben ser diferentes.",
+    path: ["destination"],
+  });
+
+export const createdTripSchema = z.object({
+  id: z.uuid(),
+  slug: z.string().min(1),
+});
+
 export const tripCardSchema = z.object({
   id: z.uuid(),
   slug: z.string().min(1),
@@ -61,6 +107,9 @@ export const tripCardSchema = z.object({
 export type SearchTripsInput = z.infer<typeof searchTripsSchema>;
 export type TripDateSelection = z.infer<typeof tripDateSelectionSchema>;
 export type TripCard = z.infer<typeof tripCardSchema>;
+export type CreateTripInput = z.infer<typeof createTripInputSchema>;
+export type CreatedTrip = z.infer<typeof createdTripSchema>;
+export type TripLinkInput = z.infer<typeof tripLinkInputSchema>;
 
 export const featuredTrips: TripCard[] = [
   {

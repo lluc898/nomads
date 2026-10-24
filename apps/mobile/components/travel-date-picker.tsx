@@ -31,8 +31,10 @@ function shortDate(value: string, locale: string) {
 
 export function TravelDatePicker({
   onChange,
+  exactOnly = false,
 }: {
   onChange: (selection: TripDateSelection | null) => void;
+  exactOnly?: boolean;
 }) {
   const { locale, t } = useI18n();
   const today = new Date();
@@ -142,27 +144,29 @@ export function TravelDatePicker({
 
       {expanded ? (
         <View className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
-          <View className="flex-row rounded-xl bg-slate-200 p-1">
-            {(["exact", "flexible"] as const).map((option) => (
-              <Pressable
-                key={option}
-                accessibilityRole="button"
-                accessibilityState={{ selected: mode === option }}
-                onPress={() => changeMode(option)}
-                className={`min-h-10 flex-1 items-center justify-center rounded-lg ${
-                  mode === option ? "bg-white" : "bg-transparent"
-                }`}
-              >
-                <Text
-                  className={`text-sm font-bold ${
-                    mode === option ? "text-brand-600" : "text-slate-600"
+          {!exactOnly ? (
+            <View className="flex-row rounded-xl bg-slate-200 p-1">
+              {(["exact", "flexible"] as const).map((option) => (
+                <Pressable
+                  key={option}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: mode === option }}
+                  onPress={() => changeMode(option)}
+                  className={`min-h-10 flex-1 items-center justify-center rounded-lg ${
+                    mode === option ? "bg-white" : "bg-transparent"
                   }`}
                 >
-                  {option === "exact" ? t("exactDates") : t("flexibleMonth")}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+                  <Text
+                    className={`text-sm font-bold ${
+                      mode === option ? "text-brand-600" : "text-slate-600"
+                    }`}
+                  >
+                    {option === "exact" ? t("exactDates") : t("flexibleMonth")}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
 
           {mode === "exact" ? (
             <View className="mt-4">

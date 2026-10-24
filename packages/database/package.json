@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@viajeroshub/shared": "workspace:*",
     "csv-parse": "^7.0.3",
     "drizzle-orm": "^0.45.4",
     "postgres": "^3.4.9"
