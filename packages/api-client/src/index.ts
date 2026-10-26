@@ -7,11 +7,14 @@ import {
   travelLocationSchema,
   tripCardSchema,
   tripDetailSchema,
+  tripJoinResultSchema,
+  tripJoinReviewSchema,
   type CreateTripInput,
   type MobileProfile,
   type TravelLocation,
   type TripCard,
   type TripDetail,
+  type TripJoinReview,
 } from "@viajeroshub/shared";
 
 export interface ApiClientOptions {
@@ -103,6 +106,36 @@ export function createApiClient({
       );
       if (!response.ok) throw await apiError(response);
       return tripDetailSchema.parse(await response.json());
+    },
+
+    async joinTrip(token: string, slug: string) {
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}/join`,
+        { method: "POST", headers: authorization(token) },
+      );
+      if (!response.ok) throw await apiError(response);
+      return tripJoinResultSchema.parse(await response.json());
+    },
+
+    async reviewTripJoinRequest(
+      token: string,
+      slug: string,
+      requestId: string,
+      input: TripJoinReview,
+    ) {
+      const body = tripJoinReviewSchema.parse(input);
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}/requests/${encodeURIComponent(requestId)}`,
+        {
+          method: "PATCH",
+          headers: {
+            ...authorization(token),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        },
+      );
+      if (!response.ok) throw await apiError(response);
     },
 
     async exchangeMobileCode(code: string, verifier: string) {

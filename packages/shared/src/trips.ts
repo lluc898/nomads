@@ -11,6 +11,16 @@ export const tripStatusSchema = z.enum([
 ]);
 
 export const tripLinkTypeSchema = z.enum(["flight", "accommodation"]);
+export const tripMembershipStatusSchema = z.enum([
+  "none",
+  "owner",
+  "pending",
+  "approved",
+  "rejected",
+]);
+export const tripJoinReviewSchema = z.object({
+  action: z.enum(["accept", "reject"]),
+});
 
 export const tripLinkInputSchema = z.object({
   name: z.string().trim().min(2).max(80),
@@ -116,6 +126,10 @@ export const tripDetailSchema = z.object({
   budget: z.number().nonnegative().nullable(),
   currency: z.string().length(3),
   maxParticipants: z.number().int().min(2).nullable(),
+  availablePlaces: z.number().int().nonnegative().nullable(),
+  isFull: z.boolean(),
+  canViewPrivateContent: z.boolean(),
+  viewerMembershipStatus: tripMembershipStatusSchema,
   creator: z
     .object({
       name: z.string().nullable(),
@@ -127,14 +141,41 @@ export const tripDetailSchema = z.object({
       id: z.uuid(),
       name: z.string().min(1),
       type: tripLinkTypeSchema,
+      href: z.string().startsWith("/go/"),
     }),
   ),
+  participants: z.array(
+    z.object({
+      userId: z.uuid(),
+      name: z.string().nullable(),
+      username: z.string().nullable(),
+      image: z.string().nullable(),
+      role: z.enum(["owner", "participant"]),
+    }),
+  ),
+  pendingRequests: z.array(
+    z.object({
+      id: z.uuid(),
+      userId: z.uuid(),
+      name: z.string().nullable(),
+      username: z.string().nullable(),
+      image: z.string().nullable(),
+      requestedAt: z.iso.datetime(),
+    }),
+  ),
+});
+
+export const tripJoinResultSchema = z.object({
+  status: z.enum(["pending", "approved"]),
 });
 
 export type SearchTripsInput = z.infer<typeof searchTripsSchema>;
 export type TripDateSelection = z.infer<typeof tripDateSelectionSchema>;
 export type TripCard = z.infer<typeof tripCardSchema>;
 export type TripDetail = z.infer<typeof tripDetailSchema>;
+export type TripMembershipStatus = z.infer<typeof tripMembershipStatusSchema>;
+export type TripJoinResult = z.infer<typeof tripJoinResultSchema>;
+export type TripJoinReview = z.infer<typeof tripJoinReviewSchema>;
 export type CreateTripInput = z.infer<typeof createTripInputSchema>;
 export type CreatedTrip = z.infer<typeof createdTripSchema>;
 export type TripLinkInput = z.infer<typeof tripLinkInputSchema>;

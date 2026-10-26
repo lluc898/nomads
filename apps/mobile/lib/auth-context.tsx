@@ -39,6 +39,12 @@ type AuthContextValue = {
     slug: string,
     locale?: SupportedLocale,
   ) => ReturnType<typeof api.getTrip>;
+  joinTrip: (slug: string) => ReturnType<typeof api.joinTrip>;
+  reviewTripJoinRequest: (
+    slug: string,
+    requestId: string,
+    action: "accept" | "reject",
+  ) => ReturnType<typeof api.reviewTripJoinRequest>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -184,6 +190,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [token],
   );
 
+  const joinTrip = useCallback(
+    (slug: string) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.joinTrip(token, slug);
+    },
+    [token],
+  );
+
+  const reviewTripJoinRequest = useCallback(
+    (slug: string, requestId: string, action: "accept" | "reject") => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.reviewTripJoinRequest(token, slug, requestId, { action });
+    },
+    [token],
+  );
+
   const value = useMemo(
     () => ({
       status,
@@ -196,6 +218,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createTrip,
       listMyTrips,
       getTrip,
+      joinTrip,
+      reviewTripJoinRequest,
     }),
     [
       completeSignIn,
@@ -208,6 +232,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       createTrip,
       listMyTrips,
       getTrip,
+      joinTrip,
+      reviewTripJoinRequest,
     ],
   );
 

@@ -14,7 +14,7 @@ export default async function MyTripsPage() {
   const locale = await getRequestLocale();
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   const trips = await findTripCards(getDatabase(), {
-    creatorId: user.id,
+    userId: user.id,
     locale,
   });
 

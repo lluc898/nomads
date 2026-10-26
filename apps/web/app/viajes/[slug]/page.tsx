@@ -4,8 +4,11 @@ import { notFound } from "next/navigation";
 
 import { auth } from "@/auth";
 import { SiteHeader } from "@/components/site-header";
+import { UserAvatar } from "@/components/user-avatar";
 import { getDatabase } from "@/lib/database";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
+
+import { TripMembership } from "./trip-membership";
 
 export default async function TripDetailPage({
   params,
@@ -17,10 +20,14 @@ export default async function TripDetailPage({
     key: Parameters<typeof translate>[1],
     values?: Record<string, string | number>,
   ) => translate(locale, key, values);
-  const trip = await getTripDetail(getDatabase(), (await params).slug, locale);
-  if (!trip) notFound();
   const session = await auth();
-  if (trip.visibility === "private" && session?.user?.id !== trip.creatorId)
+  const trip = await getTripDetail(
+    getDatabase(),
+    (await params).slug,
+    locale,
+    session?.user?.id,
+  );
+  if (!trip || (trip.visibility === "private" && !session?.user?.id))
     notFound();
   const dates = new Intl.DateTimeFormat(locale, {
     dateStyle: "long",
@@ -49,15 +56,53 @@ export default async function TripDetailPage({
       </section>
       <section className="mx-auto grid max-w-5xl gap-6 px-5 py-10 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
-          <article className="rounded-3xl border border-slate-200 bg-white p-6">
-            <h2 className="text-xl font-extrabold text-slate-950">
-              {t("description")}
-            </h2>
-            <p className="mt-3 leading-7 whitespace-pre-wrap text-slate-600">
-              {trip.description || t("createTripDescription")}
-            </p>
-          </article>
-          {trip.links.length ? (
+          {trip.canViewPrivateContent ? (
+            <article className="rounded-3xl border border-slate-200 bg-white p-6">
+              <h2 className="text-xl font-extrabold text-slate-950">
+                {t("description")}
+              </h2>
+              <p className="mt-3 leading-7 whitespace-pre-wrap text-slate-600">
+                {trip.description || t("createTripDescription")}
+              </p>
+            </article>
+          ) : (
+            <article className="rounded-3xl border border-blue-200 bg-blue-50 p-6 font-semibold text-blue-900">
+              {t("privateContentPending")}
+            </article>
+          )}
+          {trip.canViewPrivateContent && trip.participants.length ? (
+            <article className="rounded-3xl border border-slate-200 bg-white p-6">
+              <h2 className="text-xl font-extrabold text-slate-950">
+                {t("participants")} ({trip.participants.length})
+              </h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {trip.participants.map((participant) => (
+                  <div
+                    key={participant.userId}
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 p-4"
+                  >
+                    <UserAvatar
+                      image={participant.image}
+                      name={participant.name}
+                      username={participant.username}
+                      size="sm"
+                    />
+                    <div>
+                      <p className="font-bold text-slate-900">
+                        {participant.name ?? `@${participant.username}`}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {participant.role === "owner"
+                          ? t("owner")
+                          : t("participant")}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ) : null}
+          {trip.canViewPrivateContent && trip.links.length ? (
             <article className="rounded-3xl border border-slate-200 bg-white p-6">
               <h2 className="text-xl font-extrabold text-slate-950">
                 {t("bookingLinks")}
@@ -85,6 +130,18 @@ export default async function TripDetailPage({
           ) : null}
         </div>
         <aside className="h-fit rounded-3xl border border-slate-200 bg-white p-6">
+          {session?.user?.id ? (
+            <div className="mb-6 border-b border-slate-200 pb-6">
+              <TripMembership
+                slug={trip.slug}
+                visibility={trip.visibility}
+                status={trip.viewerMembershipStatus}
+                isFull={trip.isFull}
+                pendingRequests={trip.pendingRequests}
+                locale={locale}
+              />
+            </div>
+          ) : null}
           <p className="text-sm text-slate-500">
             {t("createdBy", {
               name:
@@ -100,9 +157,9 @@ export default async function TripDetailPage({
             </p>
           ) : null}
           <p className="mt-5 text-sm text-slate-500">
-            {t("groupSizeOptional")}
+            {trip.isFull ? t("tripFull") : t("availablePlaces")}
             <span className="mt-1 block font-bold text-slate-900">
-              {trip.maxParticipants ?? t("unlimited")}
+              {trip.availablePlaces ?? t("unlimited")}
             </span>
           </p>
         </aside>

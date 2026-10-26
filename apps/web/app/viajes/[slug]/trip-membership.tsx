@@ -1,0 +1,136 @@
+"use client";
+
+import {
+  translate,
+  type SupportedLocale,
+  type TripDetail,
+} from "@viajeroshub/shared";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+export function TripMembership({
+  slug,
+  visibility,
+  status,
+  isFull,
+  pendingRequests,
+  locale,
+}: {
+  slug: string;
+  visibility: TripDetail["visibility"];
+  status: TripDetail["viewerMembershipStatus"];
+  isFull: boolean;
+  pendingRequests: TripDetail["pendingRequests"];
+  locale: SupportedLocale;
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+
+  async function join() {
+    setBusy("join");
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/trips/${slug}/join`, {
+        method: "POST",
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        message?: string;
+        status?: "pending" | "approved";
+      } | null;
+      if (!response.ok) throw new Error(payload?.message ?? "Error");
+      setMessage(
+        payload?.status === "pending" ? t("requestSent") : t("joinedSuccess"),
+      );
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Error");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function review(requestId: string, action: "accept" | "reject") {
+    setBusy(requestId);
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/trips/${slug}/requests/${requestId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+      if (!response.ok) throw new Error(payload?.message ?? "Error");
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Error");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      {status === "owner" ? (
+        <div>
+          <p className="font-bold text-slate-900">{t("alreadyMember")}</p>
+          {pendingRequests.length ? (
+            <div className="mt-5 border-t border-slate-200 pt-5">
+              <h2 className="font-extrabold text-slate-950">
+                {t("joinRequests")} ({pendingRequests.length})
+              </h2>
+              <div className="mt-3 space-y-3">
+                {pendingRequests.map((request) => (
+                  <div key={request.id} className="rounded-xl bg-slate-50 p-3">
+                    <p className="font-bold text-slate-900">
+                      {request.name ?? `@${request.username}`}
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        disabled={busy !== null || isFull}
+                        onClick={() => review(request.id, "accept")}
+                        className="rounded-lg bg-[#0B6EFD] px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
+                      >
+                        {t("accept")}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={busy !== null}
+                        onClick={() => review(request.id, "reject")}
+                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-bold text-slate-700 disabled:opacity-50"
+                      >
+                        {t("reject")}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : status === "approved" ? (
+        <p className="font-bold text-green-700">{t("alreadyMember")}</p>
+      ) : status === "pending" ? (
+        <p className="font-bold text-amber-700">{t("requestPending")}</p>
+      ) : isFull ? (
+        <p className="font-bold text-red-700">{t("tripFull")}</p>
+      ) : (
+        <button
+          type="button"
+          disabled={busy !== null}
+          onClick={join}
+          className="w-full rounded-xl bg-[#0B6EFD] px-5 py-3 font-bold text-white disabled:opacity-50"
+        >
+          {visibility === "private" ? t("requestToJoin") : t("joinTrip")}
+        </button>
+      )}
+      {message ? (
+        <p className="text-sm font-semibold text-slate-700">{message}</p>
+      ) : null}
+    </div>
+  );
+}

@@ -94,19 +94,27 @@ describe("trip contracts", () => {
       budget: 850,
       currency: "EUR",
       maxParticipants: 4,
+      availablePlaces: 3,
+      isFull: false,
+      canViewPrivateContent: true,
+      viewerMembershipStatus: "none",
       creator: { name: "Lluc", username: "lluc" },
       links: [
         {
           id: "860d88cc-b251-47f5-bc25-93694a854b4d",
           name: "Vuelo desde Palma",
           type: "flight",
+          href: "/go/860d88cc-b251-47f5-bc25-93694a854b4d",
         },
       ],
+      participants: [],
+      pendingRequests: [],
     });
     expect(detail.links[0]).toEqual({
       id: "860d88cc-b251-47f5-bc25-93694a854b4d",
       name: "Vuelo desde Palma",
       type: "flight",
+      href: "/go/860d88cc-b251-47f5-bc25-93694a854b4d",
     });
   });
 });

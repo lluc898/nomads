@@ -10,6 +10,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -28,6 +29,11 @@ export const tripLinkType = pgEnum("trip_link_type", [
 export const affiliateLinkStatus = pgEnum("affiliate_link_status", [
   "pending_review",
   "monetized",
+]);
+export const tripParticipantStatus = pgEnum("trip_participant_status", [
+  "pending",
+  "approved",
+  "rejected",
 ]);
 
 export const users = pgTable("users", {
@@ -209,6 +215,41 @@ export const trips = pgTable(
     index("trips_status_departure_idx").on(trip.status, trip.departureDate),
     index("trips_origin_country_idx").on(trip.originCountryCode),
     index("trips_destination_country_idx").on(trip.destinationCountryCode),
+  ],
+);
+
+export const tripParticipants = pgTable(
+  "trip_participants",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: tripParticipantStatus("status").notNull(),
+    requestedAt: timestamp("requested_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    respondedAt: timestamp("responded_at", { withTimezone: true }),
+    respondedBy: uuid("responded_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+  },
+  (participant) => [
+    uniqueIndex("trip_participants_trip_user_uidx").on(
+      participant.tripId,
+      participant.userId,
+    ),
+    index("trip_participants_user_status_idx").on(
+      participant.userId,
+      participant.status,
+    ),
+    index("trip_participants_trip_status_idx").on(
+      participant.tripId,
+      participant.status,
+    ),
   ],
 );
 

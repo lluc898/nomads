@@ -3,7 +3,18 @@ import type {
   SupportedLocale,
   TripCard,
 } from "@viajeroshub/shared";
-import { and, asc, desc, eq, gte, lte, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gte,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import type { Database } from "./client";
@@ -12,11 +23,134 @@ import {
   airports,
   countries,
   tripLinks,
+  tripParticipants,
   trips,
   users,
 } from "./schema";
 
 export class InvalidTripLocationError extends Error {}
+export class TripNotFoundError extends Error {}
+export class TripOwnerCannotJoinError extends Error {}
+export class TripFullError extends Error {}
+export class TripJoinRequestNotFoundError extends Error {}
+export class TripOwnerRequiredError extends Error {}
+
+export async function joinTrip(
+  database: Database,
+  slug: string,
+  userId: string,
+) {
+  return database.transaction(async (transaction) => {
+    const [trip] = await transaction
+      .select({
+        id: trips.id,
+        creatorId: trips.creatorId,
+        visibility: trips.visibility,
+        maxParticipants: trips.maxParticipants,
+      })
+      .from(trips)
+      .where(and(eq(trips.slug, slug), eq(trips.status, "published")))
+      .for("update")
+      .limit(1);
+    if (!trip) throw new TripNotFoundError("Viaje no encontrado.");
+    if (trip.creatorId === userId) {
+      throw new TripOwnerCannotJoinError("Ya eres el creador de este viaje.");
+    }
+
+    const [existing] = await transaction
+      .select({ status: tripParticipants.status })
+      .from(tripParticipants)
+      .where(
+        and(
+          eq(tripParticipants.tripId, trip.id),
+          eq(tripParticipants.userId, userId),
+        ),
+      )
+      .limit(1);
+    if (existing?.status === "approved" || existing?.status === "pending") {
+      return { status: existing.status };
+    }
+
+    await assertTripHasCapacity(transaction, trip.id, trip.maxParticipants);
+    const status = trip.visibility === "private" ? "pending" : "approved";
+    await transaction
+      .insert(tripParticipants)
+      .values({
+        tripId: trip.id,
+        userId,
+        status,
+        respondedAt: status === "approved" ? new Date() : null,
+        respondedBy: status === "approved" ? trip.creatorId : null,
+      })
+      .onConflictDoUpdate({
+        target: [tripParticipants.tripId, tripParticipants.userId],
+        set: {
+          status,
+          requestedAt: new Date(),
+          respondedAt: status === "approved" ? new Date() : null,
+          respondedBy: status === "approved" ? trip.creatorId : null,
+        },
+      });
+    return { status };
+  });
+}
+
+export async function reviewTripJoinRequest(
+  database: Database,
+  input: {
+    slug: string;
+    requestId: string;
+    reviewerId: string;
+    action: "accept" | "reject";
+  },
+) {
+  return database.transaction(async (transaction) => {
+    const [trip] = await transaction
+      .select({
+        id: trips.id,
+        creatorId: trips.creatorId,
+        maxParticipants: trips.maxParticipants,
+      })
+      .from(trips)
+      .where(and(eq(trips.slug, input.slug), eq(trips.status, "published")))
+      .for("update")
+      .limit(1);
+    if (!trip) throw new TripNotFoundError("Viaje no encontrado.");
+    if (trip.creatorId !== input.reviewerId) {
+      throw new TripOwnerRequiredError(
+        "Solo el creador puede gestionar solicitudes.",
+      );
+    }
+    const [request] = await transaction
+      .select({ id: tripParticipants.id })
+      .from(tripParticipants)
+      .where(
+        and(
+          eq(tripParticipants.id, input.requestId),
+          eq(tripParticipants.tripId, trip.id),
+          eq(tripParticipants.status, "pending"),
+        ),
+      )
+      .for("update")
+      .limit(1);
+    if (!request) {
+      throw new TripJoinRequestNotFoundError("Solicitud no encontrada.");
+    }
+    if (input.action === "accept") {
+      await assertTripHasCapacity(transaction, trip.id, trip.maxParticipants);
+    }
+    const status = input.action === "accept" ? "approved" : "rejected";
+    await transaction
+      .update(tripParticipants)
+      .set({
+        status,
+        respondedAt: new Date(),
+        respondedBy: input.reviewerId,
+      })
+      .where(eq(tripParticipants.id, request.id));
+    return { status };
+  });
+}
 
 export async function getTripLinkForRedirect(
   database: Database,
@@ -29,6 +163,7 @@ export async function getTripLinkForRedirect(
       visibility: trips.visibility,
       creatorId: trips.creatorId,
       status: trips.status,
+      tripId: trips.id,
     })
     .from(tripLinks)
     .innerJoin(trips, eq(trips.id, tripLinks.tripId))
@@ -37,6 +172,32 @@ export async function getTripLinkForRedirect(
   return result
     ? { ...result, url: result.affiliateUrl ?? result.originalUrl }
     : null;
+}
+
+export async function canUserAccessTrip(
+  database: Database,
+  tripId: string,
+  userId: string,
+) {
+  const [trip] = await database
+    .select({ creatorId: trips.creatorId })
+    .from(trips)
+    .where(eq(trips.id, tripId))
+    .limit(1);
+  if (!trip) return false;
+  if (trip.creatorId === userId) return true;
+  const [participant] = await database
+    .select({ id: tripParticipants.id })
+    .from(tripParticipants)
+    .where(
+      and(
+        eq(tripParticipants.tripId, tripId),
+        eq(tripParticipants.userId, userId),
+        eq(tripParticipants.status, "approved"),
+      ),
+    )
+    .limit(1);
+  return Boolean(participant);
 }
 
 export async function recordAffiliateClick(
@@ -112,7 +273,7 @@ export async function findTripCards(
     departureDate?: string;
     returnDate?: string;
     flexibleMonth?: string;
-    creatorId?: string;
+    userId?: string;
     locale?: SupportedLocale;
     limit?: number;
   } = {},
@@ -135,7 +296,19 @@ export async function findTripCards(
     conditions.push(lte(trips.departureDate, end));
     conditions.push(gte(trips.returnDate, start));
   }
-  if (input.creatorId) conditions.push(eq(trips.creatorId, input.creatorId));
+  if (input.userId) {
+    conditions.push(
+      or(
+        eq(trips.creatorId, input.userId),
+        sql`exists (
+          select 1 from ${tripParticipants}
+          where ${tripParticipants.tripId} = ${trips.id}
+            and ${tripParticipants.userId} = ${input.userId}
+            and ${tripParticipants.status} = 'approved'
+        )`,
+      )!,
+    );
+  }
 
   const rows = await database
     .select({
@@ -147,6 +320,11 @@ export async function findTripCards(
       budget: trips.budget,
       currency: trips.currency,
       maxParticipants: trips.maxParticipants,
+      approvedParticipantCount: sql<number>`(
+        select count(*)::int from ${tripParticipants}
+        where ${tripParticipants.tripId} = ${trips.id}
+          and ${tripParticipants.status} = 'approved'
+      )`,
       createdAt: trips.createdAt,
       creatorName: users.name,
       creatorUsername: users.username,
@@ -191,7 +369,10 @@ export async function findTripCards(
     availablePlaces:
       row.maxParticipants === null
         ? null
-        : Math.max(row.maxParticipants - 1, 0),
+        : Math.max(
+            row.maxParticipants - 1 - Number(row.approvedParticipantCount),
+            0,
+          ),
     visibility: row.visibility,
     tags: [],
     creator: creatorLabel(row.creatorName, row.creatorUsername),
@@ -204,6 +385,7 @@ export async function getTripDetail(
   database: Database,
   slug: string,
   locale: SupportedLocale = "es",
+  viewerUserId?: string | null,
 ) {
   const [trip] = await database
     .select()
@@ -212,7 +394,12 @@ export async function getTripDetail(
     .limit(1);
   if (!trip || trip.status !== "published") return null;
   const [creator] = await database
-    .select({ name: users.name, username: users.username, image: users.image })
+    .select({
+      id: users.id,
+      name: users.name,
+      username: users.username,
+      image: users.image,
+    })
     .from(users)
     .where(eq(users.id, trip.creatorId))
     .limit(1);
@@ -228,17 +415,77 @@ export async function getTripDetail(
       ? `airport:${trip.destinationAirportId}`
       : `country:${trip.destinationCountryCode}`,
   );
-  const links = await database
+  const [viewerMembership] = viewerUserId
+    ? await database
+        .select({ status: tripParticipants.status })
+        .from(tripParticipants)
+        .where(
+          and(
+            eq(tripParticipants.tripId, trip.id),
+            eq(tripParticipants.userId, viewerUserId),
+          ),
+        )
+        .limit(1)
+    : [];
+  const viewerMembershipStatus =
+    viewerUserId === trip.creatorId
+      ? ("owner" as const)
+      : (viewerMembership?.status ?? ("none" as const));
+  const canViewPrivateContent =
+    trip.visibility === "public" ||
+    viewerMembershipStatus === "owner" ||
+    viewerMembershipStatus === "approved";
+
+  const approvedParticipants = await database
     .select({
-      id: tripLinks.id,
-      name: tripLinks.name,
-      type: tripLinks.type,
-      originalUrl: tripLinks.originalUrl,
-      affiliateUrl: tripLinks.affiliateUrl,
+      userId: users.id,
+      name: users.name,
+      username: users.username,
+      image: users.image,
     })
-    .from(tripLinks)
-    .where(eq(tripLinks.tripId, trip.id))
-    .orderBy(asc(tripLinks.position));
+    .from(tripParticipants)
+    .innerJoin(users, eq(users.id, tripParticipants.userId))
+    .where(
+      and(
+        eq(tripParticipants.tripId, trip.id),
+        eq(tripParticipants.status, "approved"),
+      ),
+    )
+    .orderBy(asc(tripParticipants.requestedAt));
+  const links = canViewPrivateContent
+    ? await database
+        .select({
+          id: tripLinks.id,
+          name: tripLinks.name,
+          type: tripLinks.type,
+          originalUrl: tripLinks.originalUrl,
+          affiliateUrl: tripLinks.affiliateUrl,
+        })
+        .from(tripLinks)
+        .where(eq(tripLinks.tripId, trip.id))
+        .orderBy(asc(tripLinks.position))
+    : [];
+  const pendingRequests =
+    viewerMembershipStatus === "owner"
+      ? await database
+          .select({
+            id: tripParticipants.id,
+            userId: users.id,
+            name: users.name,
+            username: users.username,
+            image: users.image,
+            requestedAt: tripParticipants.requestedAt,
+          })
+          .from(tripParticipants)
+          .innerJoin(users, eq(users.id, tripParticipants.userId))
+          .where(
+            and(
+              eq(tripParticipants.tripId, trip.id),
+              eq(tripParticipants.status, "pending"),
+            ),
+          )
+          .orderBy(asc(tripParticipants.requestedAt))
+      : [];
   const displayNames = new Intl.DisplayNames([locale], { type: "region" });
   const localized = (location: Awaited<ReturnType<typeof resolveLocation>>) =>
     location.airportId
@@ -246,12 +493,70 @@ export async function getTripDetail(
       : (displayNames.of(location.countryCode) ?? location.name);
   return {
     ...trip,
-    budget: trip.budget === null ? null : Number(trip.budget),
+    description: canViewPrivateContent ? trip.description : "",
+    budget:
+      canViewPrivateContent && trip.budget !== null
+        ? Number(trip.budget)
+        : null,
     origin: localized(origin),
     destination: localized(destination),
     creator,
     links,
+    viewerMembershipStatus,
+    canViewPrivateContent,
+    availablePlaces:
+      trip.maxParticipants === null
+        ? null
+        : Math.max(trip.maxParticipants - 1 - approvedParticipants.length, 0),
+    isFull:
+      trip.maxParticipants !== null &&
+      1 + approvedParticipants.length >= trip.maxParticipants,
+    participants: canViewPrivateContent
+      ? [
+          ...(creator
+            ? [
+                {
+                  userId: creator.id,
+                  name: creator.name,
+                  username: creator.username,
+                  image: creator.image,
+                  role: "owner" as const,
+                },
+              ]
+            : []),
+          ...approvedParticipants.map((participant) => ({
+            ...participant,
+            role: "participant" as const,
+          })),
+        ]
+      : [],
+    pendingRequests: pendingRequests.map((request) => ({
+      ...request,
+      requestedAt: request.requestedAt.toISOString(),
+    })),
   };
+}
+
+type CapacityDatabase = Pick<Database, "select">;
+
+async function assertTripHasCapacity(
+  database: CapacityDatabase,
+  tripId: string,
+  maxParticipants: number | null,
+) {
+  if (maxParticipants === null) return;
+  const [result] = await database
+    .select({ value: count() })
+    .from(tripParticipants)
+    .where(
+      and(
+        eq(tripParticipants.tripId, tripId),
+        eq(tripParticipants.status, "approved"),
+      ),
+    );
+  if (1 + Number(result?.value ?? 0) >= maxParticipants) {
+    throw new TripFullError("Este viaje ya está completo.");
+  }
 }
 
 type LocationDatabase = Pick<Database, "select">;

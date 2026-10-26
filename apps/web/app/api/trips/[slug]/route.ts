@@ -4,6 +4,7 @@ import { isSupportedLocale, tripDetailSchema } from "@viajeroshub/shared";
 import { auth } from "@/auth";
 import { getDatabase } from "@/lib/database";
 import { getBearerToken, requireMobileAuth } from "@/lib/mobile-auth";
+import { createTripLinkAccess } from "@/lib/trip-link-access";
 
 export async function GET(
   request: Request,
@@ -11,12 +12,17 @@ export async function GET(
 ) {
   const requestedLocale = new URL(request.url).searchParams.get("locale");
   const locale = isSupportedLocale(requestedLocale) ? requestedLocale : "es";
-  const trip = await getTripDetail(getDatabase(), (await params).slug, locale);
+  const userId = await authenticatedUserId(request);
+  const trip = await getTripDetail(
+    getDatabase(),
+    (await params).slug,
+    locale,
+    userId,
+  );
   if (!trip)
     return Response.json({ message: "Viaje no encontrado." }, { status: 404 });
 
-  const userId = await authenticatedUserId(request);
-  if (trip.visibility === "private" && userId !== trip.creatorId) {
+  if (trip.visibility === "private" && !userId) {
     return Response.json({ message: "Viaje no encontrado." }, { status: 404 });
   }
 
@@ -33,10 +39,26 @@ export async function GET(
       budget: trip.budget,
       currency: trip.currency,
       maxParticipants: trip.maxParticipants,
+      availablePlaces: trip.availablePlaces,
+      isFull: trip.isFull,
+      canViewPrivateContent: trip.canViewPrivateContent,
+      viewerMembershipStatus: trip.viewerMembershipStatus,
       creator: trip.creator
         ? { name: trip.creator.name, username: trip.creator.username }
         : null,
-      links: trip.links.map(({ id, name, type }) => ({ id, name, type })),
+      links: trip.links.map(({ id, name, type }) => ({
+        id,
+        name,
+        type,
+        href:
+          trip.visibility === "private" && userId && process.env.AUTH_SECRET
+            ? `/go/${id}?access=${encodeURIComponent(
+                createTripLinkAccess(id, userId, process.env.AUTH_SECRET),
+              )}`
+            : `/go/${id}`,
+      })),
+      participants: trip.participants,
+      pendingRequests: trip.pendingRequests,
     }),
     { headers: { "Cache-Control": "private, no-store" } },
   );

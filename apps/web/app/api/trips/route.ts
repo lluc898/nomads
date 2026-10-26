@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     departureDate: url.searchParams.get("departureDate") ?? undefined,
     returnDate: url.searchParams.get("returnDate") ?? undefined,
     flexibleMonth: url.searchParams.get("flexibleMonth") ?? undefined,
-    creatorId: creatorId ?? undefined,
+    userId: creatorId ?? undefined,
     locale,
   });
   return Response.json(cards, {

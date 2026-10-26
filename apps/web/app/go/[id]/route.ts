@@ -1,4 +1,5 @@
 import {
+  canUserAccessTrip,
   getTripLinkForRedirect,
   recordAffiliateClick,
 } from "@viajeroshub/database";
@@ -6,6 +7,7 @@ import { createHash } from "node:crypto";
 
 import { auth } from "@/auth";
 import { getDatabase } from "@/lib/database";
+import { verifyTripLinkAccess } from "@/lib/trip-link-access";
 
 export async function GET(
   request: Request,
@@ -17,18 +19,30 @@ export async function GET(
   if (!link || link.status !== "published")
     return new Response(null, { status: 404 });
   const session = await auth();
-  if (link.visibility === "private" && session?.user?.id !== link.creatorId)
+  const secret = process.env.AUTH_SECRET;
+  const signedUserId = secret
+    ? verifyTripLinkAccess(
+        new URL(request.url).searchParams.get("access"),
+        id,
+        secret,
+      )
+    : null;
+  const userId = signedUserId ?? session?.user?.id;
+  if (
+    link.visibility === "private" &&
+    (!userId || !(await canUserAccessTrip(getDatabase(), link.tripId, userId)))
+  ) {
     return new Response(null, { status: 404 });
+  }
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const secret = process.env.AUTH_SECRET;
   const ipHash =
     ip && secret
       ? createHash("sha256").update(`${secret}:${ip}`).digest("hex")
       : null;
   await recordAffiliateClick(getDatabase(), {
     linkId: id,
-    userId: session?.user?.id,
+    userId,
     userAgent: request.headers.get("user-agent"),
     ipHash,
   });
