@@ -15,6 +15,8 @@ export class TripChatAccessError extends Error {}
 export class TripChatRateLimitError extends Error {}
 
 const MAX_MESSAGES_PER_MINUTE = 20;
+const chatSubscribers = new Map<string, Set<() => void>>();
+let chatListener: ReturnType<Database["$client"]["listen"]> | null = null;
 
 export async function listTripMessages(
   database: Database,
@@ -52,7 +54,7 @@ export async function sendTripMessage(
   database: Database,
   input: { slug: string; userId: string; content: string },
 ): Promise<ChatMessage> {
-  return database.transaction(async (transaction) => {
+  const created = await database.transaction(async (transaction) => {
     const trip = await requireTripChatAccess(
       transaction,
       input.slug,
@@ -119,8 +121,59 @@ export async function sendTripMessage(
       .limit(1);
     if (!created || !author)
       throw new TripChatNotFoundError("No se pudo enviar el mensaje.");
-    return toChatMessage({ ...created, ...author }, input.userId);
+    return {
+      conversationId: conversation.id,
+      message: toChatMessage({ ...created, ...author }, input.userId),
+    };
   });
+  await database.$client.notify("trip_chat", created.conversationId);
+  return created.message;
+}
+
+export async function getTripConversationId(
+  database: Database,
+  slug: string,
+  userId: string,
+) {
+  const trip = await requireTripChatAccess(database, slug, userId);
+  const [conversation] = await database
+    .select({ id: conversations.id })
+    .from(conversations)
+    .where(eq(conversations.tripId, trip.id))
+    .limit(1);
+  if (!conversation) throw new TripChatNotFoundError("Chat no encontrado.");
+  return conversation.id;
+}
+
+export async function subscribeToTripMessages(
+  database: Database,
+  conversationId: string,
+  callback: () => void,
+) {
+  const subscribers = chatSubscribers.get(conversationId) ?? new Set();
+  subscribers.add(callback);
+  chatSubscribers.set(conversationId, subscribers);
+
+  if (!chatListener) {
+    chatListener = database.$client.listen("trip_chat", (payload) => {
+      chatSubscribers.get(payload)?.forEach((subscriber) => subscriber());
+    });
+    try {
+      await chatListener;
+    } catch (error) {
+      chatListener = null;
+      subscribers.delete(callback);
+      throw error;
+    }
+  } else {
+    await chatListener;
+  }
+
+  return () => {
+    const active = chatSubscribers.get(conversationId);
+    active?.delete(callback);
+    if (active?.size === 0) chatSubscribers.delete(conversationId);
+  };
 }
 
 async function requireTripChatAccess(

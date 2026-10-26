@@ -8,6 +8,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 
@@ -16,8 +17,9 @@ import { absoluteMediaUrl } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
 
 export function TripChat({ slug }: { slug: string }) {
-  const { getTripChat, sendTripMessage } = useAuth();
+  const { getTripChat, sendTripMessage, subscribeTripChat } = useAuth();
   const { locale, t } = useI18n();
+  const { height } = useWindowDimensions();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -55,12 +57,24 @@ export function TripChat({ slug }: { slug: string }) {
       .finally(() => {
         if (active) setLoading(false);
       });
-    const interval = setInterval(() => void loadMessages(true), 5_000);
+    const controller = new AbortController();
+    let reconnect: ReturnType<typeof setTimeout> | undefined;
+    const connect = () => {
+      void subscribeTripChat(
+        slug,
+        () => void loadMessages(true),
+        controller.signal,
+      ).catch(() => {
+        if (!controller.signal.aborted) reconnect = setTimeout(connect, 3_000);
+      });
+    };
+    connect();
     return () => {
       active = false;
-      clearInterval(interval);
+      controller.abort();
+      if (reconnect) clearTimeout(reconnect);
     };
-  }, [getTripChat, loadMessages, slug]);
+  }, [getTripChat, loadMessages, slug, subscribeTripChat]);
 
   async function submit() {
     const nextContent = content.trim();
@@ -79,13 +93,18 @@ export function TripChat({ slug }: { slug: string }) {
   }
 
   return (
-    <View className="rounded-3xl border border-slate-200 bg-white p-5">
-      <Text className="text-xl font-extrabold text-slate-950">{t("chat")}</Text>
+    <View
+      className="-mx-5 border-t border-slate-200 bg-white px-5 pb-5 pt-8"
+      style={{ height: Math.max(height - 40, 600) }}
+    >
+      <Text className="text-2xl font-extrabold text-slate-950">
+        {t("chat")}
+      </Text>
       <Text className="mt-1 text-sm text-slate-500">{t("chatSubtitle")}</Text>
       <ScrollView
         nestedScrollEnabled
-        className="mt-4 h-96 rounded-2xl bg-slate-50"
-        contentContainerClassName="gap-4 p-4 grow"
+        className="mt-5 flex-1"
+        contentContainerClassName="gap-4 py-2 grow"
       >
         {loading ? (
           <View className="flex-1 items-center justify-center">
@@ -163,13 +182,12 @@ export function TripChat({ slug }: { slug: string }) {
         />
         <Pressable
           accessibilityRole="button"
+          accessibilityLabel={t("send")}
           disabled={!content.trim() || sending}
           onPress={submit}
-          className="min-h-12 items-center justify-center rounded-xl bg-brand-500 px-4 disabled:opacity-50"
+          className="h-12 w-12 items-center justify-center rounded-full bg-brand-500 disabled:opacity-50"
         >
-          <Text className="font-bold text-white">
-            {sending ? t("sending") : t("send")}
-          </Text>
+          <Text className="text-xl font-extrabold text-white">➤</Text>
         </Pressable>
       </View>
     </View>

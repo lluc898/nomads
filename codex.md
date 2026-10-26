@@ -123,6 +123,7 @@ packages/ui
 - Los integrantes aprobados aparecen en el detalle y sus viajes se incluyen en `Mis viajes`.
 - Cada viaje tiene un chat persistente exclusivo para el creador y participantes aprobados; el permiso se valida en cada lectura y envío desde el backend.
 - Los mensajes admiten hasta 1.000 caracteres, se muestran los 100 más recientes y se limitan a 20 envíos por usuario y minuto.
+- El chat en tiempo real usa SSE y `LISTEN/NOTIFY` de PostgreSQL; no debe volver a sondeo periódico mientras esta infraestructura siga disponible.
 
 ## Criterios de aceptación
 

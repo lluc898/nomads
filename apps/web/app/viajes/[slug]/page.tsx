@@ -72,10 +72,6 @@ export default async function TripDetailPage({
               {t("privateContentPending")}
             </article>
           )}
-          {trip.viewerMembershipStatus === "owner" ||
-          trip.viewerMembershipStatus === "approved" ? (
-            <TripChat slug={trip.slug} locale={locale} />
-          ) : null}
           {trip.canViewPrivateContent && trip.participants.length ? (
             <article className="rounded-3xl border border-slate-200 bg-white p-6">
               <h2 className="text-xl font-extrabold text-slate-950">
@@ -177,6 +173,10 @@ export default async function TripDetailPage({
           </p>
         </aside>
       </section>
+      {trip.viewerMembershipStatus === "owner" ||
+      trip.viewerMembershipStatus === "approved" ? (
+        <TripChat slug={trip.slug} locale={locale} />
+      ) : null}
     </main>
   );
 }

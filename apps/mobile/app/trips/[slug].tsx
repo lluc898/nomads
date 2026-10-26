@@ -266,11 +266,6 @@ export default function TripDetailScreen() {
               </View>
             )}
 
-            {trip.viewerMembershipStatus === "owner" ||
-            trip.viewerMembershipStatus === "approved" ? (
-              <TripChat slug={trip.slug} />
-            ) : null}
-
             <View className="rounded-3xl border border-slate-200 bg-white p-5">
               <Text className="text-sm text-slate-500">
                 {t("createdBy", {
@@ -371,6 +366,11 @@ export default function TripDetailScreen() {
                   ))}
                 </View>
               </View>
+            ) : null}
+
+            {trip.viewerMembershipStatus === "owner" ||
+            trip.viewerMembershipStatus === "approved" ? (
+              <TripChat slug={trip.slug} />
             ) : null}
           </View>
         </ScrollView>

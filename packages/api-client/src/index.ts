@@ -153,6 +153,34 @@ export function createApiClient({
       return chatMessageSchema.parse(await response.json());
     },
 
+    async subscribeTripChat(
+      token: string,
+      slug: string,
+      onMessages: () => void,
+      signal: AbortSignal,
+    ) {
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}/messages/stream`,
+        { headers: authorization(token), signal },
+      );
+      if (!response.ok) throw await apiError(response);
+      if (!response.body)
+        throw new Error("El chat en tiempo real no está disponible.");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (!signal.aborted) {
+        const { done, value } = await reader.read();
+        if (done) return;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? "";
+        events.forEach((event) => {
+          if (event.split("\n").includes("event: messages")) onMessages();
+        });
+      }
+    },
+
     async joinTrip(token: string, slug: string) {
       const response = await fetcher(
         `${baseUrl}/trips/${encodeURIComponent(slug)}/join`,
