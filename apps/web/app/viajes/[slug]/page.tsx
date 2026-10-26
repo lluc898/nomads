@@ -11,6 +11,7 @@ import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 import { TripMembership } from "./trip-membership";
 import { TripChat } from "./trip-chat";
+import { ShareTripButton } from "./share-trip-button";
 
 export default async function TripDetailPage({
   params,
@@ -41,9 +42,17 @@ export default async function TripDetailPage({
       <SiteHeader />
       <section className="bg-[#EAF3FF] px-5 pt-32 pb-12 md:pt-40">
         <div className="mx-auto max-w-5xl">
-          <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-[#0857C9]">
-            {trip.visibility === "public" ? t("public") : t("private")}
-          </span>
+          <div className="flex items-center justify-between gap-4">
+            <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-[#0857C9]">
+              {trip.visibility === "public" ? t("public") : t("private")}
+            </span>
+            <ShareTripButton
+              slug={trip.slug}
+              title={t("tripTo", { destination: trip.destination })}
+              label={t("shareTrip")}
+              copiedLabel={t("linkCopied")}
+            />
+          </div>
           <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-950">
             {t("tripTo", { destination: trip.destination })}
           </h1>

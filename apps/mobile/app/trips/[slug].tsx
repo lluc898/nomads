@@ -9,6 +9,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   Text,
   View,
 } from "react-native";
@@ -91,6 +92,13 @@ export default function TripDetailScreen() {
     }
   }
 
+  async function handleShare() {
+    if (!trip) return;
+    const title = t("tripTo", { destination: trip.destination });
+    const url = `${WEB_URL}/viajes/${trip.slug}`;
+    await Share.share({ title, message: `${title}\n${url}`, url });
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top", "bottom"]}>
       <View className="flex-row items-center border-b border-slate-200 bg-white px-4 py-3">
@@ -104,6 +112,19 @@ export default function TripDetailScreen() {
         <Text className="ml-3 text-lg font-extrabold text-slate-950">
           {t("tripDetails")}
         </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("shareTrip")}
+          onPress={handleShare}
+          className="ml-auto h-11 w-11 items-center justify-center rounded-full bg-brand-50 active:opacity-70"
+        >
+          <View className="h-6 w-6 items-center">
+            <Text className="text-brand-700 absolute -top-2 text-2xl font-bold">
+              ↑
+            </Text>
+            <View className="border-brand-700 absolute bottom-0 h-3 w-5 rounded-sm border-2 border-t-0" />
+          </View>
+        </Pressable>
       </View>
 
       <KeyboardAvoidingView

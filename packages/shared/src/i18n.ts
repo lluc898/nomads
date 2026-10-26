@@ -122,6 +122,8 @@ const es = {
   createIntro: "Comparte un plan claro para que otros viajeros puedan unirse.",
   routeAndDates: "Ruta y fechas",
   tripDetails: "Detalles del viaje",
+  shareTrip: "Compartir",
+  linkCopied: "Enlace copiado",
   description: "Descripción",
   descriptionPlaceholder:
     "Cuenta qué plan tienes, el ritmo del viaje y cualquier detalle útil.",
@@ -283,6 +285,8 @@ const en: Messages = {
   createIntro: "Share a clear plan so other travellers can join you.",
   routeAndDates: "Route and dates",
   tripDetails: "Trip details",
+  shareTrip: "Share",
+  linkCopied: "Link copied",
   description: "Description",
   descriptionPlaceholder:
     "Describe your plan, travel pace and any useful details.",
@@ -424,6 +428,8 @@ const ca: Messages = {
     "Comparteix un pla clar perquè altres viatgers s'hi puguin unir.",
   routeAndDates: "Ruta i dates",
   tripDetails: "Detalls del viatge",
+  shareTrip: "Compartir",
+  linkCopied: "Enllaç copiat",
   description: "Descripció",
   descriptionPlaceholder:
     "Explica el pla, el ritme del viatge i qualsevol detall útil.",
@@ -562,6 +568,8 @@ const fr: Messages = {
     "Partagez un projet clair pour que d'autres voyageurs puissent vous rejoindre.",
   routeAndDates: "Itinéraire et dates",
   tripDetails: "Détails du voyage",
+  shareTrip: "Partager",
+  linkCopied: "Lien copié",
   description: "Description",
   descriptionPlaceholder:
     "Décrivez le projet, le rythme du voyage et les détails utiles.",
@@ -699,6 +707,8 @@ const de: Messages = {
     "Teile einen klaren Plan, damit andere Reisende mitkommen können.",
   routeAndDates: "Route und Reisedaten",
   tripDetails: "Reisedetails",
+  shareTrip: "Teilen",
+  linkCopied: "Link kopiert",
   description: "Beschreibung",
   descriptionPlaceholder:
     "Beschreibe deinen Plan, das Reisetempo und hilfreiche Details.",
@@ -837,6 +847,8 @@ const it: Messages = {
     "Condividi un piano chiaro per permettere ad altri viaggiatori di unirsi.",
   routeAndDates: "Itinerario e date",
   tripDetails: "Dettagli del viaggio",
+  shareTrip: "Condividi",
+  linkCopied: "Link copiato",
   description: "Descrizione",
   descriptionPlaceholder:
     "Descrivi il piano, il ritmo del viaggio e ogni dettaglio utile.",
@@ -974,6 +986,8 @@ const pt: Messages = {
     "Partilha um plano claro para que outros viajantes se possam juntar.",
   routeAndDates: "Rota e datas",
   tripDetails: "Detalhes da viagem",
+  shareTrip: "Partilhar",
+  linkCopied: "Link copiado",
   description: "Descrição",
   descriptionPlaceholder:
     "Descreve o plano, o ritmo da viagem e quaisquer detalhes úteis.",
@@ -1112,6 +1126,8 @@ const nl: Messages = {
     "Deel een duidelijk plan zodat andere reizigers mee kunnen gaan.",
   routeAndDates: "Route en datums",
   tripDetails: "Reisdetails",
+  shareTrip: "Delen",
+  linkCopied: "Link gekopieerd",
   description: "Beschrijving",
   descriptionPlaceholder:
     "Beschrijf je plan, het reistempo en nuttige details.",
