@@ -35,6 +35,10 @@ type AuthContextValue = {
   refreshProfile: () => Promise<void>;
   createTrip: (input: CreateTripInput) => Promise<void>;
   listMyTrips: (locale?: SupportedLocale) => ReturnType<typeof api.listMyTrips>;
+  getTrip: (
+    slug: string,
+    locale?: SupportedLocale,
+  ) => ReturnType<typeof api.getTrip>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -172,6 +176,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [token],
   );
 
+  const getTrip = useCallback(
+    (slug: string, locale?: SupportedLocale) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.getTrip(token, slug, locale);
+    },
+    [token],
+  );
+
   const value = useMemo(
     () => ({
       status,
@@ -183,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshProfile,
       createTrip,
       listMyTrips,
+      getTrip,
     }),
     [
       completeSignIn,
@@ -194,6 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       createTrip,
       listMyTrips,
+      getTrip,
     ],
   );
 

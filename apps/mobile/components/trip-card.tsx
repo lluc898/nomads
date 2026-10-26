@@ -3,9 +3,8 @@ import {
   type SupportedLocale,
   type TripCard as TripCardData,
 } from "@viajeroshub/shared";
-import { Linking, Pressable, Text, View } from "react-native";
-
-import { WEB_URL } from "@/lib/config";
+import { useRouter } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 
 const tones = {
   sea: "bg-cyan-600",
@@ -20,6 +19,7 @@ export function TripCard({
   trip: TripCardData;
   locale?: SupportedLocale;
 }) {
+  const router = useRouter();
   const t = (
     key: Parameters<typeof translate>[1],
     values?: Record<string, string | number>,
@@ -28,7 +28,7 @@ export function TripCard({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={t("tripTo", { destination: trip.destination })}
-      onPress={() => Linking.openURL(`${WEB_URL}/viajes/${trip.slug}`)}
+      onPress={() => router.push(`/trips/${trip.slug}`)}
       className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white active:opacity-90"
     >
       <View className={`h-32 justify-end p-4 ${tones[trip.tone]}`}>

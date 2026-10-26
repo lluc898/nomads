@@ -5,6 +5,7 @@ import {
   featuredTrips,
   searchTripsSchema,
   tripCardSchema,
+  tripDetailSchema,
 } from "./trips";
 
 describe("trip contracts", () => {
@@ -78,5 +79,34 @@ describe("trip contracts", () => {
         links: [{ name: "Enlace", type: "flight", url: "javascript:alert(1)" }],
       }).success,
     ).toBe(false);
+  });
+
+  it("accepts a native-safe trip detail without provider URLs", () => {
+    const detail = tripDetailSchema.parse({
+      id: "48fdfc49-3ae4-4dd6-a053-a05e37bb0692",
+      slug: "palma-paris",
+      origin: "Palma de Mallorca (PMI)",
+      destination: "París (CDG)",
+      departureDate: "2027-06-10",
+      returnDate: "2027-06-17",
+      description: "Una semana en París.",
+      visibility: "public",
+      budget: 850,
+      currency: "EUR",
+      maxParticipants: 4,
+      creator: { name: "Lluc", username: "lluc" },
+      links: [
+        {
+          id: "860d88cc-b251-47f5-bc25-93694a854b4d",
+          name: "Vuelo desde Palma",
+          type: "flight",
+        },
+      ],
+    });
+    expect(detail.links[0]).toEqual({
+      id: "860d88cc-b251-47f5-bc25-93694a854b4d",
+      name: "Vuelo desde Palma",
+      type: "flight",
+    });
   });
 });

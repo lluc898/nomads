@@ -104,9 +104,37 @@ export const tripCardSchema = z.object({
   tone: z.enum(["sea", "sunset", "forest"]),
 });
 
+export const tripDetailSchema = z.object({
+  id: z.uuid(),
+  slug: z.string().min(1),
+  origin: z.string().min(1),
+  destination: z.string().min(1),
+  departureDate: isoDateSchema,
+  returnDate: isoDateSchema,
+  description: z.string(),
+  visibility: tripVisibilitySchema,
+  budget: z.number().nonnegative().nullable(),
+  currency: z.string().length(3),
+  maxParticipants: z.number().int().min(2).nullable(),
+  creator: z
+    .object({
+      name: z.string().nullable(),
+      username: z.string().nullable(),
+    })
+    .nullable(),
+  links: z.array(
+    z.object({
+      id: z.uuid(),
+      name: z.string().min(1),
+      type: tripLinkTypeSchema,
+    }),
+  ),
+});
+
 export type SearchTripsInput = z.infer<typeof searchTripsSchema>;
 export type TripDateSelection = z.infer<typeof tripDateSelectionSchema>;
 export type TripCard = z.infer<typeof tripCardSchema>;
+export type TripDetail = z.infer<typeof tripDetailSchema>;
 export type CreateTripInput = z.infer<typeof createTripInputSchema>;
 export type CreatedTrip = z.infer<typeof createdTripSchema>;
 export type TripLinkInput = z.infer<typeof tripLinkInputSchema>;

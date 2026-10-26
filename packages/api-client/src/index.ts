@@ -6,10 +6,12 @@ import {
   type SupportedLocale,
   travelLocationSchema,
   tripCardSchema,
+  tripDetailSchema,
   type CreateTripInput,
   type MobileProfile,
   type TravelLocation,
   type TripCard,
+  type TripDetail,
 } from "@viajeroshub/shared";
 
 export interface ApiClientOptions {
@@ -86,6 +88,21 @@ export function createApiClient({
       });
       if (!response.ok) throw await apiError(response);
       return tripCardSchema.array().parse(await response.json());
+    },
+
+    async getTrip(
+      token: string,
+      slug: string,
+      locale?: SupportedLocale,
+    ): Promise<TripDetail> {
+      const search = new URLSearchParams();
+      if (locale) search.set("locale", locale);
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}?${search}`,
+        { headers: authorization(token) },
+      );
+      if (!response.ok) throw await apiError(response);
+      return tripDetailSchema.parse(await response.json());
     },
 
     async exchangeMobileCode(code: string, verifier: string) {

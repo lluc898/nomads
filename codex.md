@@ -117,6 +117,7 @@ packages/ui
 - Solo se aceptan enlaces HTTPS sin credenciales. Se conserva la URL original y la URL afiliada por separado.
 - La interfaz nunca enlaza directamente al proveedor: usa `/go/:id`, comprueba acceso, registra el clic con IP hasheada y redirige.
 - Los viajes publicados se muestran en el buscador por las mismas claves de país/aeropuerto usadas al crearlos.
+- En la app móvil, las tarjetas abren el detalle como pantalla nativa; el navegador solo se abre al visitar un proveedor externo.
 
 ## Criterios de aceptación
 
