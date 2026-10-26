@@ -188,9 +188,40 @@ export default function TripDetailScreen() {
                       key={request.id}
                       className="rounded-xl bg-slate-50 p-4"
                     >
-                      <Text className="font-bold text-slate-900">
-                        {request.name ?? `@${request.username}`}
-                      </Text>
+                      <Pressable
+                        disabled={!request.username}
+                        onPress={() =>
+                          request.username &&
+                          router.push(`/travelers/${request.username}`)
+                        }
+                        className="flex-row items-center gap-3 active:opacity-60"
+                      >
+                        {absoluteMediaUrl(request.image) ? (
+                          <Image
+                            source={{ uri: absoluteMediaUrl(request.image)! }}
+                            className="h-11 w-11 rounded-full bg-slate-200"
+                          />
+                        ) : (
+                          <View className="h-11 w-11 items-center justify-center rounded-full bg-brand-50">
+                            <Text className="text-brand-700 font-bold">
+                              {(request.name ??
+                                request.username ??
+                                "V")[0]?.toUpperCase()}
+                            </Text>
+                          </View>
+                        )}
+                        <View className="flex-1">
+                          <Text className="font-bold text-slate-900">
+                            {request.name ?? `@${request.username}`}
+                          </Text>
+                          {request.username ? (
+                            <Text className="mt-1 text-sm text-slate-500">
+                              @{request.username}
+                            </Text>
+                          ) : null}
+                        </View>
+                        <Text className="text-xl text-slate-400">›</Text>
+                      </Pressable>
                       <View className="mt-3 flex-row gap-2">
                         <Pressable
                           disabled={busy || trip.isFull}
@@ -270,8 +301,13 @@ export default function TripDetailScreen() {
                 </Text>
                 <View className="mt-4 gap-3">
                   {trip.participants.map((participant) => (
-                    <View
+                    <Pressable
                       key={participant.userId}
+                      disabled={!participant.username}
+                      onPress={() =>
+                        participant.username &&
+                        router.push(`/travelers/${participant.username}`)
+                      }
                       className="flex-row items-center gap-3 rounded-xl border border-slate-200 p-4"
                     >
                       {absoluteMediaUrl(participant.image) ? (
@@ -298,7 +334,8 @@ export default function TripDetailScreen() {
                             : t("participant")}
                         </Text>
                       </View>
-                    </View>
+                      <Text className="text-xl text-slate-400">›</Text>
+                    </Pressable>
                   ))}
                 </View>
               </View>

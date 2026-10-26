@@ -6,7 +6,10 @@ import {
   type TripDetail,
 } from "@viajeroshub/shared";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
+
+import { UserAvatar } from "@/components/user-avatar";
 
 export function TripMembership({
   slug,
@@ -85,9 +88,29 @@ export function TripMembership({
               <div className="mt-3 space-y-3">
                 {pendingRequests.map((request) => (
                   <div key={request.id} className="rounded-xl bg-slate-50 p-3">
-                    <p className="font-bold text-slate-900">
-                      {request.name ?? `@${request.username}`}
-                    </p>
+                    {request.username ? (
+                      <Link
+                        href={`/viajeros/${request.username}`}
+                        className="flex items-center gap-3 rounded-lg transition hover:text-[#0B6EFD] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B6EFD]"
+                      >
+                        <UserAvatar
+                          image={request.image}
+                          name={request.name}
+                          username={request.username}
+                          size="sm"
+                        />
+                        <span>
+                          <span className="block font-bold text-slate-900">
+                            {request.name ?? `@${request.username}`}
+                          </span>
+                          <span className="block text-sm text-slate-500">
+                            @{request.username}
+                          </span>
+                        </span>
+                      </Link>
+                    ) : (
+                      <p className="font-bold text-slate-900">{request.name}</p>
+                    )}
                     <div className="mt-3 flex gap-2">
                       <button
                         type="button"

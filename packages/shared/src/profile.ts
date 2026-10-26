@@ -93,6 +93,15 @@ export const profileInputSchema = z.object({
 
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 
+export const publicProfileSchema = z.object({
+  name: z.string().nullable(),
+  username: usernameSchema,
+  image: z.string().nullable(),
+  instagramUrl: z.string().url().nullable(),
+});
+
+export type PublicProfile = z.infer<typeof publicProfileSchema>;
+
 export const mobileProfileSchema = z.object({
   id: z.string().uuid(),
   name: z.string().nullable(),

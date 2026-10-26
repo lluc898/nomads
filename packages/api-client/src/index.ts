@@ -3,6 +3,7 @@ import {
   createTripInputSchema,
   isSupportedLocale,
   mobileProfileSchema,
+  publicProfileSchema,
   type SupportedLocale,
   travelLocationSchema,
   tripCardSchema,
@@ -11,6 +12,7 @@ import {
   tripJoinReviewSchema,
   type CreateTripInput,
   type MobileProfile,
+  type PublicProfile,
   type TravelLocation,
   type TripCard,
   type TripDetail,
@@ -27,6 +29,14 @@ export function createApiClient({
   fetcher = fetch,
 }: ApiClientOptions) {
   return {
+    async getPublicProfile(username: string): Promise<PublicProfile> {
+      const response = await fetcher(
+        `${baseUrl}/profiles/${encodeURIComponent(username)}`,
+      );
+      if (!response.ok) throw await apiError(response);
+      return publicProfileSchema.parse(await response.json());
+    },
+
     async searchLocations(
       query: string,
       options: { includeAnywhere?: boolean; locale?: SupportedLocale } = {},

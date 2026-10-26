@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   normalizeInstagramUrl,
   profileInputSchema,
+  publicProfileSchema,
   usernameSchema,
 } from "./profile";
 
@@ -47,5 +48,18 @@ describe("profileInputSchema", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+});
+
+describe("publicProfileSchema", () => {
+  it("validates a public traveler profile", () => {
+    expect(
+      publicProfileSchema.parse({
+        name: "Lluc",
+        username: "lluc_89",
+        image: "/uploads/lluc.webp",
+        instagramUrl: "https://www.instagram.com/lluc/",
+      }),
+    ).toMatchObject({ username: "lluc_89" });
   });
 });

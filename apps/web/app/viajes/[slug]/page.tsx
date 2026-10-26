@@ -1,5 +1,6 @@
 import { getTripDetail } from "@viajeroshub/database";
 import { translate } from "@viajeroshub/shared";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -77,8 +78,9 @@ export default async function TripDetailPage({
               </h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {trip.participants.map((participant) => (
-                  <div
+                  <Link
                     key={participant.userId}
+                    href={`/viajeros/${participant.username}`}
                     className="flex items-center gap-3 rounded-xl border border-slate-200 p-4"
                   >
                     <UserAvatar
@@ -97,7 +99,13 @@ export default async function TripDetailPage({
                           : t("participant")}
                       </p>
                     </div>
-                  </div>
+                    <span
+                      className="ml-auto text-xl text-slate-400"
+                      aria-hidden="true"
+                    >
+                      ›
+                    </span>
+                  </Link>
                 ))}
               </div>
             </article>
