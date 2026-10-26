@@ -94,8 +94,8 @@ export function TripChat({ slug }: { slug: string }) {
 
   return (
     <View
-      className="-mx-5 border-t border-slate-200 bg-white px-5 pb-5 pt-8"
-      style={{ height: Math.max(height - 40, 600) }}
+      className="rounded-3xl border border-slate-200 bg-white p-5"
+      style={{ height: Math.min(Math.max(height * 0.68, 480), 620) }}
     >
       <Text className="text-2xl font-extrabold text-slate-950">
         {t("chat")}
@@ -103,8 +103,8 @@ export function TripChat({ slug }: { slug: string }) {
       <Text className="mt-1 text-sm text-slate-500">{t("chatSubtitle")}</Text>
       <ScrollView
         nestedScrollEnabled
-        className="mt-5 flex-1"
-        contentContainerClassName="gap-4 py-2 grow"
+        className="mt-5 flex-1 rounded-2xl bg-slate-50"
+        contentContainerClassName="gap-4 p-4 grow"
       >
         {loading ? (
           <View className="flex-1 items-center justify-center">

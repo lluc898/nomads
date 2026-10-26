@@ -24,7 +24,7 @@ export async function SiteHeader() {
             {t("navExplore")}
           </Link>
           <Link
-            href="/como-funciona"
+            href="/#como-funciona"
             className="transition hover:text-[#0B6EFD]"
           >
             {t("navHow")}

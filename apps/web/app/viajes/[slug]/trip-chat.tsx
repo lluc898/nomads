@@ -115,15 +115,15 @@ export function TripChat({
   }
 
   return (
-    <section className="min-h-screen border-t border-slate-200 bg-white px-5 py-10">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-5xl flex-col">
+    <section className="px-5 pb-12">
+      <div className="mx-auto flex h-[min(44rem,80vh)] max-w-5xl flex-col rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <h2 className="text-2xl font-extrabold text-slate-950">{t("chat")}</h2>
         <p className="mt-1 text-sm text-slate-500">{t("chatSubtitle")}</p>
 
         <div
           ref={messagesRef}
           aria-live="polite"
-          className="mt-6 min-h-[60vh] flex-1 space-y-4 overflow-y-auto py-2"
+          className="mt-6 flex-1 space-y-4 overflow-y-auto rounded-2xl bg-slate-50 p-4"
         >
           {loading ? (
             <p className="text-center text-sm text-slate-500">…</p>

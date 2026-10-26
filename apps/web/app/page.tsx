@@ -94,7 +94,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="px-5 py-16 md:py-24">
+      <section id="como-funciona" className="scroll-mt-8 px-5 py-16 md:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="text-center">
             <p className="text-sm font-bold tracking-[.14em] text-[#0B6EFD] uppercase">
