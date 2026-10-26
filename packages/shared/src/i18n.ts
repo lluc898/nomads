@@ -189,6 +189,13 @@ const es = {
   noPublicInstagram: "Sin Instagram público",
   tripTo: "Viaje a {destination}",
   createdBy: "Creado por {name}",
+  chat: "Chat del viaje",
+  chatSubtitle: "Habla con las personas que forman parte del viaje.",
+  noMessages: "Todavía no hay mensajes. Empieza la conversación.",
+  messagePlaceholder: "Escribe un mensaje…",
+  send: "Enviar",
+  sending: "Enviando…",
+  chatMembersOnly: "El chat es exclusivo para integrantes del viaje.",
 } as const;
 
 type TranslationKey = keyof typeof es;
@@ -341,6 +348,13 @@ const en: Messages = {
   noPublicInstagram: "No public Instagram",
   tripTo: "Trip to {destination}",
   createdBy: "Created by {name}",
+  chat: "Trip chat",
+  chatSubtitle: "Talk with the people who are part of the trip.",
+  noMessages: "There are no messages yet. Start the conversation.",
+  messagePlaceholder: "Write a message…",
+  send: "Send",
+  sending: "Sending…",
+  chatMembersOnly: "The chat is only available to trip members.",
 };
 
 const ca: Messages = {
@@ -473,6 +487,13 @@ const ca: Messages = {
   noPublicInstagram: "Sense Instagram públic",
   tripTo: "Viatge a {destination}",
   createdBy: "Creat per {name}",
+  chat: "Xat del viatge",
+  chatSubtitle: "Parla amb les persones que formen part del viatge.",
+  noMessages: "Encara no hi ha missatges. Comença la conversa.",
+  messagePlaceholder: "Escriu un missatge…",
+  send: "Enviar",
+  sending: "Enviant…",
+  chatMembersOnly: "El xat és exclusiu per als integrants del viatge.",
 };
 const fr: Messages = {
   ...en,
@@ -604,6 +625,13 @@ const fr: Messages = {
   noPublicInstagram: "Aucun Instagram public",
   tripTo: "Voyage à {destination}",
   createdBy: "Créé par {name}",
+  chat: "Chat du voyage",
+  chatSubtitle: "Échangez avec les personnes qui participent au voyage.",
+  noMessages: "Il n’y a pas encore de messages. Lancez la conversation.",
+  messagePlaceholder: "Écrivez un message…",
+  send: "Envoyer",
+  sending: "Envoi…",
+  chatMembersOnly: "Le chat est réservé aux membres du voyage.",
 };
 const de: Messages = {
   ...en,
@@ -734,6 +762,13 @@ const de: Messages = {
   noPublicInstagram: "Kein öffentliches Instagram",
   tripTo: "Reise nach {destination}",
   createdBy: "Erstellt von {name}",
+  chat: "Reisechat",
+  chatSubtitle: "Tausche dich mit den anderen Reiseteilnehmenden aus.",
+  noMessages: "Noch keine Nachrichten. Starte die Unterhaltung.",
+  messagePlaceholder: "Nachricht schreiben…",
+  send: "Senden",
+  sending: "Wird gesendet…",
+  chatMembersOnly: "Der Chat ist nur für Reiseteilnehmende verfügbar.",
 };
 const it: Messages = {
   ...en,
@@ -864,6 +899,13 @@ const it: Messages = {
   noPublicInstagram: "Nessun Instagram pubblico",
   tripTo: "Viaggio a {destination}",
   createdBy: "Creato da {name}",
+  chat: "Chat del viaggio",
+  chatSubtitle: "Parla con le persone che partecipano al viaggio.",
+  noMessages: "Non ci sono ancora messaggi. Inizia la conversazione.",
+  messagePlaceholder: "Scrivi un messaggio…",
+  send: "Invia",
+  sending: "Invio…",
+  chatMembersOnly: "La chat è riservata ai partecipanti del viaggio.",
 };
 const pt: Messages = {
   ...en,
@@ -995,6 +1037,13 @@ const pt: Messages = {
   noPublicInstagram: "Sem Instagram público",
   tripTo: "Viagem para {destination}",
   createdBy: "Criado por {name}",
+  chat: "Chat da viagem",
+  chatSubtitle: "Converse com as pessoas que fazem parte da viagem.",
+  noMessages: "Ainda não há mensagens. Inicie a conversa.",
+  messagePlaceholder: "Escreva uma mensagem…",
+  send: "Enviar",
+  sending: "A enviar…",
+  chatMembersOnly: "O chat é exclusivo para participantes da viagem.",
 };
 const nl: Messages = {
   ...en,
@@ -1126,6 +1175,13 @@ const nl: Messages = {
   noPublicInstagram: "Geen openbare Instagram",
   tripTo: "Reis naar {destination}",
   createdBy: "Gemaakt door {name}",
+  chat: "Reischat",
+  chatSubtitle: "Praat met de mensen die deelnemen aan de reis.",
+  noMessages: "Er zijn nog geen berichten. Start het gesprek.",
+  messagePlaceholder: "Schrijf een bericht…",
+  send: "Versturen",
+  sending: "Versturen…",
+  chatMembersOnly: "De chat is alleen beschikbaar voor reisleden.",
 };
 
 const translations: Record<SupportedLocale, Messages> = {

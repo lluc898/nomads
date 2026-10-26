@@ -64,6 +64,13 @@
       "when": 1793006408118,
       "tag": "0008_natural_shotgun",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793015724730,
+      "tag": "0009_jittery_gabe_jones",
+      "breakpoints": true
     }
   ]
 }

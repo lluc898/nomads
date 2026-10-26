@@ -21,6 +21,7 @@ import type { Database } from "./client";
 import {
   affiliateClicks,
   airports,
+  conversations,
   countries,
   tripLinks,
   tripParticipants,
@@ -248,6 +249,7 @@ export async function createPublishedTrip(
       .returning({ id: trips.id, slug: trips.slug });
 
     if (!trip) throw new Error("No se ha podido crear el viaje.");
+    await transaction.insert(conversations).values({ tripId: trip.id });
     if (input.links.length) {
       await transaction.insert(tripLinks).values(
         input.links.map((link, position) => ({

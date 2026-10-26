@@ -1,0 +1,181 @@
+import type { ChatMessage } from "@viajeroshub/shared";
+import { and, count, desc, eq, gte } from "drizzle-orm";
+
+import type { Database } from "./client";
+import {
+  conversations,
+  messages,
+  tripParticipants,
+  trips,
+  users,
+} from "./schema";
+
+export class TripChatNotFoundError extends Error {}
+export class TripChatAccessError extends Error {}
+export class TripChatRateLimitError extends Error {}
+
+const MAX_MESSAGES_PER_MINUTE = 20;
+
+export async function listTripMessages(
+  database: Database,
+  slug: string,
+  userId: string,
+): Promise<ChatMessage[]> {
+  const trip = await requireTripChatAccess(database, slug, userId);
+  const [conversation] = await database
+    .select({ id: conversations.id })
+    .from(conversations)
+    .where(eq(conversations.tripId, trip.id))
+    .limit(1);
+  if (!conversation) return [];
+
+  const rows = await database
+    .select({
+      id: messages.id,
+      content: messages.content,
+      createdAt: messages.createdAt,
+      senderId: users.id,
+      senderName: users.name,
+      senderUsername: users.username,
+      senderImage: users.image,
+    })
+    .from(messages)
+    .innerJoin(users, eq(users.id, messages.senderId))
+    .where(eq(messages.conversationId, conversation.id))
+    .orderBy(desc(messages.createdAt))
+    .limit(100);
+
+  return rows.reverse().map((row) => toChatMessage(row, userId));
+}
+
+export async function sendTripMessage(
+  database: Database,
+  input: { slug: string; userId: string; content: string },
+): Promise<ChatMessage> {
+  return database.transaction(async (transaction) => {
+    const trip = await requireTripChatAccess(
+      transaction,
+      input.slug,
+      input.userId,
+    );
+    let [conversation] = await transaction
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(eq(conversations.tripId, trip.id))
+      .limit(1);
+    if (!conversation) {
+      [conversation] = await transaction
+        .insert(conversations)
+        .values({ tripId: trip.id })
+        .onConflictDoNothing({ target: conversations.tripId })
+        .returning({ id: conversations.id });
+      if (!conversation) {
+        [conversation] = await transaction
+          .select({ id: conversations.id })
+          .from(conversations)
+          .where(eq(conversations.tripId, trip.id))
+          .limit(1);
+      }
+    }
+    if (!conversation) throw new TripChatNotFoundError("Chat no encontrado.");
+
+    const since = new Date(Date.now() - 60_000);
+    const [recent] = await transaction
+      .select({ value: count() })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.senderId, input.userId),
+          gte(messages.createdAt, since),
+        ),
+      );
+    if (Number(recent?.value ?? 0) >= MAX_MESSAGES_PER_MINUTE) {
+      throw new TripChatRateLimitError(
+        "Has enviado demasiados mensajes. Espera un momento.",
+      );
+    }
+
+    const [created] = await transaction
+      .insert(messages)
+      .values({
+        conversationId: conversation.id,
+        senderId: input.userId,
+        content: input.content,
+      })
+      .returning({
+        id: messages.id,
+        content: messages.content,
+        createdAt: messages.createdAt,
+      });
+    const [author] = await transaction
+      .select({
+        senderId: users.id,
+        senderName: users.name,
+        senderUsername: users.username,
+        senderImage: users.image,
+      })
+      .from(users)
+      .where(eq(users.id, input.userId))
+      .limit(1);
+    if (!created || !author)
+      throw new TripChatNotFoundError("No se pudo enviar el mensaje.");
+    return toChatMessage({ ...created, ...author }, input.userId);
+  });
+}
+
+async function requireTripChatAccess(
+  database: Pick<Database, "select">,
+  slug: string,
+  userId: string,
+) {
+  const [trip] = await database
+    .select({ id: trips.id, creatorId: trips.creatorId })
+    .from(trips)
+    .where(and(eq(trips.slug, slug), eq(trips.status, "published")))
+    .limit(1);
+  if (!trip) throw new TripChatNotFoundError("Viaje no encontrado.");
+  if (trip.creatorId === userId) return trip;
+  const [participant] = await database
+    .select({ id: tripParticipants.id })
+    .from(tripParticipants)
+    .where(
+      and(
+        eq(tripParticipants.tripId, trip.id),
+        eq(tripParticipants.userId, userId),
+        eq(tripParticipants.status, "approved"),
+      ),
+    )
+    .limit(1);
+  if (!participant) {
+    throw new TripChatAccessError(
+      "El chat solo está disponible para integrantes del viaje.",
+    );
+  }
+  return trip;
+}
+
+function toChatMessage(
+  row: {
+    id: string;
+    content: string;
+    createdAt: Date;
+    senderId: string;
+    senderName: string | null;
+    senderUsername: string | null;
+    senderImage: string | null;
+  },
+  viewerUserId: string,
+): ChatMessage {
+  return {
+    id: row.id,
+    content: row.content,
+    createdAt: row.createdAt.toISOString(),
+    isOwn: row.senderId === viewerUserId,
+    author: {
+      userId: row.senderId,
+      name: row.senderName,
+      username: row.senderUsername,
+      image: row.senderImage,
+    },
+  };
+}

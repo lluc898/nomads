@@ -10,6 +10,7 @@ import { getDatabase } from "@/lib/database";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 import { TripMembership } from "./trip-membership";
+import { TripChat } from "./trip-chat";
 
 export default async function TripDetailPage({
   params,
@@ -71,6 +72,10 @@ export default async function TripDetailPage({
               {t("privateContentPending")}
             </article>
           )}
+          {trip.viewerMembershipStatus === "owner" ||
+          trip.viewerMembershipStatus === "approved" ? (
+            <TripChat slug={trip.slug} locale={locale} />
+          ) : null}
           {trip.canViewPrivateContent && trip.participants.length ? (
             <article className="rounded-3xl border border-slate-200 bg-white p-6">
               <h2 className="text-xl font-extrabold text-slate-950">

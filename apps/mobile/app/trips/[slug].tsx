@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { TripChat } from "@/components/trip-chat";
 import { useAuth } from "@/lib/auth-context";
 import { absoluteMediaUrl, WEB_URL } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
@@ -264,6 +265,11 @@ export default function TripDetailScreen() {
                 </Text>
               </View>
             )}
+
+            {trip.viewerMembershipStatus === "owner" ||
+            trip.viewerMembershipStatus === "approved" ? (
+              <TripChat slug={trip.slug} />
+            ) : null}
 
             <View className="rounded-3xl border border-slate-200 bg-white p-5">
               <Text className="text-sm text-slate-500">

@@ -121,6 +121,8 @@ packages/ui
 - Unirse a un viaje público es inmediato; en uno privado crea una solicitud que solo puede aceptar o rechazar su creador.
 - El creador cuenta dentro del aforo. La unión y la aceptación bloquean el viaje en transacción y nunca pueden superar `maxParticipants`.
 - Los integrantes aprobados aparecen en el detalle y sus viajes se incluyen en `Mis viajes`.
+- Cada viaje tiene un chat persistente exclusivo para el creador y participantes aprobados; el permiso se valida en cada lectura y envío desde el backend.
+- Los mensajes admiten hasta 1.000 caracteres, se muestran los 100 más recientes y se limitan a 20 envíos por usuario y minuto.
 
 ## Criterios de aceptación
 

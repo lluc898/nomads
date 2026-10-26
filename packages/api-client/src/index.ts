@@ -1,22 +1,27 @@
 import {
   createdTripSchema,
+  chatMessageSchema,
   createTripInputSchema,
   isSupportedLocale,
   mobileProfileSchema,
   publicProfileSchema,
+  sendChatMessageSchema,
   type SupportedLocale,
   travelLocationSchema,
   tripCardSchema,
   tripDetailSchema,
   tripJoinResultSchema,
   tripJoinReviewSchema,
+  tripChatSchema,
   type CreateTripInput,
+  type ChatMessage,
   type MobileProfile,
   type PublicProfile,
   type TravelLocation,
   type TripCard,
   type TripDetail,
   type TripJoinReview,
+  type TripChat,
 } from "@viajeroshub/shared";
 
 export interface ApiClientOptions {
@@ -116,6 +121,36 @@ export function createApiClient({
       );
       if (!response.ok) throw await apiError(response);
       return tripDetailSchema.parse(await response.json());
+    },
+
+    async getTripChat(token: string, slug: string): Promise<TripChat> {
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}/messages`,
+        { headers: authorization(token) },
+      );
+      if (!response.ok) throw await apiError(response);
+      return tripChatSchema.parse(await response.json());
+    },
+
+    async sendTripMessage(
+      token: string,
+      slug: string,
+      content: string,
+    ): Promise<ChatMessage> {
+      const body = sendChatMessageSchema.parse({ content });
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}/messages`,
+        {
+          method: "POST",
+          headers: {
+            ...authorization(token),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        },
+      );
+      if (!response.ok) throw await apiError(response);
+      return chatMessageSchema.parse(await response.json());
     },
 
     async joinTrip(token: string, slug: string) {

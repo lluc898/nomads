@@ -1,3 +1,4 @@
+export * from "./chat";
 export * from "./client";
 export * from "./locations";
 export * from "./mobile-auth";

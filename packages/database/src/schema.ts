@@ -253,6 +253,49 @@ export const tripParticipants = pgTable(
   ],
 );
 
+export const conversations = pgTable(
+  "conversations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (conversation) => [
+    uniqueIndex("conversations_trip_id_uidx").on(conversation.tripId),
+  ],
+);
+
+export const messages = pgTable(
+  "messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    conversationId: uuid("conversation_id")
+      .notNull()
+      .references(() => conversations.id, { onDelete: "cascade" }),
+    senderId: uuid("sender_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (message) => [
+    index("messages_conversation_created_idx").on(
+      message.conversationId,
+      message.createdAt,
+    ),
+    index("messages_sender_created_idx").on(
+      message.senderId,
+      message.createdAt,
+    ),
+  ],
+);
+
 export const tripLinks = pgTable(
   "trip_links",
   {
