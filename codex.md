@@ -72,6 +72,8 @@ packages/ui
 - Debe funcionar la búsqueda por mes completo.
 - La búsqueda no pide cantidad de viajeros: cada cuenta busca una plaza para sí misma.
 - En la app móvil, el buscador vive en Inicio y no tiene una pestaña independiente.
+- Al enviar una búsqueda en móvil se abre una pantalla nativa de resultados con un resumen compacto y la opción de modificar los filtros; el formulario completo no comparte pantalla permanentemente con el listado.
+- Los criterios seleccionados se conservan al mostrar resultados tanto en web como en móvil.
 - La interfaz comparte i18n para `es`, `en`, `ca`, `fr`, `de`, `it`, `pt` y `nl`; la selección manual persistida prevalece sobre la detección inicial por país/IP.
 - Usa índices PostgreSQL y consultas eficientes.
 - Devuelve resultados paginados con filtros y orden.

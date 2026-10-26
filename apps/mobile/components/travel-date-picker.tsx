@@ -32,21 +32,35 @@ function shortDate(value: string, locale: string) {
 export function TravelDatePicker({
   onChange,
   exactOnly = false,
+  initialValue = null,
 }: {
   onChange: (selection: TripDateSelection | null) => void;
   exactOnly?: boolean;
+  initialValue?: TripDateSelection | null;
 }) {
   const { locale, t } = useI18n();
   const today = new Date();
   const [expanded, setExpanded] = useState(false);
-  const [mode, setMode] = useState<DateMode>("exact");
+  const [mode, setMode] = useState<DateMode>(
+    initialValue?.dateMode ?? "exact",
+  );
   const [visibleMonth, setVisibleMonth] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1),
   );
-  const [departureDate, setDepartureDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
-  const [flexibleYear, setFlexibleYear] = useState(today.getFullYear());
-  const [flexibleMonth, setFlexibleMonth] = useState("");
+  const [departureDate, setDepartureDate] = useState(
+    initialValue?.dateMode === "exact" ? initialValue.departureDate : "",
+  );
+  const [returnDate, setReturnDate] = useState(
+    initialValue?.dateMode === "exact" ? initialValue.returnDate : "",
+  );
+  const [flexibleYear, setFlexibleYear] = useState(
+    initialValue?.dateMode === "flexible"
+      ? Number(initialValue.flexibleMonth.slice(0, 4))
+      : today.getFullYear(),
+  );
+  const [flexibleMonth, setFlexibleMonth] = useState(
+    initialValue?.dateMode === "flexible" ? initialValue.flexibleMonth : "",
+  );
   const months = Array.from({ length: 12 }, (_, index) =>
     new Intl.DateTimeFormat(locale, { month: "long" }).format(
       new Date(2026, index, 1),

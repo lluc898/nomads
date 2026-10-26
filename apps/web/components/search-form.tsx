@@ -5,7 +5,17 @@ import { TravelDatePicker } from "./travel-date-picker";
 import { SearchIcon } from "./icons";
 import { useI18n } from "./i18n-provider";
 
-export function SearchForm() {
+export type SearchFormValues = {
+  origin?: string;
+  originLabel?: string;
+  destination?: string;
+  destinationLabel?: string;
+  departureDate?: string;
+  returnDate?: string;
+  flexibleMonth?: string;
+};
+
+export function SearchForm({ values = {} }: { values?: SearchFormValues }) {
   const { t } = useI18n();
   return (
     <form
@@ -16,14 +26,22 @@ export function SearchForm() {
         label={t("from")}
         name="origen"
         placeholder={t("countryAirport")}
+        initialId={values.origin}
+        initialLabel={values.originLabel}
       />
       <LocationCombobox
         label={t("to")}
         name="destino"
         placeholder={t("anywhere")}
         includeAnywhere
+        initialId={values.destination}
+        initialLabel={values.destinationLabel}
       />
-      <TravelDatePicker />
+      <TravelDatePicker
+        initialDepartureDate={values.departureDate}
+        initialReturnDate={values.returnDate}
+        initialFlexibleMonth={values.flexibleMonth}
+      />
       <div className="p-2.5 md:flex md:items-stretch">
         <button
           className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0B6EFD] px-5 font-bold text-white transition hover:bg-[#0857C9] md:w-auto"

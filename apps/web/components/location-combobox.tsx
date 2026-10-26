@@ -11,6 +11,8 @@ type LocationComboboxProps = {
   name: string;
   placeholder: string;
   includeAnywhere?: boolean;
+  initialId?: string;
+  initialLabel?: string;
 };
 
 export function LocationCombobox({
@@ -18,10 +20,12 @@ export function LocationCombobox({
   name,
   placeholder,
   includeAnywhere = false,
+  initialId = "",
+  initialLabel = "",
 }: LocationComboboxProps) {
   const { locale, t } = useI18n();
-  const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState<TravelLocation | null>(null);
+  const [query, setQuery] = useState(initialLabel);
+  const [selectedId, setSelectedId] = useState(initialId);
   const [results, setResults] = useState<TravelLocation[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,7 +33,7 @@ export function LocationCombobox({
   const requestId = useRef(0);
 
   useEffect(() => {
-    if (!open || selected) return;
+    if (!open || selectedId) return;
     if (!query.trim() && !includeAnywhere) return;
 
     const currentRequest = ++requestId.current;
@@ -61,10 +65,10 @@ export function LocationCombobox({
       clearTimeout(timeout);
       controller.abort();
     };
-  }, [includeAnywhere, locale, open, query, selected]);
+  }, [includeAnywhere, locale, open, query, selectedId]);
 
   function choose(location: TravelLocation) {
-    setSelected(location);
+    setSelectedId(location.id);
     setQuery(location.name);
     setOpen(false);
   }
@@ -79,7 +83,8 @@ export function LocationCombobox({
           <span className="block text-xs font-semibold text-slate-500">
             {label}
           </span>
-          <input type="hidden" name={name} value={selected?.id ?? ""} />
+          <input type="hidden" name={name} value={selectedId} />
+          <input type="hidden" name={`${name}Label`} value={selectedId ? query : ""} />
           <input
             value={query}
             placeholder={placeholder}
@@ -91,7 +96,7 @@ export function LocationCombobox({
             onFocus={() => setOpen(true)}
             onBlur={() => setTimeout(() => setOpen(false), 150)}
             onChange={(event) => {
-              setSelected(null);
+              setSelectedId("");
               setQuery(event.target.value);
               if (!event.target.value.trim() && !includeAnywhere)
                 setResults([]);

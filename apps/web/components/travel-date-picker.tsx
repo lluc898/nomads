@@ -109,22 +109,34 @@ function CalendarGrid({
 
 export function TravelDatePicker({
   exactOnly = false,
+  initialDepartureDate = "",
+  initialReturnDate = "",
+  initialFlexibleMonth = "",
 }: {
   exactOnly?: boolean;
+  initialDepartureDate?: string;
+  initialReturnDate?: string;
+  initialFlexibleMonth?: string;
 }) {
   const { locale, t } = useI18n();
   const panelId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const today = new Date();
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<DateMode>("exact");
+  const [mode, setMode] = useState<DateMode>(
+    initialFlexibleMonth ? "flexible" : "exact",
+  );
   const [visibleMonth, setVisibleMonth] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1),
   );
-  const [departureDate, setDepartureDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
-  const [flexibleYear, setFlexibleYear] = useState(today.getFullYear());
-  const [flexibleMonth, setFlexibleMonth] = useState("");
+  const [departureDate, setDepartureDate] = useState(initialDepartureDate);
+  const [returnDate, setReturnDate] = useState(initialReturnDate);
+  const [flexibleYear, setFlexibleYear] = useState(
+    initialFlexibleMonth
+      ? Number(initialFlexibleMonth.slice(0, 4))
+      : today.getFullYear(),
+  );
+  const [flexibleMonth, setFlexibleMonth] = useState(initialFlexibleMonth);
   const months = Array.from({ length: 12 }, (_, index) =>
     new Intl.DateTimeFormat(locale, { month: "long" }).format(
       new Date(2026, index, 1),
