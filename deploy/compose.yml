@@ -53,6 +53,7 @@ services:
       AVATAR_STORAGE_DIR: /app/data/avatars
       EXPO_TUNNEL_FILE: /app/expo-state/tunnel-url
       NEXT_PUBLIC_APP_URL: https://viajes.llucbosch.com
+      EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
     volumes:
       - avatar-data:/app/data/avatars
       - expo-state:/app/expo-state:ro

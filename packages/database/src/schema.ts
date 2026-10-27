@@ -35,6 +35,13 @@ export const tripParticipantStatus = pgEnum("trip_participant_status", [
   "approved",
   "rejected",
 ]);
+export const notificationType = pgEnum("notification_type", [
+  "join_request",
+  "join_accepted",
+  "join_rejected",
+  "participant_joined",
+  "chat_message",
+]);
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -293,6 +300,80 @@ export const messages = pgTable(
       message.senderId,
       message.createdAt,
     ),
+  ],
+);
+
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    actorId: uuid("actor_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    type: notificationType("type").notNull(),
+    preview: varchar("preview", { length: 180 }),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (notification) => [
+    index("notifications_user_created_idx").on(
+      notification.userId,
+      notification.createdAt,
+    ),
+    index("notifications_user_read_idx").on(
+      notification.userId,
+      notification.readAt,
+    ),
+  ],
+);
+
+export const pushDevices = pgTable(
+  "push_devices",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expoPushToken: varchar("expo_push_token", { length: 255 }).notNull(),
+    platform: varchar("platform", { length: 16 }).notNull(),
+    locale: varchar("locale", { length: 5 }).default("es").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (device) => [
+    uniqueIndex("push_devices_token_uidx").on(device.expoPushToken),
+    index("push_devices_user_idx").on(device.userId),
+  ],
+);
+
+export const tripNotificationPreferences = pgTable(
+  "trip_notification_preferences",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tripId: uuid("trip_id")
+      .notNull()
+      .references(() => trips.id, { onDelete: "cascade" }),
+    chatMuted: boolean("chat_muted").default(false).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (preference) => [
+    primaryKey({ columns: [preference.userId, preference.tripId] }),
   ],
 );
 

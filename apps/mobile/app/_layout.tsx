@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { LoadingScreen } from "@/components/loading-screen";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { I18nProvider } from "@/lib/i18n-context";
+import { NotificationsProvider } from "@/lib/notifications-context";
 
 import "../global.css";
 
@@ -13,7 +14,9 @@ export default function RootLayout() {
     <I18nProvider>
       <AuthProvider>
         <StatusBar style="dark" />
-        <AuthGate />
+        <NotificationsProvider>
+          <AuthGate />
+        </NotificationsProvider>
       </AuthProvider>
     </I18nProvider>
   );

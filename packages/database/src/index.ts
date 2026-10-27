@@ -2,6 +2,7 @@ export * from "./chat";
 export * from "./client";
 export * from "./locations";
 export * from "./mobile-auth";
+export * from "./notifications";
 export * from "./profiles";
 export * from "./schema";
 export * from "./trips";

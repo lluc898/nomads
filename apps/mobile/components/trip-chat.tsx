@@ -17,7 +17,13 @@ import { absoluteMediaUrl } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
 
 export function TripChat({ slug }: { slug: string }) {
-  const { getTripChat, sendTripMessage, subscribeTripChat } = useAuth();
+  const {
+    getTripChat,
+    sendTripMessage,
+    subscribeTripChat,
+    getTripNotificationPreferences,
+    setTripNotificationPreferences,
+  } = useAuth();
   const { locale, t } = useI18n();
   const { height } = useWindowDimensions();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -25,6 +31,8 @@ export function TripChat({ slug }: { slug: string }) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chatMuted, setChatMuted] = useState(false);
+  const [savingPreference, setSavingPreference] = useState(false);
 
   const loadMessages = useCallback(
     async (quiet = false) => {
@@ -76,6 +84,27 @@ export function TripChat({ slug }: { slug: string }) {
     };
   }, [getTripChat, loadMessages, slug, subscribeTripChat]);
 
+  useEffect(() => {
+    getTripNotificationPreferences(slug)
+      .then((preference) => setChatMuted(preference.chatMuted))
+      .catch(() => undefined);
+  }, [getTripNotificationPreferences, slug]);
+
+  async function toggleChatNotifications() {
+    if (savingPreference) return;
+    const nextMuted = !chatMuted;
+    setSavingPreference(true);
+    setChatMuted(nextMuted);
+    try {
+      await setTripNotificationPreferences(slug, nextMuted);
+    } catch (caught) {
+      setChatMuted(!nextMuted);
+      setError(caught instanceof Error ? caught.message : "Error");
+    } finally {
+      setSavingPreference(false);
+    }
+  }
+
   async function submit() {
     const nextContent = content.trim();
     if (!nextContent || sending) return;
@@ -97,10 +126,31 @@ export function TripChat({ slug }: { slug: string }) {
       className="rounded-3xl border border-slate-200 bg-white p-5"
       style={{ height: Math.min(Math.max(height * 0.68, 480), 620) }}
     >
-      <Text className="text-2xl font-extrabold text-slate-950">
-        {t("chat")}
-      </Text>
-      <Text className="mt-1 text-sm text-slate-500">{t("chatSubtitle")}</Text>
+      <View className="flex-row items-start justify-between gap-3">
+        <View className="min-w-0 flex-1">
+          <Text className="text-2xl font-extrabold text-slate-950">
+            {t("chat")}
+          </Text>
+          <Text className="mt-1 text-sm text-slate-500">
+            {t("chatSubtitle")}
+          </Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={
+            chatMuted
+              ? t("unmuteChatNotifications")
+              : t("muteChatNotifications")
+          }
+          disabled={savingPreference}
+          onPress={() => void toggleChatNotifications()}
+          className={`h-11 w-11 items-center justify-center rounded-full ${
+            chatMuted ? "bg-slate-200" : "bg-brand-50"
+          }`}
+        >
+          <Text className="text-lg">{chatMuted ? "🔕" : "🔔"}</Text>
+        </Pressable>
+      </View>
       <ScrollView
         nestedScrollEnabled
         className="mt-5 flex-1 rounded-2xl bg-slate-50"

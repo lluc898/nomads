@@ -69,7 +69,7 @@ export async function joinTrip(
       )
       .limit(1);
     if (existing?.status === "approved" || existing?.status === "pending") {
-      return { status: existing.status };
+      return { status: existing.status, created: false };
     }
 
     await assertTripHasCapacity(transaction, trip.id, trip.maxParticipants);
@@ -92,7 +92,7 @@ export async function joinTrip(
           respondedBy: status === "approved" ? trip.creatorId : null,
         },
       });
-    return { status };
+    return { status, created: true };
   });
 }
 

@@ -1,4 +1,5 @@
 import {
+  createJoinReviewNotification,
   reviewTripJoinRequest,
   TripFullError,
   TripJoinRequestNotFoundError,
@@ -9,6 +10,7 @@ import { tripJoinReviewSchema } from "@viajeroshub/shared";
 
 import { auth } from "@/auth";
 import { getDatabase } from "@/lib/database";
+import { sendNotificationPushes } from "@/lib/notification-push";
 import { getBearerToken, requireMobileAuth } from "@/lib/mobile-auth";
 
 export async function PATCH(
@@ -26,12 +28,19 @@ export async function PATCH(
   }
   const { slug, requestId } = await params;
   try {
-    const result = await reviewTripJoinRequest(getDatabase(), {
+    const database = getDatabase();
+    const result = await reviewTripJoinRequest(database, {
       slug,
       requestId,
       reviewerId,
       action: parsed.data.action,
     });
+    const notificationIds = await createJoinReviewNotification(database, {
+      requestId,
+      reviewerId,
+      accepted: parsed.data.action === "accept",
+    });
+    await sendNotificationPushes(database, notificationIds);
     return Response.json(result);
   } catch (error) {
     if (

@@ -126,6 +126,9 @@ packages/ui
 - Cada viaje tiene un chat persistente exclusivo para el creador y participantes aprobados; el permiso se valida en cada lectura y envío desde el backend.
 - Los mensajes admiten hasta 1.000 caracteres, se muestran los 100 más recientes y se limitan a 20 envíos por usuario y minuto.
 - El chat en tiempo real usa SSE y `LISTEN/NOTIFY` de PostgreSQL; no debe volver a sondeo periódico mientras esta infraestructura siga disponible.
+- Las solicitudes, decisiones de acceso, nuevos integrantes y mensajes generan notificaciones persistentes. Los contadores en web y móvil se actualizan mediante SSE y `LISTEN/NOTIFY`, no mediante sondeo.
+- Cada integrante puede silenciar los avisos de chat por viaje sin dejar de recibir los mensajes dentro del chat.
+- Las push usan Expo Push Service y se prueban en una development build; Expo Go mantiene el centro interno pero no admite push remotas.
 
 ## Criterios de aceptación
 

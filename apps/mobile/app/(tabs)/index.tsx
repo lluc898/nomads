@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HomeSearch } from "@/components/home-search";
 import { LanguageSelector } from "@/components/language-selector";
+import { NotificationBell } from "@/components/notification-bell";
 import { TripCard } from "@/components/trip-card";
 import { useAuth } from "@/lib/auth-context";
 import { absoluteMediaUrl } from "@/lib/config";
@@ -33,6 +34,7 @@ export default function HomeScreen() {
             </View>
             <View className="flex-row items-center gap-2">
               <LanguageSelector />
+              <NotificationBell />
               {avatarUrl ? (
                 <Image
                   source={{ uri: avatarUrl }}

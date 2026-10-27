@@ -1,4 +1,5 @@
 import {
+  createChatNotifications,
   listTripMessages,
   sendTripMessage,
   TripChatAccessError,
@@ -13,6 +14,7 @@ import {
 
 import { auth } from "@/auth";
 import { getDatabase } from "@/lib/database";
+import { sendNotificationPushes } from "@/lib/notification-push";
 import { getBearerToken, requireMobileAuth } from "@/lib/mobile-auth";
 
 type RouteContext = { params: Promise<{ slug: string }> };
@@ -45,11 +47,19 @@ export async function POST(request: Request, { params }: RouteContext) {
     );
   }
   try {
-    const message = await sendTripMessage(getDatabase(), {
-      slug: (await params).slug,
+    const slug = (await params).slug;
+    const database = getDatabase();
+    const message = await sendTripMessage(database, {
+      slug,
       userId,
       content: parsed.data.content,
     });
+    const notificationIds = await createChatNotifications(database, {
+      slug,
+      actorId: userId,
+      preview: message.content,
+    });
+    await sendNotificationPushes(database, notificationIds);
     return Response.json(chatMessageSchema.parse(message), {
       status: 201,
       headers: noStore().headers,

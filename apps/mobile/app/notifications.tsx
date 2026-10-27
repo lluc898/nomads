@@ -1,0 +1,137 @@
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { absoluteMediaUrl } from "@/lib/config";
+import { useI18n } from "@/lib/i18n-context";
+import { notificationText } from "@/lib/notification-copy";
+import { useNotifications } from "@/lib/notifications-context";
+
+export default function NotificationsScreen() {
+  const router = useRouter();
+  const { locale, t } = useI18n();
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    refresh,
+    markRead,
+    markAllRead,
+  } = useNotifications();
+  const [refreshing, setRefreshing] = useState(false);
+
+  return (
+    <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
+      <View className="flex-row items-center border-b border-slate-200 bg-white px-5 py-3">
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("back")}
+          onPress={() => router.back()}
+          className="mr-3 h-11 w-11 items-center justify-center rounded-full bg-slate-100"
+        >
+          <Text className="text-2xl text-slate-800">‹</Text>
+        </Pressable>
+        <Text className="flex-1 text-2xl font-extrabold text-slate-950">
+          {t("notifications")}
+        </Text>
+        {unreadCount ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void markAllRead()}
+            className="min-h-11 justify-center px-2"
+          >
+            <Text className="text-sm font-bold text-brand-600">
+              {t("markAllRead")}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
+
+      {loading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color="#0B6EFD" />
+        </View>
+      ) : (
+        <ScrollView
+          contentContainerClassName="px-5 py-5 grow"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              tintColor="#0B6EFD"
+              onRefresh={() => {
+                setRefreshing(true);
+                void refresh().finally(() => setRefreshing(false));
+              }}
+            />
+          }
+        >
+          {!notifications.length ? (
+            <View className="flex-1 items-center justify-center px-8">
+              <View className="h-16 w-16 items-center justify-center rounded-2xl bg-brand-50">
+                <Text className="text-3xl">🔔</Text>
+              </View>
+              <Text className="mt-5 text-center font-semibold text-slate-600">
+                {t("noNotifications")}
+              </Text>
+            </View>
+          ) : (
+            <View className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
+              {notifications.map((notification) => {
+                const image = absoluteMediaUrl(notification.actorImage);
+                return (
+                  <Pressable
+                    key={notification.id}
+                    accessibilityRole="button"
+                    onPress={() => {
+                      if (!notification.isRead) void markRead(notification.id);
+                      router.push(`/trips/${notification.tripSlug}`);
+                    }}
+                    className={`flex-row gap-3 border-b border-slate-100 p-4 active:bg-slate-100 ${
+                      notification.isRead ? "bg-white" : "bg-brand-50"
+                    }`}
+                  >
+                    {image ? (
+                      <Image
+                        source={{ uri: image }}
+                        className="h-11 w-11 rounded-full bg-slate-200"
+                      />
+                    ) : (
+                      <View className="h-11 w-11 items-center justify-center rounded-full bg-white">
+                        <Text className="font-bold text-brand-600">
+                          {(notification.actorName ?? "V")[0]?.toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                    <View className="min-w-0 flex-1">
+                      <Text className="font-bold leading-5 text-slate-950">
+                        {notificationText(notification, t)}
+                      </Text>
+                      <Text className="mt-1 text-xs text-slate-500">
+                        {new Intl.DateTimeFormat(locale, {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        }).format(new Date(notification.createdAt))}
+                      </Text>
+                    </View>
+                    {!notification.isRead ? (
+                      <View className="mt-2 h-2.5 w-2.5 rounded-full bg-brand-500" />
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+        </ScrollView>
+      )}
+    </SafeAreaView>
+  );
+}

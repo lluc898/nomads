@@ -4,6 +4,7 @@ import {
   createTripInputSchema,
   isSupportedLocale,
   mobileProfileSchema,
+  notificationCenterSchema,
   publicProfileSchema,
   sendChatMessageSchema,
   type SupportedLocale,
@@ -12,15 +13,18 @@ import {
   tripDetailSchema,
   tripJoinResultSchema,
   tripJoinReviewSchema,
+  tripNotificationPreferencesSchema,
   tripChatSchema,
   type CreateTripInput,
   type ChatMessage,
   type MobileProfile,
+  type NotificationCenter,
   type PublicProfile,
   type TravelLocation,
   type TripCard,
   type TripDetail,
   type TripJoinReview,
+  type TripNotificationPreferences,
   type TripChat,
 } from "@viajeroshub/shared";
 
@@ -209,6 +213,122 @@ export function createApiClient({
         },
       );
       if (!response.ok) throw await apiError(response);
+    },
+
+    async listNotifications(token: string): Promise<NotificationCenter> {
+      const response = await fetcher(`${baseUrl}/notifications`, {
+        headers: authorization(token),
+      });
+      if (!response.ok) throw await apiError(response);
+      return notificationCenterSchema.parse(await response.json());
+    },
+
+    async markNotificationRead(
+      token: string,
+      input: { notificationId: string } | { all: true },
+    ) {
+      const response = await fetcher(`${baseUrl}/notifications`, {
+        method: "PATCH",
+        headers: {
+          ...authorization(token),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) throw await apiError(response);
+    },
+
+    async subscribeNotifications(
+      token: string,
+      onNotifications: () => void,
+      signal: AbortSignal,
+    ) {
+      const response = await fetcher(`${baseUrl}/notifications/stream`, {
+        headers: authorization(token),
+        signal,
+      });
+      if (!response.ok) throw await apiError(response);
+      if (!response.body)
+        throw new Error(
+          "Las notificaciones en tiempo real no están disponibles.",
+        );
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (!signal.aborted) {
+        const { done, value } = await reader.read();
+        if (done) return;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() ?? "";
+        events.forEach((event) => {
+          if (event.split("\n").includes("event: notifications"))
+            onNotifications();
+        });
+      }
+    },
+
+    async registerPushToken(
+      token: string,
+      input: {
+        token: string;
+        platform: "ios" | "android";
+        locale: SupportedLocale;
+      },
+    ) {
+      const response = await fetcher(`${baseUrl}/notifications/push-token`, {
+        method: "POST",
+        headers: {
+          ...authorization(token),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) throw await apiError(response);
+    },
+
+    async removePushToken(token: string, pushToken: string) {
+      const response = await fetcher(`${baseUrl}/notifications/push-token`, {
+        method: "DELETE",
+        headers: {
+          ...authorization(token),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: pushToken }),
+      });
+      if (!response.ok) throw await apiError(response);
+    },
+
+    async getTripNotificationPreferences(
+      token: string,
+      slug: string,
+    ): Promise<TripNotificationPreferences> {
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}/notification-preferences`,
+        { headers: authorization(token) },
+      );
+      if (!response.ok) throw await apiError(response);
+      return tripNotificationPreferencesSchema.parse(await response.json());
+    },
+
+    async setTripNotificationPreferences(
+      token: string,
+      slug: string,
+      input: TripNotificationPreferences,
+    ): Promise<TripNotificationPreferences> {
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}/notification-preferences`,
+        {
+          method: "PATCH",
+          headers: {
+            ...authorization(token),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(input),
+        },
+      );
+      if (!response.ok) throw await apiError(response);
+      return tripNotificationPreferencesSchema.parse(await response.json());
     },
 
     async exchangeMobileCode(code: string, verifier: string) {

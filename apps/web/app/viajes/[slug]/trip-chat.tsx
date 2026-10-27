@@ -19,6 +19,8 @@ export function TripChat({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chatMuted, setChatMuted] = useState(false);
+  const [savingPreference, setSavingPreference] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
 
   const loadMessages = useCallback(
@@ -79,6 +81,38 @@ export function TripChat({
   }, [loadMessages, slug]);
 
   useEffect(() => {
+    fetch(`/api/trips/${slug}/notification-preferences`, { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((preference: { chatMuted?: unknown } | null) => {
+        if (typeof preference?.chatMuted === "boolean")
+          setChatMuted(preference.chatMuted);
+      })
+      .catch(() => undefined);
+  }, [slug]);
+
+  async function toggleChatNotifications() {
+    if (savingPreference) return;
+    const nextMuted = !chatMuted;
+    setSavingPreference(true);
+    setChatMuted(nextMuted);
+    try {
+      const response = await fetch(
+        `/api/trips/${slug}/notification-preferences`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chatMuted: nextMuted }),
+        },
+      );
+      if (!response.ok) throw new Error("Error");
+    } catch {
+      setChatMuted(!nextMuted);
+    } finally {
+      setSavingPreference(false);
+    }
+  }
+
+  useEffect(() => {
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
@@ -117,8 +151,32 @@ export function TripChat({
   return (
     <section className="px-5 pb-12">
       <div className="mx-auto flex h-[min(44rem,80vh)] max-w-5xl flex-col rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-        <h2 className="text-2xl font-extrabold text-slate-950">{t("chat")}</h2>
-        <p className="mt-1 text-sm text-slate-500">{t("chatSubtitle")}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-950">
+              {t("chat")}
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">{t("chatSubtitle")}</p>
+          </div>
+          <button
+            type="button"
+            disabled={savingPreference}
+            onClick={toggleChatNotifications}
+            aria-label={
+              chatMuted
+                ? t("unmuteChatNotifications")
+                : t("muteChatNotifications")
+            }
+            title={
+              chatMuted
+                ? t("unmuteChatNotifications")
+                : t("muteChatNotifications")
+            }
+            className="grid size-11 place-items-center rounded-full bg-slate-100 text-lg transition hover:bg-blue-50 disabled:opacity-50"
+          >
+            {chatMuted ? "🔕" : "🔔"}
+          </button>
+        </div>
 
         <div
           ref={messagesRef}

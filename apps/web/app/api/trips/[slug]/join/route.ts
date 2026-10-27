@@ -1,4 +1,5 @@
 import {
+  createJoinNotification,
   getUserProfileById,
   joinTrip,
   TripFullError,
@@ -9,6 +10,7 @@ import { tripJoinResultSchema } from "@viajeroshub/shared";
 
 import { auth } from "@/auth";
 import { getDatabase } from "@/lib/database";
+import { sendNotificationPushes } from "@/lib/notification-push";
 import { getBearerToken, requireMobileAuth } from "@/lib/mobile-auth";
 
 export async function POST(
@@ -26,7 +28,17 @@ export async function POST(
     );
   }
   try {
-    const result = await joinTrip(getDatabase(), (await params).slug, userId);
+    const slug = (await params).slug;
+    const database = getDatabase();
+    const result = await joinTrip(database, slug, userId);
+    if (result.created) {
+      const notificationIds = await createJoinNotification(database, {
+        slug,
+        actorId: userId,
+        status: result.status === "pending" ? "pending" : "approved",
+      });
+      await sendNotificationPushes(database, notificationIds);
+    }
     return Response.json(tripJoinResultSchema.parse(result));
   } catch (error) {
     if (error instanceof TripNotFoundError)

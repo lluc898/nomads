@@ -20,6 +20,7 @@ import {
 
 import { api } from "@/lib/api";
 import { WEB_URL } from "@/lib/config";
+import { PUSH_TOKEN_KEY } from "@/lib/push-constants";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -55,6 +56,26 @@ type AuthContextValue = {
     requestId: string,
     action: "accept" | "reject",
   ) => ReturnType<typeof api.reviewTripJoinRequest>;
+  listNotifications: () => ReturnType<typeof api.listNotifications>;
+  markNotificationRead: (
+    input: { notificationId: string } | { all: true },
+  ) => ReturnType<typeof api.markNotificationRead>;
+  subscribeNotifications: (
+    onNotifications: () => void,
+    signal: AbortSignal,
+  ) => ReturnType<typeof api.subscribeNotifications>;
+  registerPushToken: (
+    pushToken: string,
+    platform: "ios" | "android",
+    locale: SupportedLocale,
+  ) => ReturnType<typeof api.registerPushToken>;
+  getTripNotificationPreferences: (
+    slug: string,
+  ) => ReturnType<typeof api.getTripNotificationPreferences>;
+  setTripNotificationPreferences: (
+    slug: string,
+    chatMuted: boolean,
+  ) => ReturnType<typeof api.setTripNotificationPreferences>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -154,10 +175,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     const currentToken = token;
+    const pushToken = await SecureStore.getItemAsync(PUSH_TOKEN_KEY);
     setToken(null);
     setProfile(null);
     setStatus("signedOut");
     await SecureStore.deleteItemAsync(SESSION_KEY);
+    await SecureStore.deleteItemAsync(PUSH_TOKEN_KEY);
+    if (currentToken && pushToken)
+      await api.removePushToken(currentToken, pushToken).catch(() => undefined);
     if (currentToken)
       await api.logoutMobile(currentToken).catch(() => undefined);
   }, [token]);
@@ -240,6 +265,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [token],
   );
 
+  const listNotifications = useCallback(() => {
+    if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+    return api.listNotifications(token);
+  }, [token]);
+
+  const markNotificationRead = useCallback(
+    (input: { notificationId: string } | { all: true }) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.markNotificationRead(token, input);
+    },
+    [token],
+  );
+
+  const subscribeNotifications = useCallback(
+    (onNotifications: () => void, signal: AbortSignal) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.subscribeNotifications(token, onNotifications, signal);
+    },
+    [token],
+  );
+
+  const registerPushToken = useCallback(
+    (
+      pushToken: string,
+      platform: "ios" | "android",
+      locale: SupportedLocale,
+    ) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.registerPushToken(token, {
+        token: pushToken,
+        platform,
+        locale,
+      });
+    },
+    [token],
+  );
+
+  const getTripNotificationPreferences = useCallback(
+    (slug: string) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.getTripNotificationPreferences(token, slug);
+    },
+    [token],
+  );
+
+  const setTripNotificationPreferences = useCallback(
+    (slug: string, chatMuted: boolean) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.setTripNotificationPreferences(token, slug, { chatMuted });
+    },
+    [token],
+  );
+
   const value = useMemo(
     () => ({
       status,
@@ -257,6 +335,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscribeTripChat,
       joinTrip,
       reviewTripJoinRequest,
+      listNotifications,
+      markNotificationRead,
+      subscribeNotifications,
+      registerPushToken,
+      getTripNotificationPreferences,
+      setTripNotificationPreferences,
     }),
     [
       completeSignIn,
@@ -274,6 +358,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscribeTripChat,
       joinTrip,
       reviewTripJoinRequest,
+      listNotifications,
+      markNotificationRead,
+      subscribeNotifications,
+      registerPushToken,
+      getTripNotificationPreferences,
+      setTripNotificationPreferences,
     ],
   );
 
