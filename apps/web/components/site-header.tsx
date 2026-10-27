@@ -45,6 +45,12 @@ export async function SiteHeader() {
                   {t("navMyTrips")}
                 </Link>
                 <Link
+                  href="/mensajes"
+                  className="transition hover:text-[#0B6EFD]"
+                >
+                  {t("messages")}
+                </Link>
+                <Link
                   href="/perfil"
                   className="transition hover:text-[#0B6EFD]"
                 >
@@ -77,10 +83,31 @@ export async function SiteHeader() {
             </Link>
           </nav>
           {session?.user ? (
-            <NotificationBell
-              initialUnreadCount={unreadCount}
-              label={t("notifications")}
-            />
+            <>
+              <Link
+                href="/mensajes"
+                aria-label={t("messages")}
+                className="grid size-11 place-items-center rounded-xl text-slate-700 transition hover:bg-white/70 hover:text-[#0B6EFD] md:hidden"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-5"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M5 5.5h14v10H9l-4 3v-13Z"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
+              <NotificationBell
+                initialUnreadCount={unreadCount}
+                label={t("notifications")}
+              />
+            </>
           ) : null}
           <div className="flex items-center gap-2 md:hidden">
             <LanguageSelector compact />

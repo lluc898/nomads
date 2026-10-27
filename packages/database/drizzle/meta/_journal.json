@@ -78,6 +78,13 @@
       "when": 1793106923104,
       "tag": "0010_luxuriant_mad_thinker",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793111943775,
+      "tag": "0011_condemned_zombie",
+      "breakpoints": true
     }
   ]
 }

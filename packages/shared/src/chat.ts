@@ -23,6 +23,22 @@ export const tripChatSchema = z.object({
   messages: z.array(chatMessageSchema),
 });
 
+export const tripConversationSummarySchema = z.object({
+  tripSlug: z.string().min(1),
+  tripTitle: z.string().min(1),
+  lastMessage: z.string().nullable(),
+  lastMessageAt: z.iso.datetime().nullable(),
+  lastSenderName: z.string().nullable(),
+  unreadCount: z.number().int().nonnegative(),
+});
+
+export const tripConversationCenterSchema = z.array(
+  tripConversationSummarySchema,
+);
+
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type TripChat = z.infer<typeof tripChatSchema>;
 export type SendChatMessage = z.infer<typeof sendChatMessageSchema>;
+export type TripConversationSummary = z.infer<
+  typeof tripConversationSummarySchema
+>;

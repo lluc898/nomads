@@ -10,7 +10,6 @@ import { getDatabase } from "@/lib/database";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 import { TripMembership } from "./trip-membership";
-import { TripChat } from "./trip-chat";
 import { ShareTripButton } from "./share-trip-button";
 
 export default async function TripDetailPage({
@@ -160,6 +159,28 @@ export default async function TripDetailPage({
               />
             </div>
           ) : null}
+          {trip.viewerMembershipStatus === "owner" ||
+          trip.viewerMembershipStatus === "approved" ? (
+            <Link
+              href={`/mensajes/${trip.slug}`}
+              className="mb-6 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#0B6EFD] px-4 font-bold text-white hover:bg-[#0857C9]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="size-5"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M5 5.5h14v10H9l-4 3v-13Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              {t("openGroupChat")}
+            </Link>
+          ) : null}
           <p className="text-sm text-slate-500">
             {t("createdBy", {
               name:
@@ -182,10 +203,6 @@ export default async function TripDetailPage({
           </p>
         </aside>
       </section>
-      {trip.viewerMembershipStatus === "owner" ||
-      trip.viewerMembershipStatus === "approved" ? (
-        <TripChat slug={trip.slug} locale={locale} />
-      ) : null}
     </main>
   );
 }

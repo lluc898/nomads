@@ -15,7 +15,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { TripChat } from "@/components/trip-chat";
 import { useAuth } from "@/lib/auth-context";
 import { absoluteMediaUrl, WEB_URL } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
@@ -406,7 +405,15 @@ export default function TripDetailScreen() {
 
               {trip.viewerMembershipStatus === "owner" ||
               trip.viewerMembershipStatus === "approved" ? (
-                <TripChat slug={trip.slug} />
+                <Pressable
+                  onPress={() => router.push(`/messages/${trip.slug}`)}
+                  className="min-h-14 flex-row items-center justify-center gap-3 rounded-2xl bg-brand-500 px-5 active:opacity-80"
+                >
+                  <View className="h-5 w-6 rounded-md border-[1.5px] border-white" />
+                  <Text className="font-extrabold text-white">
+                    {t("openGroupChat")}
+                  </Text>
+                </Pressable>
               ) : null}
             </View>
           </ScrollView>

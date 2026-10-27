@@ -16,7 +16,13 @@ import { useAuth } from "@/lib/auth-context";
 import { absoluteMediaUrl } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
 
-export function TripChat({ slug }: { slug: string }) {
+export function TripChat({
+  slug,
+  standalone = false,
+}: {
+  slug: string;
+  standalone?: boolean;
+}) {
   const {
     getTripChat,
     sendTripMessage,
@@ -123,8 +129,16 @@ export function TripChat({ slug }: { slug: string }) {
 
   return (
     <View
-      className="rounded-3xl border border-slate-200 bg-white p-5"
-      style={{ height: Math.min(Math.max(height * 0.68, 480), 620) }}
+      className={
+        standalone
+          ? "flex-1 bg-white p-5"
+          : "rounded-3xl border border-slate-200 bg-white p-5"
+      }
+      style={
+        standalone
+          ? undefined
+          : { height: Math.min(Math.max(height * 0.68, 480), 620) }
+      }
     >
       <View className="flex-row items-start justify-between gap-3">
         <View className="min-w-0 flex-1">

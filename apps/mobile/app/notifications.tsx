@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { absoluteMediaUrl } from "@/lib/config";
+import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n-context";
 import { notificationText } from "@/lib/notification-copy";
 import { useNotifications } from "@/lib/notifications-context";
@@ -19,6 +20,7 @@ import { useNotifications } from "@/lib/notifications-context";
 export default function NotificationsScreen() {
   const router = useRouter();
   const { locale, t } = useI18n();
+  const { reviewTripJoinRequest } = useAuth();
   const {
     notifications,
     unreadCount,
@@ -28,6 +30,25 @@ export default function NotificationsScreen() {
     markAllRead,
   } = useNotifications();
   const [refreshing, setRefreshing] = useState(false);
+  const [handled, setHandled] = useState<Set<string>>(new Set());
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function review(
+    notificationId: string,
+    slug: string,
+    requestId: string,
+    action: "accept" | "reject",
+  ) {
+    if (busy) return;
+    setBusy(notificationId);
+    try {
+      await reviewTripJoinRequest(slug, requestId, action);
+      setHandled((current) => new Set(current).add(notificationId));
+      await markRead(notificationId);
+    } finally {
+      setBusy(null);
+    }
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
@@ -88,44 +109,97 @@ export default function NotificationsScreen() {
               {notifications.map((notification) => {
                 const image = absoluteMediaUrl(notification.actorImage);
                 return (
-                  <Pressable
+                  <View
                     key={notification.id}
-                    accessibilityRole="button"
-                    onPress={() => {
-                      if (!notification.isRead) void markRead(notification.id);
-                      router.push(`/trips/${notification.tripSlug}`);
-                    }}
                     className={`flex-row gap-3 border-b border-slate-100 p-4 active:bg-slate-100 ${
                       notification.isRead ? "bg-white" : "bg-brand-50"
                     }`}
                   >
-                    {image ? (
-                      <Image
-                        source={{ uri: image }}
-                        className="h-11 w-11 rounded-full bg-slate-200"
-                      />
-                    ) : (
-                      <View className="h-11 w-11 items-center justify-center rounded-full bg-white">
-                        <Text className="font-bold text-brand-600">
-                          {(notification.actorName ?? "V")[0]?.toUpperCase()}
-                        </Text>
-                      </View>
-                    )}
+                    <Pressable
+                      disabled={!notification.actorUsername}
+                      onPress={() =>
+                        notification.actorUsername &&
+                        router.push(`/travelers/${notification.actorUsername}`)
+                      }
+                    >
+                      {image ? (
+                        <Image
+                          source={{ uri: image }}
+                          className="h-11 w-11 rounded-full bg-slate-200"
+                        />
+                      ) : (
+                        <View className="h-11 w-11 items-center justify-center rounded-full bg-white">
+                          <Text className="font-bold text-brand-600">
+                            {(notification.actorName ?? "V")[0]?.toUpperCase()}
+                          </Text>
+                        </View>
+                      )}
+                    </Pressable>
                     <View className="min-w-0 flex-1">
-                      <Text className="font-bold leading-5 text-slate-950">
-                        {notificationText(notification, t)}
-                      </Text>
-                      <Text className="mt-1 text-xs text-slate-500">
-                        {new Intl.DateTimeFormat(locale, {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        }).format(new Date(notification.createdAt))}
-                      </Text>
+                      <Pressable
+                        onPress={() => {
+                          if (!notification.isRead)
+                            void markRead(notification.id);
+                          router.push(
+                            notification.type === "chat_message"
+                              ? `/messages/${notification.tripSlug}`
+                              : `/trips/${notification.tripSlug}`,
+                          );
+                        }}
+                      >
+                        <Text className="font-bold leading-5 text-slate-950">
+                          {notificationText(notification, t)}
+                        </Text>
+                        <Text className="mt-1 text-xs text-slate-500">
+                          {new Intl.DateTimeFormat(locale, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(notification.createdAt))}
+                        </Text>
+                      </Pressable>
+                      {notification.type === "join_request" &&
+                      notification.requestId &&
+                      !handled.has(notification.id) ? (
+                        <View className="mt-3 flex-row gap-2">
+                          <Pressable
+                            disabled={busy === notification.id}
+                            onPress={() =>
+                              void review(
+                                notification.id,
+                                notification.tripSlug,
+                                notification.requestId!,
+                                "accept",
+                              )
+                            }
+                            className="min-h-11 flex-1 items-center justify-center rounded-xl bg-brand-500 disabled:opacity-50"
+                          >
+                            <Text className="font-bold text-white">
+                              {t("accept")}
+                            </Text>
+                          </Pressable>
+                          <Pressable
+                            disabled={busy === notification.id}
+                            onPress={() =>
+                              void review(
+                                notification.id,
+                                notification.tripSlug,
+                                notification.requestId!,
+                                "reject",
+                              )
+                            }
+                            className="min-h-11 flex-1 items-center justify-center rounded-xl border border-slate-300 disabled:opacity-50"
+                          >
+                            <Text className="font-bold text-slate-700">
+                              {t("reject")}
+                            </Text>
+                          </Pressable>
+                        </View>
+                      ) : null}
                     </View>
                     {!notification.isRead ? (
                       <View className="mt-2 h-2.5 w-2.5 rounded-full bg-brand-500" />
                     ) : null}
-                  </Pressable>
+                  </View>
                 );
               })}
             </View>

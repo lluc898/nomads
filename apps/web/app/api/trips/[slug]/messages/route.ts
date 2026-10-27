@@ -1,6 +1,7 @@
 import {
   createChatNotifications,
   listTripMessages,
+  markTripChatNotificationsRead,
   sendTripMessage,
   TripChatAccessError,
   TripChatNotFoundError,
@@ -23,11 +24,10 @@ export async function GET(request: Request, { params }: RouteContext) {
   const userId = await authenticatedUserId(request);
   if (!userId) return unauthorized();
   try {
-    const messages = await listTripMessages(
-      getDatabase(),
-      (await params).slug,
-      userId,
-    );
+    const database = getDatabase();
+    const slug = (await params).slug;
+    const messages = await listTripMessages(database, slug, userId);
+    await markTripChatNotificationsRead(database, slug, userId);
     return Response.json(tripChatSchema.parse({ messages }), noStore());
   } catch (error) {
     return chatErrorResponse(error);

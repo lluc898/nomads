@@ -32,7 +32,9 @@ export async function listUserNotifications(
       tripSlug: trips.slug,
       tripTitle: trips.title,
       actorName: actor.name,
+      actorUsername: actor.username,
       actorImage: actor.image,
+      requestId: notifications.joinRequestId,
       preview: notifications.preview,
       readAt: notifications.readAt,
       createdAt: notifications.createdAt,
@@ -176,6 +178,20 @@ export async function createJoinNotification(
     .where(eq(trips.slug, input.slug))
     .limit(1);
   if (!trip) return [];
+  const [joinRequest] =
+    input.status === "pending"
+      ? await database
+          .select({ id: tripParticipants.id })
+          .from(tripParticipants)
+          .where(
+            and(
+              eq(tripParticipants.tripId, trip.id),
+              eq(tripParticipants.userId, input.actorId),
+              eq(tripParticipants.status, "pending"),
+            ),
+          )
+          .limit(1)
+      : [];
   const recipients =
     input.status === "pending"
       ? [trip.creatorId]
@@ -186,6 +202,7 @@ export async function createJoinNotification(
       userId,
       actorId: input.actorId,
       tripId: trip.id,
+      joinRequestId: joinRequest?.id ?? null,
       type:
         input.status === "pending"
           ? ("join_request" as const)
@@ -208,12 +225,18 @@ export async function createJoinReviewNotification(
     .where(eq(tripParticipants.id, input.requestId))
     .limit(1);
   if (!request) return [];
+  await database
+    .update(notifications)
+    .set({ joinRequestId: null, readAt: new Date() })
+    .where(eq(notifications.joinRequestId, input.requestId));
+  await publishNotificationUsers(database, [input.reviewerId]);
   const values: Array<{
     userId: string;
     actorId: string;
     tripId: string;
     type: NotificationType;
     preview: string | null;
+    joinRequestId: string | null;
   }> = [
     {
       userId: request.userId,
@@ -221,6 +244,7 @@ export async function createJoinReviewNotification(
       tripId: request.tripId,
       type: input.accepted ? "join_accepted" : "join_rejected",
       preview: null,
+      joinRequestId: null,
     },
   ];
   if (input.accepted) {
@@ -238,6 +262,7 @@ export async function createJoinReviewNotification(
           tripId: request.tripId,
           type: "participant_joined" as const,
           preview: null,
+          joinRequestId: null,
         })),
     );
   }
@@ -277,6 +302,7 @@ export async function createChatNotifications(
         tripId: trip.id,
         type: "chat_message" as const,
         preview: input.preview.slice(0, 180),
+        joinRequestId: null,
       })),
   );
 }
@@ -344,6 +370,7 @@ async function createNotifications(
     tripId: string;
     type: NotificationType;
     preview: string | null;
+    joinRequestId: string | null;
   }>,
 ) {
   if (!values.length) return [];

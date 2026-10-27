@@ -316,6 +316,10 @@ export const notifications = pgTable(
     tripId: uuid("trip_id")
       .notNull()
       .references(() => trips.id, { onDelete: "cascade" }),
+    joinRequestId: uuid("join_request_id").references(
+      () => tripParticipants.id,
+      { onDelete: "set null" },
+    ),
     type: notificationType("type").notNull(),
     preview: varchar("preview", { length: 180 }),
     readAt: timestamp("read_at", { withTimezone: true }),

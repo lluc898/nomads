@@ -14,6 +14,7 @@ import {
   tripJoinResultSchema,
   tripJoinReviewSchema,
   tripNotificationPreferencesSchema,
+  tripConversationCenterSchema,
   tripChatSchema,
   type CreateTripInput,
   type ChatMessage,
@@ -25,6 +26,7 @@ import {
   type TripDetail,
   type TripJoinReview,
   type TripNotificationPreferences,
+  type TripConversationSummary,
   type TripChat,
 } from "@viajeroshub/shared";
 
@@ -134,6 +136,16 @@ export function createApiClient({
       );
       if (!response.ok) throw await apiError(response);
       return tripChatSchema.parse(await response.json());
+    },
+
+    async listTripConversations(
+      token: string,
+    ): Promise<TripConversationSummary[]> {
+      const response = await fetcher(`${baseUrl}/messages`, {
+        headers: authorization(token),
+      });
+      if (!response.ok) throw await apiError(response);
+      return tripConversationCenterSchema.parse(await response.json());
     },
 
     async sendTripMessage(

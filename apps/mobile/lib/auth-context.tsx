@@ -41,6 +41,7 @@ type AuthContextValue = {
     locale?: SupportedLocale,
   ) => ReturnType<typeof api.getTrip>;
   getTripChat: (slug: string) => ReturnType<typeof api.getTripChat>;
+  listTripConversations: () => ReturnType<typeof api.listTripConversations>;
   sendTripMessage: (
     slug: string,
     content: string,
@@ -241,6 +242,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [token],
   );
 
+  const listTripConversations = useCallback(() => {
+    if (!token) return Promise.reject(new Error("Tu sesiÃ³n ha caducado."));
+    return api.listTripConversations(token);
+  }, [token]);
+
   const sendTripMessage = useCallback(
     (slug: string, content: string) => {
       if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
@@ -331,6 +337,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       listMyTrips,
       getTrip,
       getTripChat,
+      listTripConversations,
       sendTripMessage,
       subscribeTripChat,
       joinTrip,
@@ -354,6 +361,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       listMyTrips,
       getTrip,
       getTripChat,
+      listTripConversations,
       sendTripMessage,
       subscribeTripChat,
       joinTrip,
