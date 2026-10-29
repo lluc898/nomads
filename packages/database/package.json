@@ -11,6 +11,7 @@
     "db:generate": "drizzle-kit generate",
     "db:deploy": "drizzle-kit migrate && tsx src/seed-locations.ts && tsx src/seed-country-images.ts",
     "db:seed-country-images": "tsx src/seed-country-images.ts",
+    "db:seed-demo-trips": "tsx src/seed-demo-trips.ts",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "lint": "tsc --noEmit",

@@ -2,9 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createTripInputSchema,
-  featuredTrips,
   searchTripsSchema,
-  tripCardSchema,
   tripDetailSchema,
 } from "./trips";
 
@@ -42,10 +40,6 @@ describe("trip contracts", () => {
         returnDate: "2027-04-10",
       }),
     ).toThrow();
-  });
-
-  it("keeps fixture cards aligned with the public contract", () => {
-    expect(tripCardSchema.array().parse(featuredTrips)).toHaveLength(3);
   });
 
   it("accepts exact routes with typed booking links", () => {

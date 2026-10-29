@@ -1,4 +1,5 @@
-import { featuredTrips, translate } from "@viajeroshub/shared";
+import { findTripCards } from "@viajeroshub/database";
+import { translate } from "@viajeroshub/shared";
 import Link from "next/link";
 
 import {
@@ -12,11 +13,16 @@ import { Logo } from "@/components/logo";
 import { SearchForm } from "@/components/search-form";
 import { SiteHeader } from "@/components/site-header";
 import { TripCard } from "@/components/trip-card";
+import { getDatabase } from "@/lib/database";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 export default async function Home() {
   const locale = await getRequestLocale();
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+  const featuredTrips = await findTripCards(getDatabase(), {
+    locale,
+    limit: 9,
+  });
   const quickLinks = [
     t("quickFromBaleares"),
     t("quickSummer"),

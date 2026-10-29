@@ -40,15 +40,6 @@ const countrySelection = {
   heroImageLicense: countries.heroImageLicense,
 };
 const allCountries = await database.select(countrySelection).from(countries);
-const missingCountries = refreshAll
-  ? allCountries
-  : allCountries.filter(
-      (country) =>
-        !country.heroImageUrl ||
-        !country.heroImageSourceUrl ||
-        !country.heroImageLicense ||
-        isNonScenicSource(country.heroImageSourceUrl),
-    );
 
 const searchOverrides: Record<string, string> = {
   BA: "Bosnia landscape",
@@ -90,13 +81,53 @@ const searchOverrides: Record<string, string> = {
   YT: "Mayotte island landscape",
   ZW: "Zimbabwe landscape",
 };
+const curatedImages: Record<string, CountryImage> = {
+  CD: {
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/20180531_View_from_the_top_of_Mt._Kahuzi_in_Kahuzi-Biega_National_Park.jpg/1280px-20180531_View_from_the_top_of_Mt._Kahuzi_in_Kahuzi-Biega_National_Park.jpg",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:20180531_View_from_the_top_of_Mt._Kahuzi_in_Kahuzi-Biega_National_Park.jpg",
+    author: "Forest Service, USDA (Olivia Freeman)",
+    license: "Public domain",
+    licenseUrl: null,
+    width: 4898,
+    height: 3265,
+    score: 10,
+  },
+  PT: {
+    url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Ponta_de_S%C3%A3o_Louren%C3%A7o%2C_Madeira%2C_Portugal%2C_2019-05-28%2C_DD_31.jpg/1280px-Ponta_de_S%C3%A3o_Louren%C3%A7o%2C_Madeira%2C_Portugal%2C_2019-05-28%2C_DD_31.jpg",
+    sourceUrl:
+      "https://commons.wikimedia.org/wiki/File:Ponta_de_S%C3%A3o_Louren%C3%A7o,_Madeira,_Portugal,_2019-05-28,_DD_31.jpg",
+    author: "Diego Delso",
+    license: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    width: 7835,
+    height: 5419,
+    score: 10,
+  },
+};
+const missingCountries = refreshAll
+  ? allCountries
+  : allCountries.filter(
+      (country) =>
+        !country.heroImageUrl ||
+        !country.heroImageSourceUrl ||
+        !country.heroImageLicense ||
+        isNonScenicSource(country.heroImageSourceUrl) ||
+        (curatedImages[country.code]?.sourceUrl !== undefined &&
+          curatedImages[country.code]?.sourceUrl !==
+            country.heroImageSourceUrl),
+    );
 const allowedLicense = /^(CC0|CC BY(?:-SA)?(?: |$)|Public domain)/i;
 let imported = 0;
 let failed = 0;
 let cursor = 0;
 let nextCommonsRequestAt = 0;
 const wikidataImages = await loadWikidataCountryImages(
-  new Set(missingCountries.map((country) => country.code)),
+  new Set(
+    missingCountries
+      .filter((country) => !curatedImages[country.code])
+      .map((country) => country.code),
+  ),
 );
 
 async function worker() {
@@ -133,6 +164,8 @@ async function worker() {
 }
 
 async function findCountryImage(code: string, name: string) {
+  const curated = curatedImages[code];
+  if (curated) return curated;
   const representative = wikidataImages.get(code);
   if (representative) return representative;
   if (refreshAll) return null;
@@ -176,6 +209,7 @@ async function searchCommons(query: string) {
 }
 
 async function loadWikidataCountryImages(countryCodes: Set<string>) {
+  if (!countryCodes.size) return new Map<string, CountryImage>();
   const sparql = `SELECT ?code ?image WHERE {
     ?item wdt:P297 ?code; wdt:P18 ?image.
     FILTER(STRLEN(?code) = 2)
@@ -310,7 +344,7 @@ function isNonScenicSource(sourceUrl: string) {
   }
   return (
     normalized.endsWith(".svg") ||
-    /(?:^|[\s_\-/:])(map|flag|coat[\s_-]+of[\s_-]+arms|satellite|orthographic|locator|location[\s_-]+map|blank[\s_-]+map|relief[\s_-]+map|administrative|painting|artwork|drawing|engraving|illustration|watercolou?r|poster|kuroda)(?:[\s_\-/.]|$)/i.test(
+    /(?:^|[\s_\-/:])(map|carte|flag|coat[\s_-]+of[\s_-]+arms|satellite|orthographic|locator|location[\s_-]+map|blank[\s_-]+map|relief[\s_-]+map|administrative|painting|artwork|drawing|engraving|illustration|watercolou?r|poster|kuroda)(?:[\s_\-/.]|$)/i.test(
       normalized,
     )
   );

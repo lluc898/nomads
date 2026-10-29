@@ -119,6 +119,8 @@ packages/ui
 - Solo se aceptan enlaces HTTPS sin credenciales. Se conserva la URL original y la URL afiliada por separado.
 - La interfaz nunca enlaza directamente al proveedor: usa `/go/:id`, comprueba acceso, registra el clic con IP hasheada y redirige.
 - Los viajes publicados se muestran en el buscador por las mismas claves de país/aeropuerto usadas al crearlos.
+- La sección de portada "Viajes que están tomando forma" consume viajes publicados reales de PostgreSQL; no usa tarjetas estáticas y cada tarjeta debe abrir un detalle existente.
+- Las tarjetas de portada y resultados muestran la fotografía libre del país de destino con su atribución y licencia.
 - En la app móvil, las tarjetas abren el detalle como pantalla nativa; el navegador solo se abre al visitar un proveedor externo.
 - Unirse a un viaje público es inmediato; en uno privado crea una solicitud que solo puede aceptar o rechazar su creador.
 - El creador cuenta dentro del aforo. La unión y la aceptación bloquean el viaje en transacción y nunca pueden superar `maxParticipants`.
