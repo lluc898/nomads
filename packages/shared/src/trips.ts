@@ -124,6 +124,12 @@ export const tripCardSchema = z.object({
   destinationImage: destinationImageSchema.nullable(),
 });
 
+export const tripCardPageSchema = z.object({
+  items: z.array(tripCardSchema),
+  nextCursor: z.string().min(1).nullable(),
+  total: z.number().int().nonnegative().nullable(),
+});
+
 export const tripDetailSchema = z.object({
   id: z.uuid(),
   slug: z.string().min(1),
@@ -183,6 +189,7 @@ export const tripJoinResultSchema = z.object({
 export type SearchTripsInput = z.infer<typeof searchTripsSchema>;
 export type TripDateSelection = z.infer<typeof tripDateSelectionSchema>;
 export type TripCard = z.infer<typeof tripCardSchema>;
+export type TripCardPage = z.infer<typeof tripCardPageSchema>;
 export type TripDetail = z.infer<typeof tripDetailSchema>;
 export type TripMembershipStatus = z.infer<typeof tripMembershipStatusSchema>;
 export type TripJoinResult = z.infer<typeof tripJoinResultSchema>;

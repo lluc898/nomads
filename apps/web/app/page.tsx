@@ -10,9 +10,9 @@ import {
   UsersIcon,
 } from "@/components/icons";
 import { Logo } from "@/components/logo";
+import { FeaturedTripsCarousel } from "@/components/featured-trips-carousel";
 import { SearchForm } from "@/components/search-form";
 import { SiteHeader } from "@/components/site-header";
-import { TripCard } from "@/components/trip-card";
 import { getDatabase } from "@/lib/database";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
@@ -21,7 +21,7 @@ export default async function Home() {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   const featuredTrips = await findTripCards(getDatabase(), {
     locale,
-    limit: 9,
+    limit: 3,
   });
   const quickLinks = [
     t("quickFromBaleares"),
@@ -92,11 +92,7 @@ export default async function Home() {
               {t("viewAll")} <ArrowRightIcon className="size-4" />
             </Link>
           </div>
-          <div className="mt-9 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {featuredTrips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} locale={locale} />
-            ))}
-          </div>
+          <FeaturedTripsCarousel trips={featuredTrips} locale={locale} />
         </div>
       </section>
 

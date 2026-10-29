@@ -1,6 +1,6 @@
 import {
   createPublishedTrip,
-  findTripCards,
+  findTripCardPage,
   getUserProfileById,
   InvalidTripLocationError,
 } from "@viajeroshub/database";
@@ -18,16 +18,28 @@ export async function GET(request: Request) {
     return Response.json({ message: "No autorizado." }, { status: 401 });
   const requestedLocale = url.searchParams.get("locale");
   const locale = isSupportedLocale(requestedLocale) ? requestedLocale : "es";
-  const cards = await findTripCards(getDatabase(), {
-    origin: url.searchParams.get("origin") ?? undefined,
-    destination: url.searchParams.get("destination") ?? undefined,
-    departureDate: url.searchParams.get("departureDate") ?? undefined,
-    returnDate: url.searchParams.get("returnDate") ?? undefined,
-    flexibleMonth: url.searchParams.get("flexibleMonth") ?? undefined,
+  const origin = url.searchParams.get("origin") ?? undefined;
+  const destination = url.searchParams.get("destination") ?? undefined;
+  const departureDate = url.searchParams.get("departureDate") ?? undefined;
+  const returnDate = url.searchParams.get("returnDate") ?? undefined;
+  const flexibleMonth = url.searchParams.get("flexibleMonth") ?? undefined;
+  const hasSearch = Boolean(
+    origin || destination || departureDate || flexibleMonth,
+  );
+  const page = await findTripCardPage(getDatabase(), {
+    origin,
+    destination,
+    departureDate,
+    returnDate,
+    flexibleMonth,
     userId: creatorId ?? undefined,
     locale,
+    cursor: url.searchParams.get("cursor") ?? undefined,
+    limit: parseTripLimit(url.searchParams.get("limit")),
+    includeTotal:
+      hasSearch && url.searchParams.get("includeTotal") !== "false",
   });
-  return Response.json(cards, {
+  return Response.json(page, {
     headers: {
       "Cache-Control": mine
         ? "private, no-store"
@@ -84,4 +96,9 @@ async function authenticatedUserId(request: Request) {
     return (await requireMobileAuth(request))?.user.id ?? null;
   }
   return (await auth())?.user?.id ?? null;
+}
+
+function parseTripLimit(value: string | null) {
+  const parsed = Number(value ?? 12);
+  return Number.isInteger(parsed) && parsed > 0 ? Math.min(parsed, 30) : 12;
 }

@@ -167,7 +167,7 @@ Toda lista o detalle debe cubrir:
 
 1. Hero con buscador prominente.
 2. Chips de accesos rápidos: “Desde Baleares”, “Verano”, “Sin destino”, “Últimos viajes”.
-3. Grid de viajes destacados.
+3. Carrusel horizontal de tres viajes destacados, con desplazamiento por `scroll snap` y controles accesibles.
 4. Sección “Cómo funciona”.
 5. CTA para crear viaje.
 
@@ -176,7 +176,8 @@ Toda lista o detalle debe cubrir:
 - Barra de filtros sticky.
 - Lista de tarjetas de viaje.
 - Orden: relevancia, fecha, precio, popularidad.
-- Paginación o infinite scroll con botón “Cargar más”.
+- Paginación por cursor con botón “Ver más viajes”; conserva los resultados ya visibles y evita `OFFSET`.
+- El total de resultados solo aparece después de ejecutar una búsqueda, nunca en el listado general.
 
 ### Detalle de viaje
 

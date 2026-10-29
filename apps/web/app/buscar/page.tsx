@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { findTripCards } from "@viajeroshub/database";
+import { findTripCardPage } from "@viajeroshub/database";
 import { translate } from "@viajeroshub/shared";
 
 import { SearchForm } from "@/components/search-form";
+import { SearchTripGrid } from "@/components/search-trip-grid";
 import { SiteHeader } from "@/components/site-header";
-import { TripCard } from "@/components/trip-card";
 import { getDatabase } from "@/lib/database";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
@@ -17,6 +17,7 @@ type SearchPageProps = {
     departureDate?: string;
     returnDate?: string;
     flexibleMonth?: string;
+    cursor?: string;
   }>;
 };
 
@@ -33,14 +34,18 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     params.departureDate ||
     params.flexibleMonth,
   );
-  const trips = await findTripCards(getDatabase(), {
+  const page = await findTripCardPage(getDatabase(), {
     origin: params.origen,
     destination: params.destino,
     departureDate: params.departureDate,
     returnDate: params.returnDate,
     flexibleMonth: params.flexibleMonth,
     locale,
+    cursor: params.cursor,
+    limit: 12,
+    includeTotal: hasSearch,
   });
+  const trips = page.items;
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -58,7 +63,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </div>
             {hasSearch ? (
               <p className="rounded-full bg-white px-4 py-2 text-sm font-bold text-[#0857C9] shadow-sm">
-                {t("resultsFound", { count: trips.length })}
+                {t("resultsFound", { count: page.total ?? 0 })}
               </p>
             ) : null}
           </div>
@@ -85,16 +90,19 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 <h2 className="text-2xl font-extrabold text-slate-950">
                   {t("availableTrips")}
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  {t("resultsFound", { count: trips.length })}
-                </p>
               </div>
             </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {trips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} locale={locale} />
-              ))}
-            </div>
+            <SearchTripGrid
+              initialPage={page}
+              locale={locale}
+              query={{
+                origin: params.origen,
+                destination: params.destino,
+                departureDate: params.departureDate,
+                returnDate: params.returnDate,
+                flexibleMonth: params.flexibleMonth,
+              }}
+            />
           </div>
         ) : (
           <div className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 text-center">

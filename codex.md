@@ -77,6 +77,7 @@ packages/ui
 - La interfaz comparte i18n para `es`, `en`, `ca`, `fr`, `de`, `it`, `pt` y `nl`; la selección manual persistida prevalece sobre la detección inicial por país/IP.
 - Usa índices PostgreSQL y consultas eficientes.
 - Devuelve resultados paginados con filtros y orden.
+- La paginación de viajes usa un cursor estable por `createdAt` + `id`, nunca `OFFSET`; el total solo se calcula y muestra tras una búsqueda explícita. Las cargas posteriores no repiten el recuento.
 - Origen y destino reutilizan el catálogo `countries`/`airports`; el origen exige país o aeropuerto y el destino admite además `anywhere` ("Cualquier lugar").
 - La fuente mundial inicial es OurAirports. Se incluyen aeropuertos activos grandes, medianos, pequeños e hidroaeropuertos; no se muestran instalaciones cerradas, helipuertos ni balloonports.
 
@@ -120,6 +121,7 @@ packages/ui
 - La interfaz nunca enlaza directamente al proveedor: usa `/go/:id`, comprueba acceso, registra el clic con IP hasheada y redirige.
 - Los viajes publicados se muestran en el buscador por las mismas claves de país/aeropuerto usadas al crearlos.
 - La sección de portada "Viajes que están tomando forma" consume viajes publicados reales de PostgreSQL; no usa tarjetas estáticas y cada tarjeta debe abrir un detalle existente.
+- La portada limita esta sección a tres viajes y los presenta en un carrusel horizontal con `scroll snap`, adaptado a web y móvil.
 - Las tarjetas de portada y resultados muestran la fotografía libre del país de destino con su atribución y licencia.
 - En la app móvil, las tarjetas abren el detalle como pantalla nativa; el navegador solo se abre al visitar un proveedor externo.
 - Unirse a un viaje público es inmediato; en uno privado crea una solicitud que solo puede aceptar o rechazar su creador.

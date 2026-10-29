@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,6 +21,7 @@ import { absoluteMediaUrl } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
 
 export default function HomeScreen() {
+  const { width } = useWindowDimensions();
   const { profile } = useAuth();
   const { locale, t } = useI18n();
   const avatarUrl = absoluteMediaUrl(profile?.image ?? null);
@@ -31,9 +33,9 @@ export default function HomeScreen() {
   useEffect(() => {
     let active = true;
     api
-      .listTrips({ locale })
-      .then((trips) => {
-        if (active) setFeaturedTrips(trips.slice(0, 9));
+      .listTrips({ locale, limit: 3 })
+      .then((page) => {
+        if (active) setFeaturedTrips(page.items);
       })
       .catch((error: unknown) => {
         if (active)
@@ -111,14 +113,14 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View className="px-5">
+        <View>
           {loadingTrips ? (
-            <View className="min-h-40 items-center justify-center rounded-2xl border border-slate-200 bg-white">
+            <View className="mx-5 min-h-40 items-center justify-center rounded-2xl border border-slate-200 bg-white">
               <ActivityIndicator color="#0B6EFD" size="large" />
             </View>
           ) : null}
           {tripsError && !loadingTrips ? (
-            <View className="rounded-2xl border border-red-200 bg-white p-5">
+            <View className="mx-5 rounded-2xl border border-red-200 bg-white p-5">
               <Text className="font-bold text-slate-950">
                 {t("searchError")}
               </Text>
@@ -138,11 +140,24 @@ export default function HomeScreen() {
               </Pressable>
             </View>
           ) : null}
-          {!loadingTrips && !tripsError
-            ? featuredTrips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} locale={locale} />
-              ))
-            : null}
+          {!loadingTrips && !tripsError ? (
+            <ScrollView
+              horizontal
+              decelerationRate="fast"
+              snapToInterval={Math.max(width - 40, 280) + 16}
+              contentContainerClassName="gap-4 px-5"
+              showsHorizontalScrollIndicator={false}
+            >
+              {featuredTrips.map((trip) => (
+                <View
+                  key={trip.id}
+                  style={{ width: Math.max(width - 40, 280) }}
+                >
+                  <TripCard trip={trip} locale={locale} />
+                </View>
+              ))}
+            </ScrollView>
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

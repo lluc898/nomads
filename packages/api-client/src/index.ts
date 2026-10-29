@@ -9,7 +9,7 @@ import {
   sendChatMessageSchema,
   type SupportedLocale,
   travelLocationSchema,
-  tripCardSchema,
+  tripCardPageSchema,
   tripDetailSchema,
   tripJoinResultSchema,
   tripJoinReviewSchema,
@@ -22,7 +22,7 @@ import {
   type NotificationCenter,
   type PublicProfile,
   type TravelLocation,
-  type TripCard,
+  type TripCardPage,
   type TripDetail,
   type TripJoinReview,
   type TripNotificationPreferences,
@@ -75,11 +75,14 @@ export function createApiClient({
         returnDate?: string;
         flexibleMonth?: string;
         locale?: SupportedLocale;
+        cursor?: string;
+        limit?: number;
+        includeTotal?: boolean;
       } = {},
-    ): Promise<TripCard[]> {
+    ): Promise<TripCardPage> {
       const search = new URLSearchParams();
       Object.entries(options).forEach(([key, value]) => {
-        if (value) search.set(key, value);
+        if (value !== undefined && value !== "") search.set(key, String(value));
       });
       const response = await fetcher(`${baseUrl}/trips?${search}`);
       if (!response.ok) {
@@ -87,7 +90,7 @@ export function createApiClient({
           `No se pudieron cargar los viajes (${response.status})`,
         );
       }
-      return tripCardSchema.array().parse(await response.json());
+      return tripCardPageSchema.parse(await response.json());
     },
 
     async createTrip(token: string, input: CreateTripInput) {
@@ -105,13 +108,13 @@ export function createApiClient({
     },
 
     async listMyTrips(token: string, locale?: SupportedLocale) {
-      const search = new URLSearchParams({ mine: "true" });
+      const search = new URLSearchParams({ mine: "true", limit: "30" });
       if (locale) search.set("locale", locale);
       const response = await fetcher(`${baseUrl}/trips?${search}`, {
         headers: authorization(token),
       });
       if (!response.ok) throw await apiError(response);
-      return tripCardSchema.array().parse(await response.json());
+      return tripCardPageSchema.parse(await response.json()).items;
     },
 
     async getTrip(

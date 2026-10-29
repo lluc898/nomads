@@ -229,6 +229,11 @@ export const trips = pgTable(
   (trip) => [
     index("trips_creator_id_idx").on(trip.creatorId),
     index("trips_status_departure_idx").on(trip.status, trip.departureDate),
+    index("trips_status_created_id_idx").on(
+      trip.status,
+      trip.createdAt,
+      trip.id,
+    ),
     index("trips_origin_country_idx").on(trip.originCountryCode),
     index("trips_destination_country_idx").on(trip.destinationCountryCode),
   ],

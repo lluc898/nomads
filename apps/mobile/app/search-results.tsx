@@ -28,7 +28,11 @@ export default function SearchResultsScreen() {
   const [search, setSearch] = useState<TripSearchSelection | null>(initialSearch);
   const [editing, setEditing] = useState(false);
   const [trips, setTrips] = useState<TripCardData[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -47,9 +51,14 @@ export default function SearchResultsScreen() {
             }
           : { flexibleMonth: search.dates.flexibleMonth }),
         locale,
+        limit: 10,
       })
-      .then((nextTrips) => {
-        if (active) setTrips(nextTrips);
+      .then((page) => {
+        if (active) {
+          setTrips(page.items);
+          setNextCursor(page.nextCursor);
+          setTotal(page.total);
+        }
       })
       .catch((caught: unknown) => {
         if (!active) return;
@@ -170,7 +179,7 @@ export default function SearchResultsScreen() {
                 {t("availableTrips")}
               </Text>
               <Text className="mt-1 text-sm text-slate-500">
-                {t("resultsFound", { count: trips.length })}
+                {t("resultsFound", { count: total ?? trips.length })}
               </Text>
             </View>
           </View>
@@ -224,6 +233,52 @@ export default function SearchResultsScreen() {
               <TripCard key={trip.id} trip={trip} locale={locale} />
             ))
           : null}
+
+        {!loading && !error && nextCursor ? (
+          <Pressable
+            accessibilityRole="button"
+            disabled={loadingMore}
+            onPress={() => {
+              setLoadingMore(true);
+              setLoadMoreError(null);
+              api
+                .listTrips({
+                  origin: search.origin.id,
+                  destination: search.destination.id,
+                  ...(search.dates.dateMode === "exact"
+                    ? {
+                        departureDate: search.dates.departureDate,
+                        returnDate: search.dates.returnDate,
+                      }
+                    : { flexibleMonth: search.dates.flexibleMonth }),
+                  locale,
+                  limit: 10,
+                  cursor: nextCursor,
+                  includeTotal: false,
+                })
+                .then((page) => {
+                  setTrips((current) => [...current, ...page.items]);
+                  setNextCursor(page.nextCursor);
+                })
+                .catch((caught: unknown) => {
+                  setLoadMoreError(
+                    caught instanceof Error ? caught.message : t("searchError"),
+                  );
+                })
+                .finally(() => setLoadingMore(false));
+            }}
+            className="min-h-12 items-center justify-center rounded-full border border-blue-200 bg-white px-6 active:bg-brand-50 disabled:opacity-60"
+          >
+            <Text className="font-bold text-brand-600">
+              {loadingMore ? `${t("loadMoreTrips")}…` : t("loadMoreTrips")}
+            </Text>
+          </Pressable>
+        ) : null}
+        {loadMoreError ? (
+          <Text className="mt-3 text-center text-sm font-semibold text-red-700">
+            {loadMoreError}
+          </Text>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

@@ -92,6 +92,13 @@
       "when": 1793268615307,
       "tag": "0012_smiling_rawhide_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793284604499,
+      "tag": "0013_wooden_iron_monger",
+      "breakpoints": true
     }
   ]
 }

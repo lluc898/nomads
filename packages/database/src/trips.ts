@@ -2,6 +2,7 @@ import type {
   CreateTripInput,
   SupportedLocale,
   TripCard,
+  TripCardPage,
 } from "@viajeroshub/shared";
 import {
   and,
@@ -10,6 +11,7 @@ import {
   desc,
   eq,
   gte,
+  lt,
   lte,
   or,
   sql,
@@ -280,6 +282,25 @@ export async function findTripCards(
     limit?: number;
   } = {},
 ): Promise<TripCard[]> {
+  const page = await findTripCardPage(database, input);
+  return page.items;
+}
+
+export async function findTripCardPage(
+  database: Database,
+  input: {
+    origin?: string;
+    destination?: string;
+    departureDate?: string;
+    returnDate?: string;
+    flexibleMonth?: string;
+    userId?: string;
+    locale?: SupportedLocale;
+    limit?: number;
+    cursor?: string;
+    includeTotal?: boolean;
+  } = {},
+): Promise<TripCardPage> {
   const originCountry = alias(countries, "origin_country");
   const destinationCountry = alias(countries, "destination_country");
   const originAirport = alias(airports, "origin_airport");
@@ -311,6 +332,19 @@ export async function findTripCards(
       )!,
     );
   }
+
+  const totalConditions = [...conditions];
+  const cursor = parseTripCursor(input.cursor);
+  if (cursor) {
+    conditions.push(
+      or(
+        lt(trips.createdAt, cursor.createdAt),
+        and(eq(trips.createdAt, cursor.createdAt), lt(trips.id, cursor.id)),
+      )!,
+    );
+  }
+
+  const limit = Math.min(Math.max(input.limit ?? 12, 1), 30);
 
   const rows = await database
     .select({
@@ -362,11 +396,29 @@ export async function findTripCards(
       eq(destinationAirport.id, trips.destinationAirportId),
     )
     .where(and(...conditions))
-    .orderBy(desc(trips.createdAt))
-    .limit(Math.min(Math.max(input.limit ?? 30, 1), 100));
+    .orderBy(desc(trips.createdAt), desc(trips.id))
+    .limit(limit + 1);
+
+  const hasMore = rows.length > limit;
+  const visibleRows = hasMore ? rows.slice(0, limit) : rows;
+  const lastRow = visibleRows.at(-1);
+  const nextCursor =
+    hasMore && lastRow
+      ? formatTripCursor(lastRow.createdAt, lastRow.id)
+      : null;
+  const total = input.includeTotal
+    ? Number(
+        (
+          await database
+            .select({ value: count() })
+            .from(trips)
+            .where(and(...totalConditions))
+        )[0]?.value ?? 0,
+      )
+    : null;
 
   const locale = input.locale ?? "es";
-  return rows.map((row) => ({
+  const items = visibleRows.map((row) => ({
     id: row.id,
     slug: row.slug,
     origin: locationLabel(row, "origin", locale),
@@ -403,6 +455,27 @@ export async function findTripCards(
           }
         : null,
   }));
+  return { items, nextCursor, total };
+}
+
+function formatTripCursor(createdAt: Date, id: string) {
+  return `${createdAt.toISOString()}|${id}`;
+}
+
+function parseTripCursor(value?: string) {
+  if (!value) return null;
+  const separator = value.lastIndexOf("|");
+  if (separator < 1) return null;
+  const createdAt = new Date(value.slice(0, separator));
+  const id = value.slice(separator + 1);
+  if (
+    Number.isNaN(createdAt.getTime()) ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      id,
+    )
+  )
+    return null;
+  return { createdAt, id };
 }
 
 export async function getTripDetail(
