@@ -1,4 +1,4 @@
-import { eq, isNull, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { createDatabase } from "./client";
 import { countries } from "./schema";
@@ -31,16 +31,23 @@ if (!databaseUrl)
   throw new Error("DATABASE_URL es obligatoria para importar imÃ¡genes.");
 
 const database = createDatabase(databaseUrl);
-const missingCountries = await database
-  .select({ code: countries.code, name: countries.name })
-  .from(countries)
-  .where(
-    or(
-      isNull(countries.heroImageUrl),
-      isNull(countries.heroImageSourceUrl),
-      isNull(countries.heroImageLicense),
-    ),
-  );
+const refreshAll = process.env.REFRESH_COUNTRY_IMAGES === "true";
+const countrySelection = {
+  code: countries.code,
+  name: countries.name,
+  heroImageUrl: countries.heroImageUrl,
+  heroImageSourceUrl: countries.heroImageSourceUrl,
+  heroImageLicense: countries.heroImageLicense,
+};
+const allCountries = await database.select(countrySelection).from(countries);
+const missingCountries = refreshAll
+  ? allCountries
+  : allCountries.filter(
+      (country) =>
+        !country.heroImageUrl ||
+        !country.heroImageSourceUrl ||
+        !country.heroImageLicense,
+    );
 
 const searchOverrides: Record<string, string> = {
   BA: "Bosnia landscape",
