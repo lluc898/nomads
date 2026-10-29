@@ -16,6 +16,15 @@ type CommonsPage = {
   imageinfo?: CommonsImageInfo[];
 };
 type CommonsResponse = { query?: { pages?: CommonsPage[] } };
+type WikidataResponse = {
+  results?: {
+    bindings?: Array<{
+      code?: { value?: string };
+      image?: { value?: string };
+    }>;
+  };
+};
+type CountryImage = Awaited<ReturnType<typeof searchCommons>>[number];
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl)
@@ -46,6 +55,9 @@ let imported = 0;
 let failed = 0;
 let cursor = 0;
 let nextCommonsRequestAt = 0;
+const wikidataImages = await loadWikidataCountryImages(
+  new Set(missingCountries.map((country) => country.code)),
+);
 
 async function worker() {
   while (cursor < missingCountries.length) {
@@ -81,6 +93,9 @@ async function worker() {
 }
 
 async function findCountryImage(code: string, name: string) {
+  const representative = wikidataImages.get(code);
+  if (representative) return representative;
+
   const queries = [
     searchOverrides[code] ?? `${name} country landscape travel`,
     `${name} scenery landscape`,
@@ -115,12 +130,91 @@ async function searchCommons(query: string) {
     `https://commons.wikimedia.org/w/api.php?${params}`,
   );
   const payload = (await response.json()) as CommonsResponse;
-  return (payload.query?.pages ?? []).flatMap((page) => {
+  return parseCommonsPages(payload.query?.pages ?? []);
+}
+
+async function loadWikidataCountryImages(countryCodes: Set<string>) {
+  const sparql = `SELECT ?code ?image WHERE {
+    ?item wdt:P297 ?code; wdt:P18 ?image.
+    FILTER(STRLEN(?code) = 2)
+  }`;
+  const params = new URLSearchParams({ query: sparql, format: "json" });
+  const response = await fetch(`https://query.wikidata.org/sparql?${params}`, {
+    headers: {
+      Accept: "application/sparql-results+json",
+      "User-Agent":
+        "ViajerosHub/1.0 (https://viajes.llucbosch.com; country image catalog; contact: webmaster@llucbosch.com)",
+    },
+    signal: AbortSignal.timeout(30_000),
+  });
+  if (!response.ok) throw new Error(`Wikidata HTTP ${response.status}`);
+
+  const payload = (await response.json()) as WikidataResponse;
+  const codesByFile = new Map<string, Set<string>>();
+  for (const binding of payload.results?.bindings ?? []) {
+    const code = binding.code?.value?.toUpperCase();
+    const imageUrl = binding.image?.value;
+    if (!code || !countryCodes.has(code) || !imageUrl) continue;
+    const fileName = decodeURIComponent(imageUrl.split("/").pop() ?? "");
+    if (!fileName) continue;
+    const normalized = normalizeFileName(fileName);
+    const codes = codesByFile.get(normalized) ?? new Set<string>();
+    codes.add(code);
+    codesByFile.set(normalized, codes);
+  }
+
+  const files = [...codesByFile.keys()];
+  const candidatesByCode = new Map<string, CountryImage[]>();
+  for (let index = 0; index < files.length; index += 40) {
+    const batch = files.slice(index, index + 40);
+    const commonsParams = new URLSearchParams({
+      action: "query",
+      titles: batch.map((file) => `File:${file}`).join("|"),
+      prop: "imageinfo",
+      iiprop: "url|size|extmetadata",
+      iiurlwidth: "1280",
+      redirects: "1",
+      format: "json",
+      formatversion: "2",
+      origin: "*",
+    });
+    const commonsResponse = await fetchCommonsWithRetry(
+      `https://commons.wikimedia.org/w/api.php?${commonsParams}`,
+    );
+    const commonsPayload = (await commonsResponse.json()) as CommonsResponse;
+    for (const page of commonsPayload.query?.pages ?? []) {
+      const file = normalizeFileName(page.title?.replace(/^File:/i, "") ?? "");
+      const codes = codesByFile.get(file);
+      const candidate = parseCommonsPages([page])[0];
+      if (!codes || !candidate) continue;
+      for (const code of codes) {
+        const candidates = candidatesByCode.get(code) ?? [];
+        candidates.push(candidate);
+        candidatesByCode.set(code, candidates);
+      }
+    }
+  }
+
+  const selected = new Map<string, CountryImage>();
+  for (const [code, candidates] of candidatesByCode) {
+    const image = candidates
+      .filter((candidate) => candidate.license.match(allowedLicense))
+      .filter((candidate) => candidate.width >= candidate.height * 1.2)
+      .sort((left, right) => right.score - left.score)[0];
+    if (image) selected.set(code, image);
+  }
+  return selected;
+}
+
+function parseCommonsPages(pages: CommonsPage[]) {
+  return pages.flatMap((page) => {
     const info = page.imageinfo?.[0];
     const metadata = info?.extmetadata;
     const license = metadata?.LicenseShortName?.value?.trim();
     const author = cleanText(
-      metadata?.Attribution?.value ?? metadata?.Artist?.value,
+      metadata?.Attribution?.value ??
+        metadata?.Artist?.value ??
+        metadata?.Credit?.value,
     );
     const url = info?.thumburl;
     const sourceUrl = info?.descriptionurl;
@@ -149,6 +243,10 @@ async function searchCommons(query: string) {
       },
     ];
   });
+}
+
+function normalizeFileName(value: string) {
+  return value.replace(/_/g, " ").trim().toLowerCase();
 }
 
 async function fetchCommonsWithRetry(url: string) {
