@@ -46,7 +46,8 @@ const missingCountries = refreshAll
       (country) =>
         !country.heroImageUrl ||
         !country.heroImageSourceUrl ||
-        !country.heroImageLicense,
+        !country.heroImageLicense ||
+        isNonScenicSource(country.heroImageSourceUrl),
     );
 
 const searchOverrides: Record<string, string> = {
@@ -145,6 +146,7 @@ async function findCountryImage(code: string, name: string) {
     const candidates = await searchCommons(query);
     const selected = candidates
       .filter((candidate) => candidate.license.match(allowedLicense))
+      .filter(isScenicCandidate)
       .filter((candidate) => candidate.width >= candidate.height * 1.25)
       .sort((left, right) => right.score - left.score)[0];
     if (selected) return selected;
@@ -243,6 +245,7 @@ async function loadWikidataCountryImages(countryCodes: Set<string>) {
   for (const [code, candidates] of candidatesByCode) {
     const licensed = candidates
       .filter((candidate) => candidate.license.match(allowedLicense))
+      .filter(isScenicCandidate)
       .sort((left, right) => right.score - left.score);
     const image =
       licensed.find((candidate) => candidate.width >= candidate.height * 1.2) ??
@@ -292,6 +295,25 @@ function parseCommonsPages(pages: CommonsPage[]) {
 
 function normalizeFileName(value: string) {
   return value.replace(/_/g, " ").trim().toLowerCase();
+}
+
+function isScenicCandidate(candidate: CountryImage) {
+  return !isNonScenicSource(candidate.sourceUrl);
+}
+
+function isNonScenicSource(sourceUrl: string) {
+  let normalized = sourceUrl.toLowerCase();
+  try {
+    normalized = decodeURIComponent(normalized);
+  } catch {
+    // La URL original sigue siendo suficiente para aplicar los filtros.
+  }
+  return (
+    normalized.endsWith(".svg") ||
+    /(?:^|[\s_\-/])(map|flag|coat[\s_-]+of[\s_-]+arms|satellite|orthographic|locator|location[\s_-]+map|blank[\s_-]+map|relief[\s_-]+map|administrative)(?:[\s_\-/.]|$)/i.test(
+      normalized,
+    )
+  );
 }
 
 async function fetchCommonsWithRetry(url: string) {
