@@ -10,6 +10,7 @@ import {
   Pressable,
   ScrollView,
   Share,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -152,25 +153,70 @@ export default function TripDetailScreen() {
             contentContainerClassName="pb-12"
             showsVerticalScrollIndicator={false}
           >
-            <View className="bg-brand-50 px-5 py-8">
-              <View className="self-start rounded-full bg-white px-3 py-1">
+            <View
+              className={`relative min-h-52 justify-end overflow-hidden px-5 py-6 ${
+                trip.destinationImage ? "bg-slate-900" : "bg-brand-50"
+              }`}
+            >
+              {trip.destinationImage ? (
+                <>
+                  <Image
+                    source={{ uri: trip.destinationImage.url }}
+                    accessibilityLabel={trip.destinationImage.alt}
+                    style={StyleSheet.absoluteFill}
+                    resizeMode="cover"
+                  />
+                  <View
+                    style={StyleSheet.absoluteFill}
+                    className="bg-black/50"
+                  />
+                </>
+              ) : null}
+              <View className="self-start rounded-full bg-white/95 px-3 py-1">
                 <Text className="text-brand-700 text-xs font-bold">
                   {trip.visibility === "public" ? t("public") : t("private")}
                 </Text>
               </View>
-              <Text className="mt-5 text-4xl font-extrabold tracking-tight text-slate-950">
+              <Text
+                className={`mt-4 text-3xl font-extrabold tracking-tight ${
+                  trip.destinationImage ? "text-white" : "text-slate-950"
+                }`}
+              >
                 {t("tripTo", { destination: trip.destination })}
               </Text>
-              <Text className="mt-3 text-lg font-bold text-slate-700">
+              <Text
+                className={`mt-2 text-base font-bold ${
+                  trip.destinationImage ? "text-white/90" : "text-slate-700"
+                }`}
+              >
                 {trip.origin} → {trip.destination}
               </Text>
-              <Text className="mt-2 leading-6 text-slate-600">
+              <Text
+                className={`mt-1 leading-6 ${
+                  trip.destinationImage ? "text-white/80" : "text-slate-600"
+                }`}
+              >
                 {dateFormatter.format(
                   new Date(`${trip.departureDate}T00:00:00Z`),
                 )}
                 {" – "}
                 {dateFormatter.format(new Date(`${trip.returnDate}T00:00:00Z`))}
               </Text>
+              {trip.destinationImage ? (
+                <Pressable
+                  accessibilityRole="link"
+                  accessibilityLabel={`${trip.destinationImage.author}, ${trip.destinationImage.license}`}
+                  onPress={() =>
+                    void Linking.openURL(trip.destinationImage!.sourceUrl)
+                  }
+                  className="absolute right-3 top-3 max-w-[48%] rounded bg-black/50 px-2 py-1"
+                >
+                  <Text className="text-[9px] text-white/80" numberOfLines={1}>
+                    {trip.destinationImage.author} ·{" "}
+                    {trip.destinationImage.license}
+                  </Text>
+                </Pressable>
+              ) : null}
             </View>
 
             <View className="gap-5 px-5 pt-5">

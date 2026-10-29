@@ -417,6 +417,20 @@ export async function getTripDetail(
     .where(eq(trips.slug, slug))
     .limit(1);
   if (!trip || trip.status !== "published") return null;
+  const [destinationCountryImage] = trip.destinationCountryCode
+    ? await database
+        .select({
+          url: countries.heroImageUrl,
+          sourceUrl: countries.heroImageSourceUrl,
+          author: countries.heroImageAuthor,
+          license: countries.heroImageLicense,
+          licenseUrl: countries.heroImageLicenseUrl,
+          alt: countries.heroImageAlt,
+        })
+        .from(countries)
+        .where(eq(countries.code, trip.destinationCountryCode))
+        .limit(1)
+    : [];
   const [creator] = await database
     .select({
       id: users.id,
@@ -524,6 +538,22 @@ export async function getTripDetail(
         : null,
     origin: localized(origin),
     destination: localized(destination),
+    destinationImage:
+      destinationCountryImage?.url &&
+      destinationCountryImage.sourceUrl &&
+      destinationCountryImage.author &&
+      destinationCountryImage.license
+        ? {
+            url: destinationCountryImage.url,
+            sourceUrl: destinationCountryImage.sourceUrl,
+            author: destinationCountryImage.author,
+            license: destinationCountryImage.license,
+            licenseUrl: destinationCountryImage.licenseUrl,
+            alt:
+              destinationCountryImage.alt ??
+              `Paisaje de ${localized(destination)}`,
+          }
+        : null,
     creator,
     links,
     viewerMembershipStatus,

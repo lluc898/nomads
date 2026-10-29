@@ -32,6 +32,7 @@ export async function GET(
       slug: trip.slug,
       origin: trip.origin,
       destination: trip.destination,
+      destinationImage: trip.destinationImage,
       departureDate: trip.departureDate,
       returnDate: trip.returnDate,
       description: trip.description ?? "",

@@ -95,6 +95,15 @@ export const createdTripSchema = z.object({
   slug: z.string().min(1),
 });
 
+const destinationImageSchema = z.object({
+  url: z.url(),
+  alt: z.string().min(1),
+  author: z.string().min(1),
+  license: z.string().min(1),
+  sourceUrl: z.url(),
+  licenseUrl: z.url().nullable(),
+});
+
 export const tripCardSchema = z.object({
   id: z.uuid(),
   slug: z.string().min(1),
@@ -112,16 +121,7 @@ export const tripCardSchema = z.object({
   }),
   publishedLabel: z.string().min(1),
   tone: z.enum(["sea", "sunset", "forest"]),
-  destinationImage: z
-    .object({
-      url: z.url(),
-      alt: z.string().min(1),
-      author: z.string().min(1),
-      license: z.string().min(1),
-      sourceUrl: z.url(),
-      licenseUrl: z.url().nullable(),
-    })
-    .nullable(),
+  destinationImage: destinationImageSchema.nullable(),
 });
 
 export const tripDetailSchema = z.object({
@@ -129,6 +129,7 @@ export const tripDetailSchema = z.object({
   slug: z.string().min(1),
   origin: z.string().min(1),
   destination: z.string().min(1),
+  destinationImage: destinationImageSchema.nullable(),
   departureDate: isoDateSchema,
   returnDate: isoDateSchema,
   description: z.string(),

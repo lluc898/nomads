@@ -4,7 +4,14 @@ import {
   type TripCard as TripCardData,
 } from "@viajeroshub/shared";
 import { useRouter } from "expo-router";
-import { Image, Linking, Pressable, Text, View } from "react-native";
+import {
+  Image,
+  Linking,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const tones = {
   sea: "bg-cyan-600",
@@ -36,11 +43,11 @@ export function TripCard({
           <Image
             source={{ uri: trip.destinationImage.url }}
             accessibilityLabel={trip.destinationImage.alt}
-            className="absolute inset-0 h-32 w-full"
+            style={StyleSheet.absoluteFill}
             resizeMode="cover"
           />
         ) : null}
-        <View className="absolute inset-0 bg-black/30" />
+        <View style={StyleSheet.absoluteFill} className="bg-black/30" />
         <View className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1">
           <Text className="text-xs font-bold text-slate-800">
             {trip.visibility === "public" ? t("public") : t("private")}

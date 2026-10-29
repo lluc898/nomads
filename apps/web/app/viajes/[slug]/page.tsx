@@ -1,5 +1,6 @@
 import { getTripDetail } from "@viajeroshub/database";
 import { translate } from "@viajeroshub/shared";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -39,8 +40,21 @@ export default async function TripDetailPage({
   return (
     <main className="min-h-screen bg-slate-50">
       <SiteHeader />
-      <section className="bg-[#EAF3FF] px-5 pt-32 pb-12 md:pt-40">
-        <div className="mx-auto max-w-5xl">
+      <section className="relative overflow-hidden bg-[#EAF3FF] px-5 pt-28 pb-8 md:pt-32 md:pb-10">
+        {trip.destinationImage ? (
+          <>
+            <Image
+              src={trip.destinationImage.url}
+              alt={trip.destinationImage.alt}
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/60 to-slate-950/35" />
+          </>
+        ) : null}
+        <div className="relative z-10 mx-auto max-w-5xl">
           <div className="flex items-center justify-between gap-4">
             <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-[#0857C9]">
               {trip.visibility === "public" ? t("public") : t("private")}
@@ -52,16 +66,51 @@ export default async function TripDetailPage({
               copiedLabel={t("linkCopied")}
             />
           </div>
-          <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-950">
+          <h1
+            className={`mt-4 text-3xl font-extrabold tracking-tight md:text-4xl ${
+              trip.destinationImage ? "text-white" : "text-slate-950"
+            }`}
+          >
             {t("tripTo", { destination: trip.destination })}
           </h1>
-          <p className="mt-3 text-lg font-semibold text-slate-700">
+          <p
+            className={`mt-2 text-lg font-semibold ${
+              trip.destinationImage ? "text-white/90" : "text-slate-700"
+            }`}
+          >
             {trip.origin} → {trip.destination}
           </p>
-          <p className="mt-2 text-slate-600">
+          <p
+            className={`mt-1 ${
+              trip.destinationImage ? "text-white/80" : "text-slate-600"
+            }`}
+          >
             {dates.format(new Date(`${trip.departureDate}T00:00:00Z`))} –{" "}
             {dates.format(new Date(`${trip.returnDate}T00:00:00Z`))}
           </p>
+          {trip.destinationImage ? (
+            <div className="mt-3 flex justify-end gap-1 text-[10px] text-white/80">
+              <a
+                href={trip.destinationImage.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="max-w-48 truncate rounded bg-black/40 px-2 py-1 hover:text-white"
+                title={`${trip.destinationImage.author} · ${trip.destinationImage.license}`}
+              >
+                Foto: {trip.destinationImage.author}
+              </a>
+              {trip.destinationImage.licenseUrl ? (
+                <a
+                  href={trip.destinationImage.licenseUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded bg-black/40 px-2 py-1 hover:text-white"
+                >
+                  {trip.destinationImage.license}
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </section>
       <section className="mx-auto grid max-w-5xl gap-6 px-5 py-10 lg:grid-cols-[1fr_20rem]">
