@@ -138,9 +138,9 @@ async function findCountryImage(code: string, name: string) {
   if (refreshAll) return null;
 
   const queries = [
-    searchOverrides[code] ?? `${name} country landscape travel`,
-    `${name} scenery landscape`,
-    `${name} country tourism`,
+    searchOverrides[code] ?? `${name} landscape photograph`,
+    `${name} travel destination photograph`,
+    `${name} scenery landscape photograph`,
   ];
   for (const query of queries) {
     const candidates = await searchCommons(query);
@@ -310,7 +310,7 @@ function isNonScenicSource(sourceUrl: string) {
   }
   return (
     normalized.endsWith(".svg") ||
-    /(?:^|[\s_\-/:])(map|flag|coat[\s_-]+of[\s_-]+arms|satellite|orthographic|locator|location[\s_-]+map|blank[\s_-]+map|relief[\s_-]+map|administrative)(?:[\s_\-/.]|$)/i.test(
+    /(?:^|[\s_\-/:])(map|flag|coat[\s_-]+of[\s_-]+arms|satellite|orthographic|locator|location[\s_-]+map|blank[\s_-]+map|relief[\s_-]+map|administrative|painting|artwork|drawing|engraving|illustration|watercolou?r|poster)(?:[\s_\-/.]|$)/i.test(
       normalized,
     )
   );
