@@ -1,11 +1,9 @@
 import { getUserProfileByUsername } from "@viajeroshub/database";
 import { translate } from "@viajeroshub/shared";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Logo } from "@/components/logo";
-import { LanguageSelector } from "@/components/language-selector";
+import { SiteHeader } from "@/components/site-header";
 import { UserAvatar } from "@/components/user-avatar";
 import { getDatabase } from "@/lib/database";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
@@ -46,22 +44,9 @@ export default async function PublicProfilePage({
 
   return (
     <main className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5">
-          <Logo />
-          <div className="flex items-center gap-3">
-            <LanguageSelector />
-            <Link
-              href="/buscar"
-              className="text-sm font-bold text-[#0B6EFD] hover:text-[#0857C9]"
-            >
-              {t("navExplore")}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
-      <section className="mx-auto max-w-3xl px-5 py-12 sm:py-20">
+      <section className="mx-auto max-w-3xl px-5 pt-32 pb-12 sm:pb-20">
         <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,.07)]">
           <div className="h-28 bg-gradient-to-r from-[#0B6EFD] to-[#4F9CFF] sm:h-36" />
           <div className="px-6 pb-8 sm:px-10 sm:pb-10">

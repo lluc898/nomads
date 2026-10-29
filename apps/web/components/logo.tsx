@@ -4,7 +4,7 @@ export function Logo() {
   return (
     <Link
       href="/"
-      className="inline-flex items-center gap-2"
+      className="inline-flex shrink-0 items-center gap-2 text-slate-950"
       aria-label="ViajerosHub, inicio"
     >
       <span className="grid size-9 place-items-center rounded-xl bg-[#0B6EFD] text-white shadow-[0_6px_18px_rgba(11,110,253,.25)]">

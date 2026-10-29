@@ -1,7 +1,6 @@
 import { translate } from "@viajeroshub/shared";
 
-import { LanguageSelector } from "@/components/language-selector";
-import { Logo } from "@/components/logo";
+import { SiteHeader } from "@/components/site-header";
 import { requireCompleteProfilePage } from "@/lib/auth/guards";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
@@ -13,13 +12,8 @@ export default async function CreateTripPage() {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   return (
     <main className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-20 max-w-5xl items-center justify-between px-5">
-          <Logo />
-          <LanguageSelector />
-        </div>
-      </header>
-      <section className="mx-auto max-w-5xl px-5 py-10 sm:py-14">
+      <SiteHeader />
+      <section className="mx-auto max-w-5xl px-5 pt-32 pb-10 sm:pb-14">
         <p className="text-sm font-bold tracking-widest text-[#0857C9] uppercase">
           {t("navCreate")}
         </p>

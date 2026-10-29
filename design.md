@@ -91,6 +91,15 @@ Caption: 12–13px / 500
 
 ## Componentes base
 
+### Cabecera web
+
+- Usa una superficie clara fija con borde, sombra suave y `backdrop-blur`; el texto nunca se apoya directamente sobre fotografÃ­as o banners.
+- La navegaciÃ³n primaria se limita a **Explorar**, **Mis viajes** y **Mensajes**. **Crear viaje** permanece como CTA principal.
+- Perfil y cierre de sesiÃ³n se agrupan en el menÃº de cuenta; las notificaciones mantienen un acceso independiente por su carÃ¡cter urgente.
+- En anchos inferiores a `lg`, la navegaciÃ³n se concentra en un Ãºnico menÃº y conserva objetivos tÃ¡ctiles mÃ­nimos de 44 px.
+- El selector de idioma permanece disponible tanto en escritorio como dentro del menÃº mÃ³vil.
+- Durante la configuraciÃ³n obligatoria del primer perfil se utiliza la cabecera restringida, sin enlaces de salida.
+
 ### Botones
 
 - `primary`: azul de marca, para “Crear viaje”, “Buscar”, “Unirme”.

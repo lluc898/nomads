@@ -4,16 +4,18 @@ type UserAvatarProps = {
   image: string | null;
   name: string | null;
   username?: string | null;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
 };
 
 const sizeClasses = {
+  xs: "size-8 text-xs",
   sm: "size-10 text-sm",
   md: "size-16 text-xl",
   lg: "size-28 text-3xl",
 };
 
 const imageSizes = {
+  xs: 32,
   sm: 40,
   md: 64,
   lg: 112,

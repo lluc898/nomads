@@ -34,7 +34,7 @@ export function NotificationBell({
     <Link
       href="/notificaciones"
       aria-label={label}
-      className="relative grid size-11 place-items-center rounded-xl text-slate-700 transition hover:bg-white/70 hover:text-[#0B6EFD]"
+      className="relative grid size-11 place-items-center rounded-xl text-slate-700 transition hover:bg-slate-100 hover:text-[#0B6EFD]"
     >
       <svg
         aria-hidden="true"
