@@ -30,8 +30,7 @@ export default async function TripDetailPage({
     locale,
     session?.user?.id,
   );
-  if (!trip || (trip.visibility === "private" && !session?.user?.id))
-    notFound();
+  if (!trip) notFound();
   const dates = new Intl.DateTimeFormat(locale, {
     dateStyle: "long",
     timeZone: "UTC",
@@ -207,7 +206,14 @@ export default async function TripDetailPage({
                 locale={locale}
               />
             </div>
-          ) : null}
+          ) : (
+            <Link
+              href={`/acceso?callbackUrl=${encodeURIComponent(`/viajes/${trip.slug}`)}`}
+              className="mb-6 flex min-h-12 items-center justify-center rounded-xl bg-[#0B6EFD] px-4 font-bold text-white hover:bg-[#0857C9]"
+            >
+              {t("navSignIn")}
+            </Link>
+          )}
           {trip.viewerMembershipStatus === "owner" ||
           trip.viewerMembershipStatus === "approved" ? (
             <Link
