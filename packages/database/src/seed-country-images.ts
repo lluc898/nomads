@@ -310,7 +310,7 @@ function isNonScenicSource(sourceUrl: string) {
   }
   return (
     normalized.endsWith(".svg") ||
-    /(?:^|[\s_\-/:])(map|flag|coat[\s_-]+of[\s_-]+arms|satellite|orthographic|locator|location[\s_-]+map|blank[\s_-]+map|relief[\s_-]+map|administrative|painting|artwork|drawing|engraving|illustration|watercolou?r|poster)(?:[\s_\-/.]|$)/i.test(
+    /(?:^|[\s_\-/:])(map|flag|coat[\s_-]+of[\s_-]+arms|satellite|orthographic|locator|location[\s_-]+map|blank[\s_-]+map|relief[\s_-]+map|administrative|painting|artwork|drawing|engraving|illustration|watercolou?r|poster|kuroda)(?:[\s_\-/.]|$)/i.test(
       normalized,
     )
   );
