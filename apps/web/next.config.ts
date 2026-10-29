@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: fileURLToPath(new URL("../..", import.meta.url)),
   reactStrictMode: true,
   transpilePackages: ["@viajeroshub/database", "@viajeroshub/shared"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "thumb.wikimedia.org" },
+      { protocol: "https", hostname: "upload.wikimedia.org" },
+    ],
+  },
 };
 
 export default nextConfig;

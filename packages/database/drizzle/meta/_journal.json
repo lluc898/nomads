@@ -85,6 +85,13 @@
       "when": 1793111943775,
       "tag": "0011_condemned_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793268615307,
+      "tag": "0012_smiling_rawhide_kid",
+      "breakpoints": true
     }
   ]
 }

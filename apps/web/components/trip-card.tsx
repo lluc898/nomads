@@ -3,6 +3,7 @@ import {
   type SupportedLocale,
   type TripCard as TripCardData,
 } from "@viajeroshub/shared";
+import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowRightIcon, CalendarIcon, MapPinIcon, UsersIcon } from "./icons";
@@ -29,9 +30,21 @@ export function TripCard({
       <div
         className={`relative h-40 overflow-hidden bg-gradient-to-br ${toneClasses[trip.tone]}`}
       >
-        <div className="absolute -top-12 -right-7 size-40 rounded-full border border-white/25" />
-        <div className="absolute -top-7 -right-2 size-28 rounded-full border border-white/25" />
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/30 to-transparent" />
+        {trip.destinationImage ? (
+          <Image
+            src={trip.destinationImage.url}
+            alt={trip.destinationImage.alt}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <>
+            <div className="absolute -top-12 -right-7 size-40 rounded-full border border-white/25" />
+            <div className="absolute -top-7 -right-2 size-28 rounded-full border border-white/25" />
+          </>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/15" />
         <div className="absolute top-5 right-5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-800 backdrop-blur">
           {trip.visibility === "public" ? t("public") : t("private")}
         </div>
@@ -41,6 +54,29 @@ export function TripCard({
             {trip.destination}
           </span>
         </div>
+        {trip.destinationImage ? (
+          <div className="absolute right-3 bottom-2 flex gap-1 text-[9px] text-white/80">
+            <a
+              href={trip.destinationImage.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="max-w-36 truncate rounded bg-black/45 px-1.5 py-0.5 hover:text-white"
+              title={`${trip.destinationImage.author} Â· ${trip.destinationImage.license}`}
+            >
+              Foto: {trip.destinationImage.author}
+            </a>
+            {trip.destinationImage.licenseUrl ? (
+              <a
+                href={trip.destinationImage.licenseUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded bg-black/45 px-1.5 py-0.5 hover:text-white"
+              >
+                {trip.destinationImage.license}
+              </a>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       <div className="p-5">
         <p className="text-sm font-semibold text-[#0B6EFD]">

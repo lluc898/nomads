@@ -339,6 +339,12 @@ export async function findTripCards(
       destinationCountryCode: trips.destinationCountryCode,
       destinationCountryName: destinationCountry.name,
       destinationCountryNameEs: destinationCountry.nameEs,
+      destinationImageUrl: destinationCountry.heroImageUrl,
+      destinationImageSourceUrl: destinationCountry.heroImageSourceUrl,
+      destinationImageAuthor: destinationCountry.heroImageAuthor,
+      destinationImageLicense: destinationCountry.heroImageLicense,
+      destinationImageLicenseUrl: destinationCountry.heroImageLicenseUrl,
+      destinationImageAlt: destinationCountry.heroImageAlt,
       destinationAirportName: destinationAirport.name,
       destinationMunicipality: destinationAirport.municipality,
       destinationAirportCode: destinationAirport.iataCode,
@@ -380,6 +386,22 @@ export async function findTripCards(
     creator: creatorLabel(row.creatorName, row.creatorUsername),
     publishedLabel: relativeDate(row.createdAt, locale),
     tone: toneFor(row.id),
+    destinationImage:
+      row.destinationImageUrl &&
+      row.destinationImageSourceUrl &&
+      row.destinationImageAuthor &&
+      row.destinationImageLicense
+        ? {
+            url: row.destinationImageUrl,
+            alt:
+              row.destinationImageAlt ??
+              `Paisaje de ${locationLabel(row, "destination", locale)}`,
+            author: row.destinationImageAuthor,
+            license: row.destinationImageLicense,
+            sourceUrl: row.destinationImageSourceUrl,
+            licenseUrl: row.destinationImageLicenseUrl,
+          }
+        : null,
   }));
 }
 

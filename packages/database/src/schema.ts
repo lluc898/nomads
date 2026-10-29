@@ -131,6 +131,15 @@ export const countries = pgTable("countries", {
   keywords: text("keywords"),
   searchText: text("search_text").notNull(),
   airportCount: integer("airport_count").default(0).notNull(),
+  heroImageUrl: text("hero_image_url"),
+  heroImageSourceUrl: text("hero_image_source_url"),
+  heroImageAuthor: varchar("hero_image_author", { length: 255 }),
+  heroImageLicense: varchar("hero_image_license", { length: 64 }),
+  heroImageLicenseUrl: text("hero_image_license_url"),
+  heroImageAlt: varchar("hero_image_alt", { length: 255 }),
+  heroImageUpdatedAt: timestamp("hero_image_updated_at", {
+    withTimezone: true,
+  }),
 });
 
 export const locationCatalogImports = pgTable("location_catalog_imports", {

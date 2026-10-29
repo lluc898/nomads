@@ -4,7 +4,7 @@ import {
   type TripCard as TripCardData,
 } from "@viajeroshub/shared";
 import { useRouter } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Image, Linking, Pressable, Text, View } from "react-native";
 
 const tones = {
   sea: "bg-cyan-600",
@@ -32,6 +32,15 @@ export function TripCard({
       className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white active:opacity-90"
     >
       <View className={`h-32 justify-end p-4 ${tones[trip.tone]}`}>
+        {trip.destinationImage ? (
+          <Image
+            source={{ uri: trip.destinationImage.url }}
+            accessibilityLabel={trip.destinationImage.alt}
+            className="absolute inset-0 h-32 w-full"
+            resizeMode="cover"
+          />
+        ) : null}
+        <View className="absolute inset-0 bg-black/30" />
         <View className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1">
           <Text className="text-xs font-bold text-slate-800">
             {trip.visibility === "public" ? t("public") : t("private")}
@@ -43,6 +52,21 @@ export function TripCard({
         <Text className="mt-1 text-2xl font-bold text-white">
           {trip.destination}
         </Text>
+        {trip.destinationImage ? (
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel={`${trip.destinationImage.author}, ${trip.destinationImage.license}`}
+            onPress={(event) => {
+              event.stopPropagation();
+              void Linking.openURL(trip.destinationImage!.sourceUrl);
+            }}
+            className="absolute bottom-1 right-2 max-w-[55%] rounded bg-black/50 px-1.5 py-0.5"
+          >
+            <Text className="text-[9px] text-white/80" numberOfLines={1}>
+              {trip.destinationImage.author} Â· {trip.destinationImage.license}
+            </Text>
+          </Pressable>
+        ) : null}
       </View>
       <View className="p-4">
         <Text className="font-semibold text-slate-700">{trip.dateLabel}</Text>

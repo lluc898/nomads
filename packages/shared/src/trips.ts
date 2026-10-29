@@ -112,6 +112,16 @@ export const tripCardSchema = z.object({
   }),
   publishedLabel: z.string().min(1),
   tone: z.enum(["sea", "sunset", "forest"]),
+  destinationImage: z
+    .object({
+      url: z.url(),
+      alt: z.string().min(1),
+      author: z.string().min(1),
+      license: z.string().min(1),
+      sourceUrl: z.url(),
+      licenseUrl: z.url().nullable(),
+    })
+    .nullable(),
 });
 
 export const tripDetailSchema = z.object({
@@ -195,6 +205,7 @@ export const featuredTrips: TripCard[] = [
     creator: { name: "Carlos", initials: "CA" },
     publishedLabel: "hace 2 h",
     tone: "sunset",
+    destinationImage: null,
   },
   {
     id: "860d88cc-b251-47f5-bc25-93694a854b4d",
@@ -210,6 +221,7 @@ export const featuredTrips: TripCard[] = [
     creator: { name: "Nora", initials: "NO" },
     publishedLabel: "ayer",
     tone: "forest",
+    destinationImage: null,
   },
   {
     id: "38646f4f-f6d6-48ee-9a26-bb24821966ad",
@@ -225,5 +237,6 @@ export const featuredTrips: TripCard[] = [
     creator: { name: "Lucía", initials: "LU" },
     publishedLabel: "hace 3 días",
     tone: "sea",
+    destinationImage: null,
   },
 ];
