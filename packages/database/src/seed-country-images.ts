@@ -47,7 +47,7 @@ const searchOverrides: Record<string, string> = {
   BL: "Saint Barthelemy island landscape",
   CD: "Democratic Republic of the Congo landscape",
   CG: "Republic of the Congo landscape",
-  DM: "Dominica island landscape",
+  DM: "Nature of Dominica",
   EH: "Western Sahara landscape",
   GF: "French Guiana landscape",
   GE: "Georgia country Caucasus landscape",
@@ -69,7 +69,7 @@ const searchOverrides: Record<string, string> = {
   RE: "Reunion island landscape",
   SH: "Saint Helena island landscape",
   SM: "San Marino landscape",
-  SR: "Suriname landscape",
+  SR: "Suriname nature",
   SS: "South Sudan landscape",
   ST: "Sao Tome landscape",
   SZ: "Eswatini landscape",
@@ -244,8 +244,8 @@ function parseCommonsPages(pages: CommonsPage[]) {
     const metadata = info?.extmetadata;
     const license = metadata?.LicenseShortName?.value?.trim();
     const author = cleanText(
-      metadata?.Attribution?.value ??
-        metadata?.Artist?.value ??
+      metadata?.Attribution?.value ||
+        metadata?.Artist?.value ||
         metadata?.Credit?.value,
     );
     const url = info?.thumburl;
