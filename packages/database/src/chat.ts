@@ -36,7 +36,7 @@ export async function listUserTripConversations(
       t.title as "tripTitle",
       latest.content as "lastMessage",
       latest.created_at as "lastMessageAt",
-      sender.name as "lastSenderName",
+      sender.display_name as "lastSenderName",
       (
         select count(*)
         from notifications n
