@@ -134,6 +134,7 @@ async function worker() {
 async function findCountryImage(code: string, name: string) {
   const representative = wikidataImages.get(code);
   if (representative) return representative;
+  if (refreshAll) return null;
 
   const queries = [
     searchOverrides[code] ?? `${name} country landscape travel`,
