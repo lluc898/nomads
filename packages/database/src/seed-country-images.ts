@@ -45,6 +45,7 @@ const allowedLicense = /^(CC0|CC BY(?:-SA)?(?: |$)|Public domain)/i;
 let imported = 0;
 let failed = 0;
 let cursor = 0;
+let nextCommonsRequestAt = 0;
 
 async function worker() {
   while (cursor < missingCountries.length) {
@@ -110,17 +111,9 @@ async function searchCommons(query: string) {
     formatversion: "2",
     origin: "*",
   });
-  const response = await fetch(
+  const response = await fetchCommonsWithRetry(
     `https://commons.wikimedia.org/w/api.php?${params}`,
-    {
-      headers: {
-        "User-Agent":
-          "ViajerosHub/1.0 (https://viajes.llucbosch.com; country image catalog)",
-      },
-      signal: AbortSignal.timeout(20_000),
-    },
   );
-  if (!response.ok) throw new Error(`Commons HTTP ${response.status}`);
   const payload = (await response.json()) as CommonsResponse;
   return (payload.query?.pages ?? []).flatMap((page) => {
     const info = page.imageinfo?.[0];
@@ -158,6 +151,37 @@ async function searchCommons(query: string) {
   });
 }
 
+async function fetchCommonsWithRetry(url: string) {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const waitForTurn = Math.max(0, nextCommonsRequestAt - Date.now());
+    if (waitForTurn) await delay(waitForTurn);
+    nextCommonsRequestAt = Date.now() + 450;
+
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent":
+          "ViajerosHub/1.0 (https://viajes.llucbosch.com; country image catalog; contact: webmaster@llucbosch.com)",
+      },
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (response.ok) return response;
+    if (response.status !== 429 && response.status < 500)
+      throw new Error(`Commons HTTP ${response.status}`);
+
+    const retryAfter = Number(response.headers.get("retry-after"));
+    const backoff = Number.isFinite(retryAfter)
+      ? retryAfter * 1_000
+      : Math.min(30_000, 2_000 * 2 ** attempt);
+    await delay(backoff + Math.floor(Math.random() * 500));
+  }
+  throw new Error("Commons sigue limitando las solicitudes tras 6 reintentos");
+}
+
+function delay(milliseconds: number) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 function cleanText(value?: string) {
   if (!value) return null;
   return value
@@ -170,7 +194,7 @@ function cleanText(value?: string) {
     .trim();
 }
 
-await Promise.all(Array.from({ length: 6 }, () => worker()));
+await worker();
 console.log(
   `ImÃ¡genes de paÃ­ses: ${imported} importadas, ${failed} pendientes, ${missingCountries.length} revisadas.`,
 );
