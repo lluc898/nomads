@@ -229,10 +229,12 @@ async function loadWikidataCountryImages(countryCodes: Set<string>) {
 
   const selected = new Map<string, CountryImage>();
   for (const [code, candidates] of candidatesByCode) {
-    const image = candidates
+    const licensed = candidates
       .filter((candidate) => candidate.license.match(allowedLicense))
-      .filter((candidate) => candidate.width >= candidate.height * 1.2)
-      .sort((left, right) => right.score - left.score)[0];
+      .sort((left, right) => right.score - left.score);
+    const image =
+      licensed.find((candidate) => candidate.width >= candidate.height * 1.2) ??
+      licensed[0];
     if (image) selected.set(code, image);
   }
   return selected;
@@ -243,11 +245,10 @@ function parseCommonsPages(pages: CommonsPage[]) {
     const info = page.imageinfo?.[0];
     const metadata = info?.extmetadata;
     const license = metadata?.LicenseShortName?.value?.trim();
-    const author = cleanText(
-      metadata?.Attribution?.value ||
-        metadata?.Artist?.value ||
-        metadata?.Credit?.value,
-    );
+    const author =
+      cleanText(metadata?.Attribution?.value) ||
+      cleanText(metadata?.Artist?.value) ||
+      cleanText(metadata?.Credit?.value);
     const url = info?.thumburl;
     const sourceUrl = info?.descriptionurl;
     const width = info?.width ?? 0;
