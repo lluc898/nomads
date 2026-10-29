@@ -191,6 +191,7 @@ async function loadWikidataCountryImages(countryCodes: Set<string>) {
 
   const payload = (await response.json()) as WikidataResponse;
   const codesByFile = new Map<string, Set<string>>();
+  const originalFiles = new Map<string, string>();
   for (const binding of payload.results?.bindings ?? []) {
     const code = binding.code?.value?.toUpperCase();
     const imageUrl = binding.image?.value;
@@ -198,6 +199,7 @@ async function loadWikidataCountryImages(countryCodes: Set<string>) {
     const fileName = decodeURIComponent(imageUrl.split("/").pop() ?? "");
     if (!fileName) continue;
     const normalized = normalizeFileName(fileName);
+    originalFiles.set(normalized, fileName);
     const codes = codesByFile.get(normalized) ?? new Set<string>();
     codes.add(code);
     codesByFile.set(normalized, codes);
@@ -209,7 +211,9 @@ async function loadWikidataCountryImages(countryCodes: Set<string>) {
     const batch = files.slice(index, index + 40);
     const commonsParams = new URLSearchParams({
       action: "query",
-      titles: batch.map((file) => `File:${file}`).join("|"),
+      titles: batch
+        .map((file) => `File:${originalFiles.get(file) ?? file}`)
+        .join("|"),
       prop: "imageinfo",
       iiprop: "url|size|extmetadata",
       iiurlwidth: "1280",
