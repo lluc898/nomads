@@ -11,6 +11,7 @@ export const chatMessageSchema = z.object({
   content: z.string().min(1),
   createdAt: z.iso.datetime(),
   isOwn: z.boolean(),
+  kind: z.enum(["message", "system"]),
   author: z.object({
     userId: z.uuid(),
     name: z.string().nullable(),

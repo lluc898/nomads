@@ -30,7 +30,9 @@ export default async function GroupChatPage({
   if (!trip) notFound();
   if (
     trip.viewerMembershipStatus !== "owner" &&
-    trip.viewerMembershipStatus !== "approved"
+    trip.viewerMembershipStatus !== "approved" &&
+    trip.viewerMembershipStatus !== "left" &&
+    trip.viewerMembershipStatus !== "expired"
   )
     redirect(`/viajes/${slug}`);
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
@@ -58,7 +60,15 @@ export default async function GroupChatPage({
           </Link>
         </div>
       </section>
-      <TripChat slug={trip.slug} locale={locale} />
+      <TripChat
+        slug={trip.slug}
+        locale={locale}
+        readOnly={
+          trip.status === "archived" ||
+          trip.viewerMembershipStatus === "left" ||
+          trip.viewerMembershipStatus === "expired"
+        }
+      />
     </main>
   );
 }

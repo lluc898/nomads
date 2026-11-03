@@ -77,15 +77,13 @@ export function TripMembership({
     }
   }
 
-  async function closeTrip() {
+  async function archiveTrip() {
     if (!window.confirm(t("closeTripConfirm"))) return;
     setBusy("close");
     setMessage(null);
     try {
-      const response = await fetch(`/api/trips/${slug}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "close" }),
+      const response = await fetch(`/api/trips/${slug}/archive`, {
+        method: "POST",
       });
       const payload = (await response.json().catch(() => null)) as {
         message?: string;
@@ -123,7 +121,7 @@ export function TripMembership({
 
   return (
     <div className="space-y-5">
-      {tripStatus === "closed" ? (
+      {tripStatus === "archived" ? (
         <div className="rounded-xl bg-slate-100 p-4">
           <p className="font-extrabold text-slate-900">{t("tripClosed")}</p>
           <p className="mt-1 text-sm leading-5 text-slate-600">
@@ -200,7 +198,7 @@ export function TripMembership({
           <button
             type="button"
             disabled={busy !== null}
-            onClick={closeTrip}
+            onClick={archiveTrip}
             className="mt-5 w-full rounded-xl border border-red-200 px-4 py-3 font-bold text-red-700 hover:bg-red-50 disabled:opacity-50"
           >
             {t("closeTrip")}

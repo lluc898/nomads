@@ -26,6 +26,7 @@ import {
   airports,
   conversations,
   countries,
+  messages,
   tripLinks,
   tripParticipants,
   trips,
@@ -38,11 +39,11 @@ export class TripOwnerCannotJoinError extends Error {}
 export class TripFullError extends Error {}
 export class TripJoinRequestNotFoundError extends Error {}
 export class TripOwnerRequiredError extends Error {}
-export class TripAlreadyClosedError extends Error {}
+export class TripAlreadyArchivedError extends Error {}
 export class TripParticipantRequiredError extends Error {}
 export class TripOwnerCannotLeaveError extends Error {}
 
-export async function closeTrip(
+export async function archiveTrip(
   database: Database,
   slug: string,
   userId: string,
@@ -58,8 +59,8 @@ export async function closeTrip(
     if (trip.creatorId !== userId) {
       throw new TripOwnerRequiredError("Solo el creador puede finalizar el viaje.");
     }
-    if (trip.status === "closed") {
-      throw new TripAlreadyClosedError("El viaje ya está finalizado.");
+    if (trip.status === "archived") {
+      throw new TripAlreadyArchivedError("El viaje ya está expirado.");
     }
     if (trip.status !== "published") {
       throw new TripNotFoundError("Viaje no encontrado.");
@@ -67,18 +68,18 @@ export async function closeTrip(
 
     await transaction
       .update(trips)
-      .set({ status: "closed", updatedAt: new Date() })
+      .set({ status: "archived", updatedAt: new Date() })
       .where(eq(trips.id, trip.id));
     await transaction
       .update(tripParticipants)
-      .set({ status: "rejected", respondedAt: new Date(), respondedBy: userId })
+      .set({ status: "expired", respondedAt: new Date(), respondedBy: userId })
       .where(
         and(
           eq(tripParticipants.tripId, trip.id),
-          eq(tripParticipants.status, "pending"),
+          inArray(tripParticipants.status, ["pending", "approved"]),
         ),
       );
-    return { status: "closed" as const };
+    return { status: "archived" as const };
   });
 }
 
@@ -92,7 +93,10 @@ export async function leaveTrip(
       .select({ id: trips.id, creatorId: trips.creatorId, status: trips.status })
       .from(trips)
       .where(
-        and(eq(trips.slug, slug), inArray(trips.status, ["published", "closed"])),
+        and(
+          eq(trips.slug, slug),
+          inArray(trips.status, ["published", "archived"]),
+        ),
       )
       .for("update")
       .limit(1);
@@ -121,8 +125,14 @@ export async function leaveTrip(
     }
     await transaction
       .update(tripParticipants)
-      .set({ status: "rejected", respondedAt: new Date(), respondedBy: userId })
+      .set({ status: "left", respondedAt: new Date(), respondedBy: userId })
       .where(eq(tripParticipants.id, participant.id));
+    await createMembershipSystemMessage(
+      transaction,
+      trip.id,
+      userId,
+      "ha abandonado el grupo",
+    );
     return { status: "left" as const };
   });
 }
@@ -183,6 +193,14 @@ export async function joinTrip(
           respondedBy: status === "approved" ? trip.creatorId : null,
         },
       });
+    if (status === "approved") {
+      await createMembershipSystemMessage(
+        transaction,
+        trip.id,
+        userId,
+        "se ha unido al grupo",
+      );
+    }
     return { status, created: true };
   });
 }
@@ -214,7 +232,7 @@ export async function reviewTripJoinRequest(
       );
     }
     const [request] = await transaction
-      .select({ id: tripParticipants.id })
+      .select({ id: tripParticipants.id, userId: tripParticipants.userId })
       .from(tripParticipants)
       .where(
         and(
@@ -240,6 +258,14 @@ export async function reviewTripJoinRequest(
         respondedBy: input.reviewerId,
       })
       .where(eq(tripParticipants.id, request.id));
+    if (status === "approved") {
+      await createMembershipSystemMessage(
+        transaction,
+        trip.id,
+        request.userId,
+        "se ha unido al grupo",
+      );
+    }
     return { status };
   });
 }
@@ -398,7 +424,7 @@ export async function findTripCardPage(
   const destinationAirport = alias(airports, "destination_airport");
   const conditions: SQL[] = [
     input.includeInactive
-      ? inArray(trips.status, ["published", "closed"])
+      ? inArray(trips.status, ["published", "archived"])
       : eq(trips.status, "published"),
   ];
   addLocationCondition(conditions, input.origin, "origin");
@@ -422,7 +448,11 @@ export async function findTripCardPage(
           select 1 from ${tripParticipants}
           where ${tripParticipants.tripId} = ${trips.id}
             and ${tripParticipants.userId} = ${input.userId}
-            and ${tripParticipants.status} = 'approved'
+            and ${tripParticipants.status} ${
+              input.includeInactive
+                ? sql`in ('approved', 'expired')`
+                : sql`= 'approved'`
+            }
         )`,
       )!,
     );
@@ -586,7 +616,7 @@ export async function getTripDetail(
     .from(trips)
     .where(eq(trips.slug, slug))
     .limit(1);
-  if (!trip || !["published", "closed"].includes(trip.status)) return null;
+  if (!trip || !["published", "archived"].includes(trip.status)) return null;
   const [destinationCountryImage] = trip.destinationCountryCode
     ? await database
         .select({
@@ -642,7 +672,9 @@ export async function getTripDetail(
   const canViewPrivateContent =
     trip.visibility === "public" ||
     viewerMembershipStatus === "owner" ||
-    viewerMembershipStatus === "approved";
+    viewerMembershipStatus === "approved" ||
+    viewerMembershipStatus === "expired" ||
+    viewerMembershipStatus === "left";
 
   const approvedParticipants = await database
     .select({
@@ -762,6 +794,47 @@ export async function getTripDetail(
 }
 
 type CapacityDatabase = Pick<Database, "select">;
+
+type MembershipMessageDatabase = Pick<
+  Database,
+  "select" | "insert" | "execute"
+>;
+
+async function createMembershipSystemMessage(
+  database: MembershipMessageDatabase,
+  tripId: string,
+  userId: string,
+  action: string,
+) {
+  const [user] = await database
+    .select({ name: users.name, username: users.username })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  const displayName = user?.name ?? (user?.username ? `@${user.username}` : "Un viajero");
+  let [conversation] = await database
+    .insert(conversations)
+    .values({ tripId })
+    .onConflictDoNothing({ target: conversations.tripId })
+    .returning({ id: conversations.id });
+  if (!conversation) {
+    [conversation] = await database
+      .select({ id: conversations.id })
+      .from(conversations)
+      .where(eq(conversations.tripId, tripId))
+      .limit(1);
+  }
+  if (!conversation) return;
+  await database.insert(messages).values({
+    conversationId: conversation.id,
+    senderId: userId,
+    content: `${displayName} ${action}`,
+    kind: "system",
+  });
+  await database.execute(
+    sql`select pg_notify('trip_chat', ${conversation.id})`,
+  );
+}
 
 async function assertTripHasCapacity(
   database: CapacityDatabase,

@@ -34,7 +34,10 @@ export const tripParticipantStatus = pgEnum("trip_participant_status", [
   "pending",
   "approved",
   "rejected",
+  "expired",
+  "left",
 ]);
+export const messageKind = pgEnum("message_kind", ["message", "system"]);
 export const notificationType = pgEnum("notification_type", [
   "join_request",
   "join_accepted",
@@ -301,6 +304,7 @@ export const messages = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
+    kind: messageKind("kind").default("message").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

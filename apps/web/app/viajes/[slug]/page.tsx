@@ -56,7 +56,7 @@ export default async function TripDetailPage({
         <div className="relative z-10 mx-auto max-w-5xl">
           <div className="flex items-center justify-between gap-4">
             <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-[#0857C9]">
-              {trip.status === "closed"
+              {trip.status === "archived"
                 ? t("tripClosed")
                 : trip.visibility === "public"
                   ? t("public")
@@ -220,7 +220,9 @@ export default async function TripDetailPage({
             </Link>
           )}
           {trip.viewerMembershipStatus === "owner" ||
-          trip.viewerMembershipStatus === "approved" ? (
+          trip.viewerMembershipStatus === "approved" ||
+          trip.viewerMembershipStatus === "left" ||
+          trip.viewerMembershipStatus === "expired" ? (
             <Link
               href={`/mensajes/${trip.slug}`}
               className="mb-6 flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#0B6EFD] px-4 font-bold text-white hover:bg-[#0857C9]"

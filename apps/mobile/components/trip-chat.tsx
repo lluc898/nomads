@@ -25,6 +25,7 @@ export function TripChat({
 }) {
   const {
     getTripChat,
+    getTrip,
     sendTripMessage,
     subscribeTripChat,
     getTripNotificationPreferences,
@@ -39,6 +40,7 @@ export function TripChat({
   const [error, setError] = useState<string | null>(null);
   const [chatMuted, setChatMuted] = useState(false);
   const [savingPreference, setSavingPreference] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
 
   const loadMessages = useCallback(
     async (quiet = false) => {
@@ -58,6 +60,16 @@ export function TripChat({
 
   useEffect(() => {
     let active = true;
+    getTrip(slug)
+      .then((trip) => {
+        if (active)
+          setReadOnly(
+            trip.status === "archived" ||
+              trip.viewerMembershipStatus === "left" ||
+              trip.viewerMembershipStatus === "expired",
+          );
+      })
+      .catch(() => undefined);
     getTripChat(slug)
       .then((result) => {
         if (!active) return;
@@ -88,7 +100,7 @@ export function TripChat({
       controller.abort();
       if (reconnect) clearTimeout(reconnect);
     };
-  }, [getTripChat, loadMessages, slug, subscribeTripChat]);
+  }, [getTrip, getTripChat, loadMessages, slug, subscribeTripChat]);
 
   useEffect(() => {
     getTripNotificationPreferences(slug)
@@ -175,7 +187,23 @@ export function TripChat({
             <ActivityIndicator color="#0B6EFD" />
           </View>
         ) : messages.length ? (
-          messages.map((message) => (
+          messages.map((message) =>
+            message.kind === "system" ? (
+              <View
+                key={message.id}
+                className="self-center rounded-full bg-slate-200/70 px-4 py-2"
+              >
+                <Text className="text-center text-sm font-medium text-slate-600">
+                  {message.content}
+                </Text>
+                <Text className="mt-1 text-center text-[11px] text-slate-500">
+                  {new Intl.DateTimeFormat(locale, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }).format(new Date(message.createdAt))}
+                </Text>
+              </View>
+            ) : (
             <View
               key={message.id}
               className={`flex-row gap-2 ${message.isOwn ? "justify-end" : "justify-start"}`}
@@ -223,7 +251,8 @@ export function TripChat({
                 </Text>
               </View>
             </View>
-          ))
+            ),
+          )
         ) : (
           <View className="flex-1 items-center justify-center px-5">
             <Text className="text-center text-sm text-slate-500">
@@ -235,6 +264,11 @@ export function TripChat({
       {error ? (
         <Text className="mt-3 text-sm font-semibold text-red-700">{error}</Text>
       ) : null}
+      {readOnly ? (
+        <Text className="mt-4 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+          {t("chatReadOnly")}
+        </Text>
+      ) : (
       <View className="mt-4 flex-row items-end gap-2">
         <TextInput
           value={content}
@@ -254,6 +288,7 @@ export function TripChat({
           <Text className="text-xl font-extrabold text-white">➤</Text>
         </Pressable>
       </View>
+      )}
     </View>
   );
 }

@@ -37,7 +37,7 @@ export function TripCard({
       accessibilityLabel={t("tripTo", { destination: trip.destination })}
       onPress={() => router.push(`/trips/${trip.slug}`)}
       className={`mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white active:opacity-90 ${
-        trip.status === "closed" ? "opacity-60" : ""
+        trip.status === "archived" ? "opacity-60" : ""
       }`}
     >
       <View className={`h-32 justify-end p-4 ${tones[trip.tone]}`}>
@@ -52,7 +52,7 @@ export function TripCard({
         <View style={StyleSheet.absoluteFill} className="bg-black/30" />
         <View className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1">
           <Text className="text-xs font-bold text-slate-800">
-            {trip.status === "closed"
+            {trip.status === "archived"
               ? t("tripClosed")
               : trip.visibility === "public"
                 ? t("public")

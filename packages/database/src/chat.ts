@@ -55,7 +55,7 @@ export async function listUserTripConversations(
       limit 1
     ) latest on true
     left join users sender on sender.id = latest.sender_id
-    where t.status in ('published', 'closed')
+    where t.status in ('published', 'archived')
       and (
         t.creator_id = ${userId}
         or exists (
@@ -63,7 +63,7 @@ export async function listUserTripConversations(
           from trip_participants tp
           where tp.trip_id = t.id
             and tp.user_id = ${userId}
-            and tp.status = 'approved'
+            and tp.status in ('approved', 'expired', 'left')
         )
       )
     order by coalesce(latest.created_at, t.created_at) desc
@@ -119,6 +119,7 @@ export async function listTripMessages(
     .select({
       id: messages.id,
       content: messages.content,
+      kind: messages.kind,
       createdAt: messages.createdAt,
       senderId: users.id,
       senderName: users.name,
@@ -143,6 +144,7 @@ export async function sendTripMessage(
       transaction,
       input.slug,
       input.userId,
+      true,
     );
     let [conversation] = await transaction
       .select({ id: conversations.id })
@@ -191,6 +193,7 @@ export async function sendTripMessage(
       .returning({
         id: messages.id,
         content: messages.content,
+        kind: messages.kind,
         createdAt: messages.createdAt,
       });
     const [author] = await transaction
@@ -264,24 +267,33 @@ async function requireTripChatAccess(
   database: Pick<Database, "select">,
   slug: string,
   userId: string,
+  write = false,
 ) {
   const [trip] = await database
-    .select({ id: trips.id, creatorId: trips.creatorId })
+    .select({ id: trips.id, creatorId: trips.creatorId, status: trips.status })
     .from(trips)
     .where(
-      and(eq(trips.slug, slug), inArray(trips.status, ["published", "closed"])),
+      and(
+        eq(trips.slug, slug),
+        inArray(trips.status, ["published", "archived"]),
+      ),
     )
     .limit(1);
   if (!trip) throw new TripChatNotFoundError("Viaje no encontrado.");
-  if (trip.creatorId === userId) return trip;
+  if (trip.creatorId === userId) {
+    if (write && trip.status !== "published") {
+      throw new TripChatAccessError("Este chat estÃ¡ disponible solo para consulta.");
+    }
+    return trip;
+  }
   const [participant] = await database
-    .select({ id: tripParticipants.id })
+    .select({ id: tripParticipants.id, status: tripParticipants.status })
     .from(tripParticipants)
     .where(
       and(
         eq(tripParticipants.tripId, trip.id),
         eq(tripParticipants.userId, userId),
-        eq(tripParticipants.status, "approved"),
+        inArray(tripParticipants.status, ["approved", "expired", "left"]),
       ),
     )
     .limit(1);
@@ -290,6 +302,12 @@ async function requireTripChatAccess(
       "El chat solo está disponible para integrantes del viaje.",
     );
   }
+  if (
+    write &&
+    (trip.status !== "published" || participant.status !== "approved")
+  ) {
+    throw new TripChatAccessError("Este chat estÃ¡ disponible solo para consulta.");
+  }
   return trip;
 }
 
@@ -297,6 +315,7 @@ function toChatMessage(
   row: {
     id: string;
     content: string;
+    kind: "message" | "system";
     createdAt: Date;
     senderId: string;
     senderName: string | null;
@@ -308,6 +327,7 @@ function toChatMessage(
   return {
     id: row.id,
     content: row.content,
+    kind: row.kind,
     createdAt: row.createdAt.toISOString(),
     isOwn: row.senderId === viewerUserId,
     author: {

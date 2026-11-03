@@ -9,9 +9,11 @@ import { UserAvatar } from "@/components/user-avatar";
 export function TripChat({
   slug,
   locale,
+  readOnly = false,
 }: {
   slug: string;
   locale: SupportedLocale;
+  readOnly?: boolean;
 }) {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -186,7 +188,23 @@ export function TripChat({
           {loading ? (
             <p className="text-center text-sm text-slate-500">…</p>
           ) : messages.length ? (
-            messages.map((message) => (
+            messages.map((message) =>
+              message.kind === "system" ? (
+                <div
+                  key={message.id}
+                  className="mx-auto w-fit max-w-[85%] rounded-full bg-slate-200/80 px-4 py-2 text-center"
+                >
+                  <p className="text-sm font-medium text-slate-600">
+                    {message.content}
+                  </p>
+                  <p className="mt-1 text-[11px] text-slate-500">
+                    {new Intl.DateTimeFormat(locale, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }).format(new Date(message.createdAt))}
+                  </p>
+                </div>
+              ) : (
               <div
                 key={message.id}
                 className={`flex gap-3 ${message.isOwn ? "flex-row-reverse" : ""}`}
@@ -222,7 +240,8 @@ export function TripChat({
                   </p>
                 </div>
               </div>
-            ))
+              ),
+            )
           ) : (
             <div className="flex h-full items-center justify-center">
               <p className="max-w-sm text-center text-sm text-slate-500">
@@ -235,6 +254,11 @@ export function TripChat({
         {error ? (
           <p className="mt-3 text-sm font-semibold text-red-700">{error}</p>
         ) : null}
+        {readOnly ? (
+          <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-900">
+            {t("chatReadOnly")}
+          </p>
+        ) : (
         <form onSubmit={submit} className="mt-4 flex items-end gap-3">
           <label className="sr-only" htmlFor="trip-chat-message">
             {t("messagePlaceholder")}
@@ -265,6 +289,7 @@ export function TripChat({
             </svg>
           </button>
         </form>
+        )}
       </div>
     </section>
   );

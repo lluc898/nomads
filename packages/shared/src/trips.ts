@@ -17,6 +17,8 @@ export const tripMembershipStatusSchema = z.enum([
   "pending",
   "approved",
   "rejected",
+  "expired",
+  "left",
 ]);
 export const tripJoinReviewSchema = z.object({
   action: z.enum(["accept", "reject"]),
@@ -189,7 +191,7 @@ export const tripJoinResultSchema = z.object({
 });
 
 export const tripLifecycleResultSchema = z.object({
-  status: z.enum(["closed", "left"]),
+  status: z.enum(["archived", "left"]),
 });
 
 export type SearchTripsInput = z.infer<typeof searchTripsSchema>;

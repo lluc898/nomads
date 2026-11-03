@@ -24,7 +24,7 @@ import { useI18n } from "@/lib/i18n-context";
 export default function TripDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
-  const { getTrip, joinTrip, reviewTripJoinRequest, closeTrip, leaveTrip } =
+  const { getTrip, joinTrip, reviewTripJoinRequest, archiveTrip, leaveTrip } =
     useAuth();
   const { locale, t } = useI18n();
   const [trip, setTrip] = useState<TripDetail | null>(null);
@@ -94,23 +94,23 @@ export default function TripDetailScreen() {
     }
   }
 
-  function handleCloseTrip() {
+  function handleArchiveTrip() {
     Alert.alert(t("closeTrip"), t("closeTripConfirm"), [
       { text: t("close"), style: "cancel" },
       {
         text: t("closeTrip"),
         style: "destructive",
-        onPress: () => void runCloseTrip(),
+        onPress: () => void runArchiveTrip(),
       },
     ]);
   }
 
-  async function runCloseTrip() {
+  async function runArchiveTrip() {
     if (!slug) return;
     setBusy(true);
     setNotice(null);
     try {
-      await closeTrip(slug);
+      await archiveTrip(slug);
       setNotice(t("closeTripSuccess"));
       await refreshTrip();
     } catch (caught) {
@@ -228,7 +228,7 @@ export default function TripDetailScreen() {
               ) : null}
               <View className="self-start rounded-full bg-white/95 px-3 py-1">
                 <Text className="text-brand-700 text-xs font-bold">
-                  {trip.status === "closed"
+                  {trip.status === "archived"
                     ? t("tripClosed")
                     : trip.visibility === "public"
                       ? t("public")
@@ -279,7 +279,7 @@ export default function TripDetailScreen() {
 
             <View className="gap-5 px-5 pt-5">
               <View className="rounded-3xl border border-slate-200 bg-white p-5">
-                {trip.status === "closed" ? (
+                {trip.status === "archived" ? (
                   <View className="rounded-xl bg-slate-100 p-4">
                     <Text className="font-extrabold text-slate-900">
                       {t("tripClosed")}
@@ -287,17 +287,6 @@ export default function TripDetailScreen() {
                     <Text className="mt-1 leading-5 text-slate-600">
                       {t("closedTripHelp")}
                     </Text>
-                    {trip.viewerMembershipStatus === "approved" ? (
-                      <Pressable
-                        disabled={busy}
-                        onPress={handleLeaveTrip}
-                        className="mt-4 min-h-11 items-center justify-center rounded-xl border border-red-200 disabled:opacity-50"
-                      >
-                        <Text className="font-bold text-red-700">
-                          {t("leaveTrip")}
-                        </Text>
-                      </Pressable>
-                    ) : null}
                   </View>
                 ) : trip.viewerMembershipStatus === "owner" ||
                   trip.viewerMembershipStatus === "approved" ? (
@@ -334,7 +323,7 @@ export default function TripDetailScreen() {
                 trip.viewerMembershipStatus === "owner" ? (
                   <Pressable
                     disabled={busy}
-                    onPress={handleCloseTrip}
+                    onPress={handleArchiveTrip}
                     className="mt-4 min-h-12 items-center justify-center rounded-xl border border-red-200 disabled:opacity-50"
                   >
                     <Text className="font-bold text-red-700">
@@ -552,7 +541,9 @@ export default function TripDetailScreen() {
               ) : null}
 
               {trip.viewerMembershipStatus === "owner" ||
-              trip.viewerMembershipStatus === "approved" ? (
+              trip.viewerMembershipStatus === "approved" ||
+              trip.viewerMembershipStatus === "left" ||
+              trip.viewerMembershipStatus === "expired" ? (
                 <Pressable
                   onPress={() => router.push(`/messages/${trip.slug}`)}
                   className="min-h-14 flex-row items-center justify-center gap-3 rounded-2xl bg-brand-500 px-5 active:opacity-80"

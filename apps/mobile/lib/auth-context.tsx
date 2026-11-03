@@ -52,7 +52,7 @@ type AuthContextValue = {
     signal: AbortSignal,
   ) => ReturnType<typeof api.subscribeTripChat>;
   joinTrip: (slug: string) => ReturnType<typeof api.joinTrip>;
-  closeTrip: (slug: string) => ReturnType<typeof api.closeTrip>;
+  archiveTrip: (slug: string) => ReturnType<typeof api.archiveTrip>;
   leaveTrip: (slug: string) => ReturnType<typeof api.leaveTrip>;
   reviewTripJoinRequest: (
     slug: string,
@@ -236,10 +236,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [token],
   );
 
-  const closeTrip = useCallback(
+  const archiveTrip = useCallback(
     (slug: string) => {
       if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
-      return api.closeTrip(token, slug);
+      return api.archiveTrip(token, slug);
     },
     [token],
   );
@@ -359,7 +359,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sendTripMessage,
       subscribeTripChat,
       joinTrip,
-      closeTrip,
+      archiveTrip,
       leaveTrip,
       reviewTripJoinRequest,
       listNotifications,
@@ -385,7 +385,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sendTripMessage,
       subscribeTripChat,
       joinTrip,
-      closeTrip,
+      archiveTrip,
       leaveTrip,
       reviewTripJoinRequest,
       listNotifications,
