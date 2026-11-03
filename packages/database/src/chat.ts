@@ -1,5 +1,5 @@
 import type { ChatMessage, TripConversationSummary } from "@viajeroshub/shared";
-import { and, count, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, isNull, sql } from "drizzle-orm";
 
 import type { Database } from "./client";
 import {
@@ -55,7 +55,7 @@ export async function listUserTripConversations(
       limit 1
     ) latest on true
     left join users sender on sender.id = latest.sender_id
-    where t.status = 'published'
+    where t.status in ('published', 'closed')
       and (
         t.creator_id = ${userId}
         or exists (
@@ -268,7 +268,9 @@ async function requireTripChatAccess(
   const [trip] = await database
     .select({ id: trips.id, creatorId: trips.creatorId })
     .from(trips)
-    .where(and(eq(trips.slug, slug), eq(trips.status, "published")))
+    .where(
+      and(eq(trips.slug, slug), inArray(trips.status, ["published", "closed"])),
+    )
     .limit(1);
   if (!trip) throw new TripChatNotFoundError("Viaje no encontrado.");
   if (trip.creatorId === userId) return trip;

@@ -14,6 +14,7 @@ import { UserAvatar } from "@/components/user-avatar";
 export function TripMembership({
   slug,
   visibility,
+  tripStatus,
   status,
   isFull,
   pendingRequests,
@@ -21,6 +22,7 @@ export function TripMembership({
 }: {
   slug: string;
   visibility: TripDetail["visibility"];
+  tripStatus: TripDetail["status"];
   status: TripDetail["viewerMembershipStatus"];
   isFull: boolean;
   pendingRequests: TripDetail["pendingRequests"];
@@ -75,9 +77,70 @@ export function TripMembership({
     }
   }
 
+  async function closeTrip() {
+    if (!window.confirm(t("closeTripConfirm"))) return;
+    setBusy("close");
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/trips/${slug}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "close" }),
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+      if (!response.ok) throw new Error(payload?.message ?? "Error");
+      setMessage(t("closeTripSuccess"));
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Error");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function leaveTrip() {
+    if (!window.confirm(t("leaveTripConfirm"))) return;
+    setBusy("leave");
+    setMessage(null);
+    try {
+      const response = await fetch(`/api/trips/${slug}/leave`, {
+        method: "POST",
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+      if (!response.ok) throw new Error(payload?.message ?? "Error");
+      setMessage(t("leaveTripSuccess"));
+      router.refresh();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Error");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   return (
     <div className="space-y-5">
-      {status === "owner" ? (
+      {tripStatus === "closed" ? (
+        <div className="rounded-xl bg-slate-100 p-4">
+          <p className="font-extrabold text-slate-900">{t("tripClosed")}</p>
+          <p className="mt-1 text-sm leading-5 text-slate-600">
+            {t("closedTripHelp")}
+          </p>
+          {status === "approved" ? (
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={leaveTrip}
+              className="mt-4 text-sm font-bold text-red-700 disabled:opacity-50"
+            >
+              {t("leaveTrip")}
+            </button>
+          ) : null}
+        </div>
+      ) : status === "owner" ? (
         <div>
           <p className="font-bold text-slate-900">{t("alreadyMember")}</p>
           {pendingRequests.length ? (
@@ -134,9 +197,27 @@ export function TripMembership({
               </div>
             </div>
           ) : null}
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={closeTrip}
+            className="mt-5 w-full rounded-xl border border-red-200 px-4 py-3 font-bold text-red-700 hover:bg-red-50 disabled:opacity-50"
+          >
+            {t("closeTrip")}
+          </button>
         </div>
       ) : status === "approved" ? (
-        <p className="font-bold text-green-700">{t("alreadyMember")}</p>
+        <div>
+          <p className="font-bold text-green-700">{t("alreadyMember")}</p>
+          <button
+            type="button"
+            disabled={busy !== null}
+            onClick={leaveTrip}
+            className="mt-4 text-sm font-bold text-red-700 disabled:opacity-50"
+          >
+            {t("leaveTrip")}
+          </button>
+        </div>
       ) : status === "pending" ? (
         <p className="font-bold text-amber-700">{t("requestPending")}</p>
       ) : isFull ? (

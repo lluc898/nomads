@@ -127,6 +127,10 @@ packages/ui
 - Unirse a un viaje público es inmediato; en uno privado crea una solicitud que solo puede aceptar o rechazar su creador.
 - El creador cuenta dentro del aforo. La unión y la aceptación bloquean el viaje en transacción y nunca pueden superar `maxParticipants`.
 - Los integrantes aprobados aparecen en el detalle y sus viajes se incluyen en `Mis viajes`.
+- Solo el creador puede finalizar un viaje publicado. Finalizar cambia su estado a `closed`: nunca elimina el viaje, rechaza las solicitudes pendientes y bloquea nuevas uniones y apariciones en el buscador.
+- Los viajes finalizados permanecen atenuados en `Mis viajes` para conservar el historial y siguen accesibles para su creador e integrantes actuales.
+- Un integrante aprobado puede abandonar un viaje, pero el creador no. La membresía se conserva como rechazada en vez de eliminarse para mantener trazabilidad.
+- El chat de un viaje finalizado sigue disponible para sus integrantes actuales; quien abandona pierde el acceso inmediatamente.
 - Cada viaje tiene un chat persistente exclusivo para el creador y participantes aprobados; el permiso se valida en cada lectura y envío desde el backend.
 - Los mensajes admiten hasta 1.000 caracteres, se muestran los 100 más recientes y se limitan a 20 envíos por usuario y minuto.
 - El chat en tiempo real usa SSE y `LISTEN/NOTIFY` de PostgreSQL; no debe volver a sondeo periódico mientras esta infraestructura siga disponible.

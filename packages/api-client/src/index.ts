@@ -12,6 +12,7 @@ import {
   tripCardPageSchema,
   tripDetailSchema,
   tripJoinResultSchema,
+  tripLifecycleResultSchema,
   tripJoinReviewSchema,
   tripNotificationPreferencesSchema,
   tripConversationCenterSchema,
@@ -207,6 +208,31 @@ export function createApiClient({
       );
       if (!response.ok) throw await apiError(response);
       return tripJoinResultSchema.parse(await response.json());
+    },
+
+    async closeTrip(token: string, slug: string) {
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}`,
+        {
+          method: "PATCH",
+          headers: {
+            ...authorization(token),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "close" }),
+        },
+      );
+      if (!response.ok) throw await apiError(response);
+      return tripLifecycleResultSchema.parse(await response.json());
+    },
+
+    async leaveTrip(token: string, slug: string) {
+      const response = await fetcher(
+        `${baseUrl}/trips/${encodeURIComponent(slug)}/leave`,
+        { method: "POST", headers: authorization(token) },
+      );
+      if (!response.ok) throw await apiError(response);
+      return tripLifecycleResultSchema.parse(await response.json());
     },
 
     async reviewTripJoinRequest(

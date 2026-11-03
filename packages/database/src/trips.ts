@@ -13,6 +13,7 @@ import {
   gte,
   lt,
   lte,
+  inArray,
   or,
   sql,
   type SQL,
@@ -37,6 +38,94 @@ export class TripOwnerCannotJoinError extends Error {}
 export class TripFullError extends Error {}
 export class TripJoinRequestNotFoundError extends Error {}
 export class TripOwnerRequiredError extends Error {}
+export class TripAlreadyClosedError extends Error {}
+export class TripParticipantRequiredError extends Error {}
+export class TripOwnerCannotLeaveError extends Error {}
+
+export async function closeTrip(
+  database: Database,
+  slug: string,
+  userId: string,
+) {
+  return database.transaction(async (transaction) => {
+    const [trip] = await transaction
+      .select({ id: trips.id, creatorId: trips.creatorId, status: trips.status })
+      .from(trips)
+      .where(eq(trips.slug, slug))
+      .for("update")
+      .limit(1);
+    if (!trip) throw new TripNotFoundError("Viaje no encontrado.");
+    if (trip.creatorId !== userId) {
+      throw new TripOwnerRequiredError("Solo el creador puede finalizar el viaje.");
+    }
+    if (trip.status === "closed") {
+      throw new TripAlreadyClosedError("El viaje ya está finalizado.");
+    }
+    if (trip.status !== "published") {
+      throw new TripNotFoundError("Viaje no encontrado.");
+    }
+
+    await transaction
+      .update(trips)
+      .set({ status: "closed", updatedAt: new Date() })
+      .where(eq(trips.id, trip.id));
+    await transaction
+      .update(tripParticipants)
+      .set({ status: "rejected", respondedAt: new Date(), respondedBy: userId })
+      .where(
+        and(
+          eq(tripParticipants.tripId, trip.id),
+          eq(tripParticipants.status, "pending"),
+        ),
+      );
+    return { status: "closed" as const };
+  });
+}
+
+export async function leaveTrip(
+  database: Database,
+  slug: string,
+  userId: string,
+) {
+  return database.transaction(async (transaction) => {
+    const [trip] = await transaction
+      .select({ id: trips.id, creatorId: trips.creatorId, status: trips.status })
+      .from(trips)
+      .where(
+        and(eq(trips.slug, slug), inArray(trips.status, ["published", "closed"])),
+      )
+      .for("update")
+      .limit(1);
+    if (!trip) throw new TripNotFoundError("Viaje no encontrado.");
+    if (trip.creatorId === userId) {
+      throw new TripOwnerCannotLeaveError(
+        "El creador no puede abandonar su propio viaje.",
+      );
+    }
+    const [participant] = await transaction
+      .select({ id: tripParticipants.id })
+      .from(tripParticipants)
+      .where(
+        and(
+          eq(tripParticipants.tripId, trip.id),
+          eq(tripParticipants.userId, userId),
+          eq(tripParticipants.status, "approved"),
+        ),
+      )
+      .for("update")
+      .limit(1);
+    if (!participant) {
+      throw new TripParticipantRequiredError(
+        "Solo un integrante puede abandonar el viaje.",
+      );
+    }
+    await transaction
+      .update(tripParticipants)
+      .set({ status: "rejected", respondedAt: new Date(), respondedBy: userId })
+      .where(eq(tripParticipants.id, participant.id));
+    return { status: "left" as const };
+  });
+}
 
 export async function joinTrip(
   database: Database,
@@ -280,6 +369,7 @@ export async function findTripCards(
     userId?: string;
     locale?: SupportedLocale;
     limit?: number;
+    includeInactive?: boolean;
   } = {},
 ): Promise<TripCard[]> {
   const page = await findTripCardPage(database, input);
@@ -299,13 +389,18 @@ export async function findTripCardPage(
     limit?: number;
     cursor?: string;
     includeTotal?: boolean;
+    includeInactive?: boolean;
   } = {},
 ): Promise<TripCardPage> {
   const originCountry = alias(countries, "origin_country");
   const destinationCountry = alias(countries, "destination_country");
   const originAirport = alias(airports, "origin_airport");
   const destinationAirport = alias(airports, "destination_airport");
-  const conditions: SQL[] = [eq(trips.status, "published")];
+  const conditions: SQL[] = [
+    input.includeInactive
+      ? inArray(trips.status, ["published", "closed"])
+      : eq(trips.status, "published"),
+  ];
   addLocationCondition(conditions, input.origin, "origin");
   if (input.destination && input.destination !== "anywhere")
     addLocationCondition(conditions, input.destination, "destination");
@@ -350,6 +445,7 @@ export async function findTripCardPage(
     .select({
       id: trips.id,
       slug: trips.slug,
+      status: trips.status,
       departureDate: trips.departureDate,
       returnDate: trips.returnDate,
       visibility: trips.visibility,
@@ -421,6 +517,7 @@ export async function findTripCardPage(
   const items = visibleRows.map((row) => ({
     id: row.id,
     slug: row.slug,
+    status: row.status,
     origin: locationLabel(row, "origin", locale),
     destination: locationLabel(row, "destination", locale),
     dateLabel: formatDateRange(row.departureDate!, row.returnDate!, locale),
@@ -489,7 +586,7 @@ export async function getTripDetail(
     .from(trips)
     .where(eq(trips.slug, slug))
     .limit(1);
-  if (!trip || trip.status !== "published") return null;
+  if (!trip || !["published", "closed"].includes(trip.status)) return null;
   const [destinationCountryImage] = trip.destinationCountryCode
     ? await database
         .select({

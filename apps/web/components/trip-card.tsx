@@ -26,7 +26,11 @@ export function TripCard({
     values?: Record<string, string | number>,
   ) => translate(locale, key, values);
   return (
-    <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(15,23,42,.12)]">
+    <article
+      className={`group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_35px_rgba(15,23,42,.12)] ${
+        trip.status === "closed" ? "opacity-60 grayscale-[.25]" : ""
+      }`}
+    >
       <div
         className={`relative h-40 overflow-hidden bg-gradient-to-br ${toneClasses[trip.tone]}`}
       >
@@ -46,7 +50,11 @@ export function TripCard({
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/15" />
         <div className="absolute top-5 right-5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-800 backdrop-blur">
-          {trip.visibility === "public" ? t("public") : t("private")}
+          {trip.status === "closed"
+            ? t("tripClosed")
+            : trip.visibility === "public"
+              ? t("public")
+              : t("private")}
         </div>
         <div className="absolute bottom-4 left-5 flex items-center gap-2 text-white">
           <MapPinIcon className="size-5" />

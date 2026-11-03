@@ -79,6 +79,7 @@ describe("trip contracts", () => {
     const detail = tripDetailSchema.parse({
       id: "48fdfc49-3ae4-4dd6-a053-a05e37bb0692",
       slug: "palma-paris",
+      status: "published",
       destinationImage: null,
       origin: "Palma de Mallorca (PMI)",
       destination: "París (CDG)",

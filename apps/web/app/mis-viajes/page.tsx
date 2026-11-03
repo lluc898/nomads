@@ -15,6 +15,7 @@ export default async function MyTripsPage() {
   const trips = await findTripCards(getDatabase(), {
     userId: user.id,
     locale,
+    includeInactive: true,
   });
 
   return (

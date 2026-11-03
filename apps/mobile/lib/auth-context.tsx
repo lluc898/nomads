@@ -52,6 +52,8 @@ type AuthContextValue = {
     signal: AbortSignal,
   ) => ReturnType<typeof api.subscribeTripChat>;
   joinTrip: (slug: string) => ReturnType<typeof api.joinTrip>;
+  closeTrip: (slug: string) => ReturnType<typeof api.closeTrip>;
+  leaveTrip: (slug: string) => ReturnType<typeof api.leaveTrip>;
   reviewTripJoinRequest: (
     slug: string,
     requestId: string,
@@ -234,6 +236,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [token],
   );
 
+  const closeTrip = useCallback(
+    (slug: string) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.closeTrip(token, slug);
+    },
+    [token],
+  );
+
+  const leaveTrip = useCallback(
+    (slug: string) => {
+      if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
+      return api.leaveTrip(token, slug);
+    },
+    [token],
+  );
+
   const getTripChat = useCallback(
     (slug: string) => {
       if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
@@ -341,6 +359,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sendTripMessage,
       subscribeTripChat,
       joinTrip,
+      closeTrip,
+      leaveTrip,
       reviewTripJoinRequest,
       listNotifications,
       markNotificationRead,
@@ -365,6 +385,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       sendTripMessage,
       subscribeTripChat,
       joinTrip,
+      closeTrip,
+      leaveTrip,
       reviewTripJoinRequest,
       listNotifications,
       markNotificationRead,

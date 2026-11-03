@@ -56,7 +56,11 @@ export default async function TripDetailPage({
         <div className="relative z-10 mx-auto max-w-5xl">
           <div className="flex items-center justify-between gap-4">
             <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-[#0857C9]">
-              {trip.visibility === "public" ? t("public") : t("private")}
+              {trip.status === "closed"
+                ? t("tripClosed")
+                : trip.visibility === "public"
+                  ? t("public")
+                  : t("private")}
             </span>
             <ShareTripButton
               slug={trip.slug}
@@ -200,6 +204,7 @@ export default async function TripDetailPage({
               <TripMembership
                 slug={trip.slug}
                 visibility={trip.visibility}
+                tripStatus={trip.status}
                 status={trip.viewerMembershipStatus}
                 isFull={trip.isFull}
                 pendingRequests={trip.pendingRequests}

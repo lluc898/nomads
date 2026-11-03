@@ -1,5 +1,15 @@
-import { getTripDetail } from "@viajeroshub/database";
-import { isSupportedLocale, tripDetailSchema } from "@viajeroshub/shared";
+import {
+  closeTrip,
+  getTripDetail,
+  TripAlreadyClosedError,
+  TripNotFoundError,
+  TripOwnerRequiredError,
+} from "@viajeroshub/database";
+import {
+  isSupportedLocale,
+  tripDetailSchema,
+  tripLifecycleResultSchema,
+} from "@viajeroshub/shared";
 
 import { auth } from "@/auth";
 import { getDatabase } from "@/lib/database";
@@ -30,6 +40,7 @@ export async function GET(
     tripDetailSchema.parse({
       id: trip.id,
       slug: trip.slug,
+      status: trip.status,
       origin: trip.origin,
       destination: trip.destination,
       destinationImage: trip.destinationImage,
@@ -63,6 +74,36 @@ export async function GET(
     }),
     { headers: { "Cache-Control": "private, no-store" } },
   );
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> },
+) {
+  const userId = await authenticatedUserId(request);
+  if (!userId)
+    return Response.json({ message: "No autorizado." }, { status: 401 });
+  const payload = (await request.json().catch(() => null)) as {
+    action?: unknown;
+  } | null;
+  if (payload?.action !== "close") {
+    return Response.json({ message: "Acción no válida." }, { status: 400 });
+  }
+  try {
+    const result = await closeTrip(getDatabase(), (await params).slug, userId);
+    return Response.json(tripLifecycleResultSchema.parse(result));
+  } catch (error) {
+    if (error instanceof TripOwnerRequiredError) {
+      return Response.json({ message: error.message }, { status: 403 });
+    }
+    if (error instanceof TripAlreadyClosedError) {
+      return Response.json({ message: error.message }, { status: 409 });
+    }
+    if (error instanceof TripNotFoundError) {
+      return Response.json({ message: error.message }, { status: 404 });
+    }
+    throw error;
+  }
 }
 
 async function authenticatedUserId(request: Request) {

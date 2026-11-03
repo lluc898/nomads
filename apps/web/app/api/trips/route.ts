@@ -33,6 +33,7 @@ export async function GET(request: Request) {
     returnDate,
     flexibleMonth,
     userId: creatorId ?? undefined,
+    includeInactive: mine,
     locale,
     cursor: url.searchParams.get("cursor") ?? undefined,
     limit: parseTripLimit(url.searchParams.get("limit")),

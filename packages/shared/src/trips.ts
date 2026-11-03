@@ -107,6 +107,7 @@ const destinationImageSchema = z.object({
 export const tripCardSchema = z.object({
   id: z.uuid(),
   slug: z.string().min(1),
+  status: tripStatusSchema,
   origin: z.string().min(1),
   destination: z.string().min(1),
   dateLabel: z.string().min(1),
@@ -133,6 +134,7 @@ export const tripCardPageSchema = z.object({
 export const tripDetailSchema = z.object({
   id: z.uuid(),
   slug: z.string().min(1),
+  status: tripStatusSchema,
   origin: z.string().min(1),
   destination: z.string().min(1),
   destinationImage: destinationImageSchema.nullable(),
@@ -186,6 +188,10 @@ export const tripJoinResultSchema = z.object({
   status: z.enum(["pending", "approved"]),
 });
 
+export const tripLifecycleResultSchema = z.object({
+  status: z.enum(["closed", "left"]),
+});
+
 export type SearchTripsInput = z.infer<typeof searchTripsSchema>;
 export type TripDateSelection = z.infer<typeof tripDateSelectionSchema>;
 export type TripCard = z.infer<typeof tripCardSchema>;
@@ -193,6 +199,7 @@ export type TripCardPage = z.infer<typeof tripCardPageSchema>;
 export type TripDetail = z.infer<typeof tripDetailSchema>;
 export type TripMembershipStatus = z.infer<typeof tripMembershipStatusSchema>;
 export type TripJoinResult = z.infer<typeof tripJoinResultSchema>;
+export type TripLifecycleResult = z.infer<typeof tripLifecycleResultSchema>;
 export type TripJoinReview = z.infer<typeof tripJoinReviewSchema>;
 export type CreateTripInput = z.infer<typeof createTripInputSchema>;
 export type CreatedTrip = z.infer<typeof createdTripSchema>;

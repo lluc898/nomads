@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Linking,
@@ -23,7 +24,8 @@ import { useI18n } from "@/lib/i18n-context";
 export default function TripDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
-  const { getTrip, joinTrip, reviewTripJoinRequest } = useAuth();
+  const { getTrip, joinTrip, reviewTripJoinRequest, closeTrip, leaveTrip } =
+    useAuth();
   const { locale, t } = useI18n();
   const [trip, setTrip] = useState<TripDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -84,6 +86,58 @@ export default function TripDetailScreen() {
     setNotice(null);
     try {
       await reviewTripJoinRequest(slug, requestId, action);
+      await refreshTrip();
+    } catch (caught) {
+      setNotice(caught instanceof Error ? caught.message : "Error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleCloseTrip() {
+    Alert.alert(t("closeTrip"), t("closeTripConfirm"), [
+      { text: t("close"), style: "cancel" },
+      {
+        text: t("closeTrip"),
+        style: "destructive",
+        onPress: () => void runCloseTrip(),
+      },
+    ]);
+  }
+
+  async function runCloseTrip() {
+    if (!slug) return;
+    setBusy(true);
+    setNotice(null);
+    try {
+      await closeTrip(slug);
+      setNotice(t("closeTripSuccess"));
+      await refreshTrip();
+    } catch (caught) {
+      setNotice(caught instanceof Error ? caught.message : "Error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handleLeaveTrip() {
+    Alert.alert(t("leaveTrip"), t("leaveTripConfirm"), [
+      { text: t("close"), style: "cancel" },
+      {
+        text: t("leaveTrip"),
+        style: "destructive",
+        onPress: () => void runLeaveTrip(),
+      },
+    ]);
+  }
+
+  async function runLeaveTrip() {
+    if (!slug) return;
+    setBusy(true);
+    setNotice(null);
+    try {
+      await leaveTrip(slug);
+      setNotice(t("leaveTripSuccess"));
       await refreshTrip();
     } catch (caught) {
       setNotice(caught instanceof Error ? caught.message : "Error");
@@ -174,7 +228,11 @@ export default function TripDetailScreen() {
               ) : null}
               <View className="self-start rounded-full bg-white/95 px-3 py-1">
                 <Text className="text-brand-700 text-xs font-bold">
-                  {trip.visibility === "public" ? t("public") : t("private")}
+                  {trip.status === "closed"
+                    ? t("tripClosed")
+                    : trip.visibility === "public"
+                      ? t("public")
+                      : t("private")}
                 </Text>
               </View>
               <Text
@@ -221,8 +279,28 @@ export default function TripDetailScreen() {
 
             <View className="gap-5 px-5 pt-5">
               <View className="rounded-3xl border border-slate-200 bg-white p-5">
-                {trip.viewerMembershipStatus === "owner" ||
-                trip.viewerMembershipStatus === "approved" ? (
+                {trip.status === "closed" ? (
+                  <View className="rounded-xl bg-slate-100 p-4">
+                    <Text className="font-extrabold text-slate-900">
+                      {t("tripClosed")}
+                    </Text>
+                    <Text className="mt-1 leading-5 text-slate-600">
+                      {t("closedTripHelp")}
+                    </Text>
+                    {trip.viewerMembershipStatus === "approved" ? (
+                      <Pressable
+                        disabled={busy}
+                        onPress={handleLeaveTrip}
+                        className="mt-4 min-h-11 items-center justify-center rounded-xl border border-red-200 disabled:opacity-50"
+                      >
+                        <Text className="font-bold text-red-700">
+                          {t("leaveTrip")}
+                        </Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                ) : trip.viewerMembershipStatus === "owner" ||
+                  trip.viewerMembershipStatus === "approved" ? (
                   <Text className="font-bold text-green-700">
                     {t("alreadyMember")}
                   </Text>
@@ -251,6 +329,30 @@ export default function TripDetailScreen() {
                   <Text className="mt-3 text-sm font-semibold text-slate-700">
                     {notice}
                   </Text>
+                ) : null}
+                {trip.status === "published" &&
+                trip.viewerMembershipStatus === "owner" ? (
+                  <Pressable
+                    disabled={busy}
+                    onPress={handleCloseTrip}
+                    className="mt-4 min-h-12 items-center justify-center rounded-xl border border-red-200 disabled:opacity-50"
+                  >
+                    <Text className="font-bold text-red-700">
+                      {t("closeTrip")}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {trip.status === "published" &&
+                trip.viewerMembershipStatus === "approved" ? (
+                  <Pressable
+                    disabled={busy}
+                    onPress={handleLeaveTrip}
+                    className="mt-4 min-h-12 items-center justify-center rounded-xl border border-red-200 disabled:opacity-50"
+                  >
+                    <Text className="font-bold text-red-700">
+                      {t("leaveTrip")}
+                    </Text>
+                  </Pressable>
                 ) : null}
               </View>
 
