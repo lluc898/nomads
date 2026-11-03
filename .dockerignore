@@ -4,6 +4,7 @@
 .expo
 .turbo
 node_modules
+**/node_modules
 dist
 coverage
 *.log
