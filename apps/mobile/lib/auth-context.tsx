@@ -243,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const listTripConversations = useCallback(() => {
-    if (!token) return Promise.reject(new Error("Tu sesiÃ³n ha caducado."));
+    if (!token) return Promise.reject(new Error("Tu sesión ha caducado."));
     return api.listTripConversations(token);
   }, [token]);
 

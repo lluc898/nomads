@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
+import { ArrowLeftIcon } from "@/components/icons";
 import { SiteHeader } from "@/components/site-header";
 import { getDatabase } from "@/lib/database";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
@@ -39,8 +40,11 @@ export default async function GroupChatPage({
       <section className="px-5 pt-28 pb-4 md:pt-32">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <div className="min-w-0">
-            <Link href="/mensajes" className="text-sm font-bold text-[#0857C9]">
-              â€¹ {t("messages")}
+            <Link
+              href="/mensajes"
+              className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#0857C9]"
+            >
+              <ArrowLeftIcon className="size-4" /> {t("messages")}
             </Link>
             <h1 className="mt-2 truncate text-2xl font-extrabold text-slate-950">
               {trip.title}

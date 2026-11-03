@@ -28,7 +28,7 @@ type CountryImage = Awaited<ReturnType<typeof searchCommons>>[number];
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl)
-  throw new Error("DATABASE_URL es obligatoria para importar imÃ¡genes.");
+  throw new Error("DATABASE_URL es obligatoria para importar imágenes.");
 
 const database = createDatabase(databaseUrl);
 const refreshAll = process.env.REFRESH_COUNTRY_IMAGES === "true";
@@ -395,6 +395,6 @@ function cleanText(value?: string) {
 
 await worker();
 console.log(
-  `ImÃ¡genes de paÃ­ses: ${imported} importadas, ${failed} pendientes, ${missingCountries.length} revisadas.`,
+  `Imágenes de países: ${imported} importadas, ${failed} pendientes, ${missingCountries.length} revisadas.`,
 );
 process.exit(0);

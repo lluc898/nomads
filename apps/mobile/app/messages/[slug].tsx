@@ -23,7 +23,7 @@ export default function GroupChatScreen() {
           onPress={() => router.back()}
           className="h-11 w-11 items-center justify-center rounded-full bg-slate-100"
         >
-          <Text className="text-2xl text-slate-800">â€¹</Text>
+          <Text className="text-2xl text-slate-800">{"\u2190"}</Text>
         </Pressable>
         <Text className="ml-3 flex-1 text-lg font-extrabold text-slate-950">
           {t("chat")}

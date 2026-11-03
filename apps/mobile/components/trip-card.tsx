@@ -70,7 +70,7 @@ export function TripCard({
             className="absolute bottom-1 right-2 max-w-[55%] rounded bg-black/50 px-1.5 py-0.5"
           >
             <Text className="text-[9px] text-white/80" numberOfLines={1}>
-              {trip.destinationImage.author} Â· {trip.destinationImage.license}
+              {trip.destinationImage.author} {"\u00B7"} {trip.destinationImage.license}
             </Text>
           </Pressable>
         ) : null}

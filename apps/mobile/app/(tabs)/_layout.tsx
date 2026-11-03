@@ -7,6 +7,14 @@ const TabIcon = ({ symbol, color }: { symbol: string; color: ColorValue }) => (
   <Text style={{ color, fontSize: 19 }}>{symbol}</Text>
 );
 
+const tabSymbols = {
+  home: "\u2302",
+  create: "\uFF0B",
+  trips: "\u2708",
+  messages: "\u2709",
+  profile: "\u25CF",
+} as const;
+
 export default function TabsLayout() {
   const { t } = useI18n();
   return (
@@ -28,35 +36,45 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: t("navHome"),
-          tabBarIcon: ({ color }) => <TabIcon symbol="⌂" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabIcon symbol={tabSymbols.home} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="create"
         options={{
           title: t("navCreate"),
-          tabBarIcon: ({ color }) => <TabIcon symbol="＋" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabIcon symbol={tabSymbols.create} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="trips"
         options={{
           title: t("navMyTrips"),
-          tabBarIcon: ({ color }) => <TabIcon symbol="✈" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabIcon symbol={tabSymbols.trips} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           title: t("messages"),
-          tabBarIcon: ({ color }) => <TabIcon symbol="â—‡" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabIcon symbol={tabSymbols.messages} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t("navProfile"),
-          tabBarIcon: ({ color }) => <TabIcon symbol="●" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <TabIcon symbol={tabSymbols.profile} color={color} />
+          ),
         }}
       />
     </Tabs>

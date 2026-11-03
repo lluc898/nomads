@@ -61,7 +61,7 @@ export function TripCard({
               target="_blank"
               rel="noreferrer"
               className="max-w-36 truncate rounded bg-black/45 px-1.5 py-0.5 hover:text-white"
-              title={`${trip.destinationImage.author} Â· ${trip.destinationImage.license}`}
+              title={`${trip.destinationImage.author} \u00B7 ${trip.destinationImage.license}`}
             >
               Foto: {trip.destinationImage.author}
             </a>
