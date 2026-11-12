@@ -356,10 +356,10 @@ Implemented on: `2026-11-11`
 
 ### Deployment evidence
 
-- On `2026-11-12`, the completed implementation and its validation evidence were pushed to `origin/main`; local and remote both resolved to commit `c2586a1334d28ff65097dee5458df220bba465d7`.
-- A fresh Expo Go tunnel was started from the completed mobile source and verified with an Expo manifest request (`200`) plus a successful JavaScript launch-asset request. Its direct development URL is `exp://c-lluckaicen-m468d2-mwda4hpuafvwvgv9.on.expo.app` and remains dependent on the development process staying online.
-- The existing production stack did not deploy from the Git push. A post-push request to `https://viajes.llucbosch.com/acceso` still returned the old nested-anchor markup and no Geist marker, while `https://viajes.llucbosch.com/expo` still redirected to the previous Expo tunnel. The GitHub repository has no deployment records, Actions workflows, registered runners, or configured repository-side deployment path.
-- Updating the production web container and stable Expo redirect requires administration access to the existing Docker host (or an operator on that host) because this checkout has no production `deploy/.env`, Docker runtime, SSH route to the host, or Portainer credentials. No production secret was copied into the repository or inferred.
+- On `2026-11-12`, the completed implementation and validation evidence were pushed to `origin/main`. The final documentation commit and the production source are based on the same implementation commit chain.
+- Before deployment, the existing server source and configuration were backed up to `/home/lluc/backups/viajeroshub-pre-ui-20261112-0935.tgz`. The release archive SHA-256 matched locally and remotely, contained no absolute/traversal paths or `deploy/.env`, and was extracted over the deployment source while preserving the production environment file, persisted avatars, database, and Docker volumes.
+- `docker compose --env-file deploy/.env -f deploy/compose.yml up -d --build database migrate web` rebuilt the production images. Drizzle reported migrations applied successfully, the location/image seed completed, and the database and web containers became healthy. External requests to `https://viajes.llucbosch.com/acceso` and `/api/trips` returned `200`; the deployed access DOM had zero nested-anchor patterns and the production stylesheet contained Geist declarations.
+- `docker compose --env-file deploy/.env -f deploy/compose.yml --profile mobile up -d --build mobile-dev` rebuilt the Expo Go service. The container and watchdog became healthy, `https://viajes.llucbosch.com/expo` redirected to the new `exp://c-lluckaicen-m468d2-mwdannru7km8p4ng.on.expo.app` tunnel, the iOS Expo manifest returned `200` with runtime `exposdk:58.0.0` and project ID `3cae2b68-68a6-43c4-8c96-f3c72c9acf13`, and its JavaScript launch asset returned `200`.
 
 ### Evidence-backed deviations and remaining blockers
 
