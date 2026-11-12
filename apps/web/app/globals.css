@@ -25,8 +25,19 @@ body {
   margin: 0;
   background: var(--neutral-100);
   color: var(--neutral-900);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    var(--font-geist-sans), Geist, Inter, ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+body:has([data-mobile-primary-navigation]) {
+  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 64rem) {
+  body:has([data-mobile-primary-navigation]) {
+    padding-bottom: 0;
+  }
 }
 
 button,

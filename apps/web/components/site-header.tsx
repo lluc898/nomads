@@ -9,24 +9,16 @@ import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { LanguageSelector } from "./language-selector";
 import { Logo } from "./logo";
 import { NotificationBell } from "./notification-bell";
+import {
+  MobilePrimaryNavigation,
+  PathAwareAccountDetails,
+  PathAwareLink,
+} from "./primary-navigation";
 import { UserAvatar } from "./user-avatar";
 
 async function signOutAction() {
   "use server";
   await signOut({ redirectTo: "/" });
-}
-
-function MessagesIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden="true">
-      <path
-        d="M5 5.5h14v10H9l-4 3v-13Z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 }
 
 function MenuIcon() {
@@ -71,26 +63,30 @@ export async function SiteHeader() {
           className="ml-10 hidden items-center gap-1 text-sm font-semibold text-slate-600 lg:flex"
           aria-label="Main navigation"
         >
-          <Link
+          <PathAwareLink
             href="/buscar"
             className="rounded-lg px-3 py-2.5 transition hover:bg-slate-100 hover:text-slate-950"
+            activeClassName="bg-blue-50 text-[#0857C9] font-extrabold"
           >
             {t("navExplore")}
-          </Link>
+          </PathAwareLink>
           {session?.user ? (
             <>
-              <Link
+              <PathAwareLink
                 href="/mis-viajes"
                 className="rounded-lg px-3 py-2.5 transition hover:bg-slate-100 hover:text-slate-950"
+                activeClassName="bg-blue-50 text-[#0857C9] font-extrabold"
               >
                 {t("navMyTrips")}
-              </Link>
-              <Link
+              </PathAwareLink>
+              <PathAwareLink
                 href="/mensajes"
+                match="prefix"
                 className="rounded-lg px-3 py-2.5 transition hover:bg-slate-100 hover:text-slate-950"
+                activeClassName="bg-blue-50 text-[#0857C9] font-extrabold"
               >
                 {t("messages")}
-              </Link>
+              </PathAwareLink>
             </>
           ) : null}
         </nav>
@@ -103,27 +99,31 @@ export async function SiteHeader() {
               label={t("notifications")}
             />
           ) : null}
-          <Link
+          <PathAwareLink
             href="/crear"
             className="ml-1 inline-flex min-h-11 items-center rounded-xl bg-[#0B6EFD] px-4 text-sm font-bold text-white shadow-[0_6px_18px_rgba(11,110,253,.20)] transition hover:bg-[#0857C9] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B6EFD]"
+            activeClassName="ring-2 ring-[#0B6EFD] ring-offset-2"
           >
             {t("navCreate")}
-          </Link>
+          </PathAwareLink>
           {session?.user ? (
-            <details className="group relative ml-1">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-xl border border-slate-200 bg-white pr-2.5 pl-1.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
-                <UserAvatar
-                  image={session.user.image ?? null}
-                  name={session.user.name ?? null}
-                  size="xs"
-                />
-                <span className="max-w-28 truncate">
-                  {session.user.name ?? t("navAccount")}
-                </span>
-                <span className="transition group-open:rotate-180">
-                  <ChevronIcon />
-                </span>
-              </summary>
+            <PathAwareAccountDetails
+              summary={
+                <>
+                  <UserAvatar
+                    image={session.user.image ?? null}
+                    name={session.user.name ?? null}
+                    size="xs"
+                  />
+                  <span className="max-w-28 truncate">
+                    {session.user.name ?? t("navAccount")}
+                  </span>
+                  <span className="transition group-open:rotate-180">
+                    <ChevronIcon />
+                  </span>
+                </>
+              }
+            >
               <div className="absolute top-[calc(100%+.6rem)] right-0 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_18px_55px_rgba(15,23,42,.16)]">
                 <Link
                   href="/perfil"
@@ -131,7 +131,10 @@ export async function SiteHeader() {
                 >
                   {t("navProfile")}
                 </Link>
-                <form action={signOutAction} className="border-t border-slate-100 pt-1">
+                <form
+                  action={signOutAction}
+                  className="border-t border-slate-100 pt-1"
+                >
                   <button
                     type="submit"
                     className="flex min-h-11 w-full cursor-pointer items-center rounded-xl px-3 text-left text-sm font-semibold text-slate-600 transition hover:bg-red-50 hover:text-red-700"
@@ -140,7 +143,7 @@ export async function SiteHeader() {
                   </button>
                 </form>
               </div>
-            </details>
+            </PathAwareAccountDetails>
           ) : (
             <Link
               href="/acceso"
@@ -180,54 +183,38 @@ export async function SiteHeader() {
                   </div>
                 </div>
               ) : null}
-              <nav className="grid" aria-label="Mobile navigation">
-                <Link
-                  href="/buscar"
-                  className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
-                >
-                  {t("navExplore")}
-                </Link>
-                {session?.user ? (
-                  <>
-                    <Link
-                      href="/mis-viajes"
-                      className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
-                    >
-                      {t("navMyTrips")}
-                    </Link>
-                    <Link
-                      href="/mensajes"
-                      className="flex min-h-11 items-center gap-2 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
-                    >
-                      <MessagesIcon /> {t("messages")}
-                    </Link>
-                    <Link
-                      href="/perfil"
-                      className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
-                    >
-                      {t("navProfile")}
-                    </Link>
-                  </>
-                ) : (
+              {!session?.user ? (
+                <nav className="grid" aria-label="Mobile navigation">
+                  <Link
+                    href="/buscar"
+                    className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
+                  >
+                    {t("navExplore")}
+                  </Link>
                   <Link
                     href="/acceso"
                     className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
                   >
                     {t("navSignIn")}
                   </Link>
-                )}
-              </nav>
-              <Link
-                href="/crear"
-                className="mt-2 flex min-h-12 items-center justify-center rounded-xl bg-[#0B6EFD] px-4 text-sm font-bold text-white"
-              >
-                {t("navCreate")}
-              </Link>
+                </nav>
+              ) : null}
+              {!session?.user ? (
+                <Link
+                  href="/crear"
+                  className="mt-2 flex min-h-12 items-center justify-center rounded-xl bg-[#0B6EFD] px-4 text-sm font-bold text-white"
+                >
+                  {t("navCreate")}
+                </Link>
+              ) : null}
               <div className="mt-3 border-t border-slate-100 px-2 pt-3">
                 <LanguageSelector />
               </div>
               {session?.user ? (
-                <form action={signOutAction} className="mt-3 border-t border-slate-100 pt-2">
+                <form
+                  action={signOutAction}
+                  className="mt-3 border-t border-slate-100 pt-2"
+                >
                   <button
                     type="submit"
                     className="min-h-11 w-full cursor-pointer rounded-xl px-3 text-left text-sm font-semibold text-red-700 hover:bg-red-50"
@@ -240,6 +227,19 @@ export async function SiteHeader() {
           </details>
         </div>
       </div>
+      {session?.user ? (
+        <MobilePrimaryNavigation
+          unreadCount={unreadCount}
+          labels={{
+            explore: t("navExplore"),
+            create: t("navCreate"),
+            trips: t("navMyTrips"),
+            messages: t("messages"),
+            profile: t("navProfile"),
+            unread: t("unreadCount"),
+          }}
+        />
+      ) : null}
     </header>
   );
 }

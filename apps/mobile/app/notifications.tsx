@@ -1,7 +1,6 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   Pressable,
   RefreshControl,
@@ -11,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ErrorState, RowsSkeleton } from "@/components/content-state";
 import { absoluteMediaUrl } from "@/lib/config";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n-context";
@@ -25,6 +25,7 @@ export default function NotificationsScreen() {
     notifications,
     unreadCount,
     loading,
+    error,
     refresh,
     markRead,
     markAllRead,
@@ -78,8 +79,8 @@ export default function NotificationsScreen() {
       </View>
 
       {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#0B6EFD" />
+        <View className="px-5 py-5">
+          <RowsSkeleton />
         </View>
       ) : (
         <ScrollView
@@ -90,12 +91,20 @@ export default function NotificationsScreen() {
               tintColor="#0B6EFD"
               onRefresh={() => {
                 setRefreshing(true);
-                void refresh().finally(() => setRefreshing(false));
+                void refresh()
+                  .catch(() => undefined)
+                  .finally(() => setRefreshing(false));
               }}
             />
           }
         >
-          {!notifications.length ? (
+          {error ? (
+            <ErrorState
+              title={t("loadError")}
+              retryLabel={t("retry")}
+              onRetry={() => void refresh().catch(() => undefined)}
+            />
+          ) : !notifications.length ? (
             <View className="flex-1 items-center justify-center px-8">
               <View className="h-16 w-16 items-center justify-center rounded-2xl bg-brand-50">
                 <Text className="text-3xl">🔔</Text>
@@ -103,6 +112,16 @@ export default function NotificationsScreen() {
               <Text className="mt-5 text-center font-semibold text-slate-600">
                 {t("noNotifications")}
               </Text>
+              <Text className="mt-2 text-center leading-6 text-slate-500">
+                {t("emptyNotificationsHelp")}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.back()}
+                className="mt-5 min-h-12 items-center justify-center rounded-xl bg-brand-500 px-6"
+              >
+                <Text className="font-bold text-white">{t("back")}</Text>
+              </Pressable>
             </View>
           ) : (
             <View className="overflow-hidden rounded-3xl border border-slate-200 bg-white">

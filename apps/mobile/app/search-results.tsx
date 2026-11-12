@@ -25,7 +25,9 @@ export default function SearchResultsScreen() {
   const router = useRouter();
   const { locale, t } = useI18n();
   const initialSearch = useMemo(() => parseTripSearch(params), [params]);
-  const [search, setSearch] = useState<TripSearchSelection | null>(initialSearch);
+  const [search, setSearch] = useState<TripSearchSelection | null>(
+    initialSearch,
+  );
   const [editing, setEditing] = useState(false);
   const [trips, setTrips] = useState<TripCardData[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -118,7 +120,10 @@ export default function SearchResultsScreen() {
         <View className="mt-4 rounded-2xl border border-blue-100 bg-brand-50 p-4">
           <View className="flex-row items-start justify-between">
             <View className="min-w-0 flex-1 pr-3">
-              <Text className="text-lg font-extrabold text-slate-950" numberOfLines={1}>
+              <Text
+                className="text-lg font-extrabold text-slate-950"
+                numberOfLines={1}
+              >
                 {search.origin.name} → {search.destination.name}
               </Text>
               <Text className="mt-1 text-sm font-semibold text-slate-600">
@@ -223,7 +228,9 @@ export default function SearchResultsScreen() {
               onPress={() => setEditing(true)}
               className="mt-5 min-h-12 items-center justify-center rounded-xl border border-blue-200 bg-brand-50 px-5"
             >
-              <Text className="font-bold text-brand-600">{t("modifySearch")}</Text>
+              <Text className="font-bold text-brand-600">
+                {t("modifySearch")}
+              </Text>
             </Pressable>
           </View>
         ) : null}
@@ -320,7 +327,7 @@ function SearchSkeleton() {
       {[0, 1, 2].map((item) => (
         <View
           key={item}
-          className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-slate-200"
+          className="h-64 rounded-2xl border border-slate-200 bg-slate-200"
         />
       ))}
     </View>

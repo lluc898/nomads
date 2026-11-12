@@ -32,6 +32,7 @@ type NotificationsContextValue = {
   notifications: AppNotification[];
   unreadCount: number;
   loading: boolean;
+  error: boolean;
   refresh: () => Promise<void>;
   markRead: (notificationId: string) => Promise<void>;
   markAllRead: () => Promise<void>;
@@ -54,13 +55,22 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const refresh = useCallback(async () => {
     if (status !== "signedIn") return;
-    const center = await listNotifications();
-    setNotifications(center.notifications);
-    setUnreadCount(center.unreadCount);
-    setLoading(false);
+    setError(false);
+    try {
+      const center = await listNotifications();
+      setNotifications(center.notifications);
+      setUnreadCount(center.unreadCount);
+    } catch (caught) {
+      console.warn("Notifications load failed", caught);
+      setError(true);
+      throw caught;
+    } finally {
+      setLoading(false);
+    }
   }, [listNotifications, status]);
 
   useEffect(() => {
@@ -72,7 +82,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         setNotifications(center.notifications);
         setUnreadCount(center.unreadCount);
       })
-      .catch(() => undefined)
+      .catch((caught) => {
+        console.warn("Initial notifications load failed", caught);
+        if (active) setError(true);
+      })
       .finally(() => {
         if (active) setLoading(false);
       });
@@ -163,11 +176,20 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       notifications,
       unreadCount,
       loading,
+      error,
       refresh,
       markRead,
       markAllRead,
     }),
-    [loading, markAllRead, markRead, notifications, refresh, unreadCount],
+    [
+      error,
+      loading,
+      markAllRead,
+      markRead,
+      notifications,
+      refresh,
+      unreadCount,
+    ],
   );
   return (
     <NotificationsContext.Provider value={value}>

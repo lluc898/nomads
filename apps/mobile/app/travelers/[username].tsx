@@ -1,8 +1,7 @@
 import type { PublicProfile } from "@viajeroshub/shared";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   Linking,
   Pressable,
@@ -12,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { DetailSkeleton, ErrorState } from "@/components/content-state";
 import { api } from "@/lib/api";
 import { absoluteMediaUrl } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
@@ -23,6 +23,18 @@ export default function PublicTravelerScreen() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const loadProfile = useCallback(async () => {
+    if (!username) return;
+    await Promise.resolve();
+    setError(null);
+    try {
+      setProfile(await api.getPublicProfile(username));
+    } catch (caught) {
+      console.warn("Public profile load failed", caught);
+      setError(t("loadError"));
+    }
+  }, [t, username]);
+
   useEffect(() => {
     let active = true;
     if (!username) return;
@@ -32,13 +44,13 @@ export default function PublicTravelerScreen() {
         if (active) setProfile(result);
       })
       .catch((caught) => {
-        if (active)
-          setError(caught instanceof Error ? caught.message : "Error");
+        console.warn("Public profile load failed", caught);
+        if (active) setError(t("loadError"));
       });
     return () => {
       active = false;
     };
-  }, [username]);
+  }, [t, username]);
 
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top", "bottom"]}>
@@ -55,17 +67,15 @@ export default function PublicTravelerScreen() {
         </Text>
       </View>
 
-      {!profile && !error ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#0B6EFD" size="large" />
-        </View>
-      ) : null}
+      {!profile && !error ? <DetailSkeleton /> : null}
 
       {error ? (
         <View className="flex-1 justify-center px-5">
-          <Text className="rounded-2xl bg-red-50 p-5 text-center font-semibold text-red-700">
-            {error}
-          </Text>
+          <ErrorState
+            title={t("loadError")}
+            retryLabel={t("retry")}
+            onRetry={() => void loadProfile()}
+          />
         </View>
       ) : null}
 

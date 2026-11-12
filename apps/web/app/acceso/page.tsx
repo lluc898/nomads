@@ -50,9 +50,9 @@ export default async function AccessPage({ searchParams }: AccessPageProps) {
       <section className="relative hidden overflow-hidden bg-[#0B6EFD] p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute -top-24 -right-28 size-96 rounded-full border border-white/15" />
         <div className="absolute top-4 -right-10 size-64 rounded-full border border-white/15" />
-        <Link href="/" className="relative w-fit brightness-0 invert">
+        <div className="relative w-fit brightness-0 invert">
           <Logo />
-        </Link>
+        </div>
         <div className="relative max-w-xl">
           <p className="text-sm font-bold tracking-[.14em] text-blue-100 uppercase">
             {t("accessTitle")}

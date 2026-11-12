@@ -2,7 +2,6 @@ import type { TripConversationSummary } from "@viajeroshub/shared";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -12,6 +11,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { NotificationBell } from "@/components/notification-bell";
+import {
+  EmptyState,
+  ErrorState,
+  RowsSkeleton,
+} from "@/components/content-state";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n-context";
 
@@ -26,15 +30,17 @@ export default function MessagesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
       setConversations(await listTripConversations());
-      setError(null);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Error");
+      console.warn("Conversations load failed", caught);
+      setError(t("loadError"));
     } finally {
       setLoading(false);
     }
-  }, [listTripConversations]);
+  }, [listTripConversations, t]);
   useFocusEffect(
     useCallback(() => {
       void load();
@@ -58,8 +64,8 @@ export default function MessagesScreen() {
         <NotificationBell />
       </View>
       {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#0B6EFD" />
+        <View className="px-5 py-4">
+          <RowsSkeleton />
         </View>
       ) : (
         <ScrollView
@@ -75,11 +81,13 @@ export default function MessagesScreen() {
           }
         >
           {error ? (
-            <Text className="mb-4 rounded-xl bg-red-50 p-4 font-semibold text-red-700">
-              {error}
-            </Text>
+            <ErrorState
+              title={t("loadError")}
+              retryLabel={t("retry")}
+              onRetry={() => void load()}
+            />
           ) : null}
-          {conversations.length ? (
+          {!error && conversations.length ? (
             <View className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
               {conversations.map((conversation) => (
                 <Pressable
@@ -125,13 +133,22 @@ export default function MessagesScreen() {
                 </Pressable>
               ))}
             </View>
-          ) : (
-            <View className="flex-1 items-center justify-center px-8">
-              <Text className="text-center font-semibold text-slate-500">
-                {t("noConversations")}
-              </Text>
-            </View>
-          )}
+          ) : !error ? (
+            <EmptyState
+              title={t("noConversations")}
+              message={t("emptyMessagesHelp")}
+              actions={[
+                {
+                  label: t("navExplore"),
+                  onPress: () => router.push("/(tabs)"),
+                },
+                {
+                  label: t("navMyTrips"),
+                  onPress: () => router.push("/(tabs)/trips"),
+                },
+              ]}
+            />
+          ) : null}
         </ScrollView>
       )}
     </SafeAreaView>

@@ -1,39 +1,43 @@
 import type { TripCard as TripCardData } from "@viajeroshub/shared";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { TripCard } from "@/components/trip-card";
+import {
+  CardListSkeleton,
+  EmptyState,
+  ErrorState,
+} from "@/components/content-state";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n-context";
 
 export default function TripsScreen() {
+  const router = useRouter();
   const { listMyTrips } = useAuth();
   const { locale, t } = useI18n();
   const [trips, setTrips] = useState<TripCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setTrips(await listMyTrips(locale));
+    } catch (caught) {
+      console.warn("My trips load failed", caught);
+      setError(t("loadError"));
+    } finally {
+      setLoading(false);
+    }
+  }, [listMyTrips, locale, t]);
+
   useFocusEffect(
     useCallback(() => {
-      let active = true;
-      setLoading(true);
-      listMyTrips(locale)
-        .then((result) => {
-          if (active) setTrips(result);
-        })
-        .catch((caught) => {
-          if (active)
-            setError(caught instanceof Error ? caught.message : "Error");
-        })
-        .finally(() => {
-          if (active) setLoading(false);
-        });
-      return () => {
-        active = false;
-      };
-    }, [listMyTrips, locale]),
+      void load();
+    }, [load]),
   );
 
   return (
@@ -46,18 +50,35 @@ export default function TripsScreen() {
           {t("myTripsDescription")}
         </Text>
         {loading ? (
-          <ActivityIndicator className="mt-10" color="#0B6EFD" />
+          <View className="mt-6">
+            <CardListSkeleton count={2} />
+          </View>
         ) : null}
         {error ? (
-          <Text className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">
-            {error}
-          </Text>
+          <View className="mt-6">
+            <ErrorState
+              title={t("loadError")}
+              retryLabel={t("retry")}
+              onRetry={() => void load()}
+            />
+          </View>
         ) : null}
         {!loading && !error && !trips.length ? (
-          <View className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-white p-8">
-            <Text className="text-center font-bold text-slate-700">
-              {t("createTripDescription")}
-            </Text>
+          <View className="mt-8">
+            <EmptyState
+              title={t("myTrips")}
+              message={t("createTripDescription")}
+              actions={[
+                {
+                  label: t("navCreate"),
+                  onPress: () => router.push("/(tabs)/create"),
+                },
+                {
+                  label: t("navExplore"),
+                  onPress: () => router.push("/(tabs)"),
+                },
+              ]}
+            />
           </View>
         ) : null}
         <View className="mt-6">

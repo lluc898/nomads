@@ -1,8 +1,7 @@
 import type { TripDetail } from "@viajeroshub/shared";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
   KeyboardAvoidingView,
@@ -17,6 +16,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { DetailSkeleton, ErrorState } from "@/components/content-state";
 import { useAuth } from "@/lib/auth-context";
 import { absoluteMediaUrl, WEB_URL } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
@@ -32,26 +32,34 @@ export default function TripDetailScreen() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
+  const loadTrip = useCallback(async () => {
+    if (!slug) return;
+    await Promise.resolve();
+    setError(null);
+    try {
+      setTrip(await getTrip(slug, locale));
+    } catch (caught) {
+      console.warn("Trip detail load failed", caught);
+      setTrip(null);
+      setError(t("loadError"));
+    }
+  }, [getTrip, locale, slug, t]);
+
   useEffect(() => {
     let active = true;
     if (!slug) return;
     getTrip(slug, locale)
       .then((result) => {
-        if (active) {
-          setTrip(result);
-          setError(null);
-        }
+        if (active) setTrip(result);
       })
       .catch((caught) => {
-        if (active) {
-          setTrip(null);
-          setError(caught instanceof Error ? caught.message : "Error");
-        }
+        console.warn("Trip detail load failed", caught);
+        if (active) setError(t("loadError"));
       });
     return () => {
       active = false;
     };
-  }, [getTrip, locale, slug]);
+  }, [getTrip, locale, slug, t]);
 
   const dateFormatter = new Intl.DateTimeFormat(locale, {
     dateStyle: "long",
@@ -185,17 +193,15 @@ export default function TripDetailScreen() {
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {!trip && !error ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator color="#0B6EFD" size="large" />
-          </View>
-        ) : null}
+        {!trip && !error ? <DetailSkeleton /> : null}
 
         {error ? (
           <View className="flex-1 justify-center px-5">
-            <Text className="rounded-2xl bg-red-50 p-5 text-center font-semibold text-red-700">
-              {error}
-            </Text>
+            <ErrorState
+              title={t("loadError")}
+              retryLabel={t("retry")}
+              onRetry={() => void loadTrip()}
+            />
           </View>
         ) : null}
 

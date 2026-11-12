@@ -1,80 +1,46 @@
 import { Tabs } from "expo-router";
-import { Text, type ColorValue } from "react-native";
 
+import { FloatingTabBar } from "@/components/floating-tab-bar";
 import { useI18n } from "@/lib/i18n-context";
-
-const TabIcon = ({ symbol, color }: { symbol: string; color: ColorValue }) => (
-  <Text style={{ color, fontSize: 19 }}>{symbol}</Text>
-);
-
-const tabSymbols = {
-  home: "\u2302",
-  create: "\uFF0B",
-  trips: "\u2708",
-  messages: "\u2709",
-  profile: "\u25CF",
-} as const;
 
 export default function TabsLayout() {
   const { t } = useI18n();
   return (
     <Tabs
+      tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#0B6EFD",
-        tabBarInactiveTintColor: "#64748B",
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
-        tabBarStyle: {
-          height: 82,
-          paddingTop: 8,
-          paddingBottom: 20,
-          borderTopColor: "#E2E8F0",
-        },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: t("navHome"),
-          tabBarIcon: ({ color }) => (
-            <TabIcon symbol={tabSymbols.home} color={color} />
-          ),
         }}
       />
       <Tabs.Screen
         name="create"
         options={{
           title: t("navCreate"),
-          tabBarIcon: ({ color }) => (
-            <TabIcon symbol={tabSymbols.create} color={color} />
-          ),
         }}
       />
       <Tabs.Screen
         name="trips"
         options={{
           title: t("navMyTrips"),
-          tabBarIcon: ({ color }) => (
-            <TabIcon symbol={tabSymbols.trips} color={color} />
-          ),
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           title: t("messages"),
-          tabBarIcon: ({ color }) => (
-            <TabIcon symbol={tabSymbols.messages} color={color} />
-          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t("navProfile"),
-          tabBarIcon: ({ color }) => (
-            <TabIcon symbol={tabSymbols.profile} color={color} />
-          ),
         }}
       />
     </Tabs>

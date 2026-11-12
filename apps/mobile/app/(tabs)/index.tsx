@@ -1,17 +1,22 @@
 import type { TripCard as TripCardData } from "@viajeroshub/shared";
-import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Image,
-  Pressable,
   ScrollView,
   Text,
   useWindowDimensions,
   View,
+  type ScrollViewInstance,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HomeSearch } from "@/components/home-search";
+import {
+  CardListSkeleton,
+  EmptyState,
+  ErrorState,
+} from "@/components/content-state";
 import { LanguageSelector } from "@/components/language-selector";
 import { NotificationBell } from "@/components/notification-bell";
 import { TripCard } from "@/components/trip-card";
@@ -21,6 +26,8 @@ import { absoluteMediaUrl } from "@/lib/config";
 import { useI18n } from "@/lib/i18n-context";
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const { width } = useWindowDimensions();
   const { profile } = useAuth();
   const { locale, t } = useI18n();
@@ -54,6 +61,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
       <ScrollView
+        ref={scrollRef}
         contentContainerClassName="pb-8"
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -115,29 +123,41 @@ export default function HomeScreen() {
 
         <View>
           {loadingTrips ? (
-            <View className="mx-5 min-h-40 items-center justify-center rounded-2xl border border-slate-200 bg-white">
-              <ActivityIndicator color="#0B6EFD" size="large" />
+            <View className="mx-5">
+              <CardListSkeleton count={1} />
             </View>
           ) : null}
           {tripsError && !loadingTrips ? (
-            <View className="mx-5 rounded-2xl border border-red-200 bg-white p-5">
-              <Text className="font-bold text-slate-950">
-                {t("searchError")}
-              </Text>
-              <Text className="mt-2 leading-6 text-slate-600">
-                {tripsError}
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => {
+            <View className="mx-5">
+              <ErrorState
+                title={t("searchError")}
+                message={t("loadError")}
+                retryLabel={t("retry")}
+                onRetry={() => {
                   setLoadingTrips(true);
                   setTripsError(null);
                   setReloadKey((current) => current + 1);
                 }}
-                className="mt-4 min-h-12 items-center justify-center rounded-xl bg-brand-500 px-5"
-              >
-                <Text className="font-bold text-white">{t("retry")}</Text>
-              </Pressable>
+              />
+            </View>
+          ) : null}
+          {!loadingTrips && !tripsError && !featuredTrips.length ? (
+            <View className="mx-5">
+              <EmptyState
+                title={t("noFeaturedTrips")}
+                message={t("noFeaturedTripsHelp")}
+                actions={[
+                  {
+                    label: t("navExplore"),
+                    onPress: () =>
+                      scrollRef.current?.scrollTo({ y: 0, animated: true }),
+                  },
+                  {
+                    label: t("navCreate"),
+                    onPress: () => router.push("/(tabs)/create"),
+                  },
+                ]}
+              />
             </View>
           ) : null}
           {!loadingTrips && !tripsError ? (
