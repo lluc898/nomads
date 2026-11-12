@@ -354,6 +354,13 @@ Implemented on: `2026-11-11`
   - `packages/database/src/trips.ts`
   - `pnpm-lock.yaml` (pnpm-generated formatting)
 
+### Deployment evidence
+
+- On `2026-11-12`, the completed implementation and its validation evidence were pushed to `origin/main`; local and remote both resolved to commit `c2586a1334d28ff65097dee5458df220bba465d7`.
+- A fresh Expo Go tunnel was started from the completed mobile source and verified with an Expo manifest request (`200`) plus a successful JavaScript launch-asset request. Its direct development URL is `exp://c-lluckaicen-m468d2-mwda4hpuafvwvgv9.on.expo.app` and remains dependent on the development process staying online.
+- The existing production stack did not deploy from the Git push. A post-push request to `https://viajes.llucbosch.com/acceso` still returned the old nested-anchor markup and no Geist marker, while `https://viajes.llucbosch.com/expo` still redirected to the previous Expo tunnel. The GitHub repository has no deployment records, Actions workflows, registered runners, or configured repository-side deployment path.
+- Updating the production web container and stable Expo redirect requires administration access to the existing Docker host (or an operator on that host) because this checkout has no production `deploy/.env`, Docker runtime, SSH route to the host, or Portainer credentials. No production secret was copied into the repository or inferred.
+
 ### Evidence-backed deviations and remaining blockers
 
 - The handoff requested device/browser combinations that this environment cannot provide. No physical-device, simulator, software-keyboard, screen-reader, dynamic-type, or authenticated route result is claimed.
