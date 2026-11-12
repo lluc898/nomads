@@ -9,11 +9,7 @@ import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { LanguageSelector } from "./language-selector";
 import { Logo } from "./logo";
 import { NotificationBell } from "./notification-bell";
-import {
-  MobilePrimaryNavigation,
-  PathAwareAccountDetails,
-  PathAwareLink,
-} from "./primary-navigation";
+import { PathAwareAccountDetails, PathAwareLink } from "./primary-navigation";
 import { UserAvatar } from "./user-avatar";
 
 async function signOutAction() {
@@ -29,6 +25,19 @@ function MenuIcon() {
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function MessagesIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden="true">
+      <path
+        d="M5 5.5h14v10H9l-4 3v-13Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -183,30 +192,49 @@ export async function SiteHeader() {
                   </div>
                 </div>
               ) : null}
-              {!session?.user ? (
-                <nav className="grid" aria-label="Mobile navigation">
-                  <Link
-                    href="/buscar"
-                    className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
-                  >
-                    {t("navExplore")}
-                  </Link>
+              <nav className="grid" aria-label="Mobile navigation">
+                <Link
+                  href="/buscar"
+                  className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
+                >
+                  {t("navExplore")}
+                </Link>
+                {session?.user ? (
+                  <>
+                    <Link
+                      href="/mis-viajes"
+                      className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
+                    >
+                      {t("navMyTrips")}
+                    </Link>
+                    <Link
+                      href="/mensajes"
+                      className="flex min-h-11 items-center gap-2 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
+                    >
+                      <MessagesIcon /> {t("messages")}
+                    </Link>
+                    <Link
+                      href="/perfil"
+                      className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
+                    >
+                      {t("navProfile")}
+                    </Link>
+                  </>
+                ) : (
                   <Link
                     href="/acceso"
                     className="min-h-11 rounded-xl px-3 py-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
                   >
                     {t("navSignIn")}
                   </Link>
-                </nav>
-              ) : null}
-              {!session?.user ? (
-                <Link
-                  href="/crear"
-                  className="mt-2 flex min-h-12 items-center justify-center rounded-xl bg-[#0B6EFD] px-4 text-sm font-bold text-white"
-                >
-                  {t("navCreate")}
-                </Link>
-              ) : null}
+                )}
+              </nav>
+              <Link
+                href="/crear"
+                className="mt-2 flex min-h-12 items-center justify-center rounded-xl bg-[#0B6EFD] px-4 text-sm font-bold text-white"
+              >
+                {t("navCreate")}
+              </Link>
               <div className="mt-3 border-t border-slate-100 px-2 pt-3">
                 <LanguageSelector />
               </div>
@@ -227,19 +255,6 @@ export async function SiteHeader() {
           </details>
         </div>
       </div>
-      {session?.user ? (
-        <MobilePrimaryNavigation
-          unreadCount={unreadCount}
-          labels={{
-            explore: t("navExplore"),
-            create: t("navCreate"),
-            trips: t("navMyTrips"),
-            messages: t("messages"),
-            profile: t("navProfile"),
-            unread: t("unreadCount"),
-          }}
-        />
-      ) : null}
     </header>
   );
 }

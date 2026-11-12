@@ -47,6 +47,9 @@ importers:
       expo:
         specifier: ~58.0.22
         version: 58.0.22(@babel/core@7.29.7)(@expo/dom-webview@58.0.2)(@expo/metro-runtime@58.0.16)(expo-router@58.0.29)(react-dom@19.2.3(react@19.3.0))(react-native-worklets@0.13.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(react-native@0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
+      expo-blur:
+        specifier: ~58.0.6
+        version: 58.0.6(expo@58.0.22)(react-native@0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(react@19.3.0)
       expo-constants:
         specifier: ~58.0.14
         version: 58.0.14(expo@58.0.22)(react-native@0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(typescript@6.0.3)
@@ -146,10 +149,10 @@ importers:
         version: link:../../packages/shared
       next:
         specifier: 16.4.2
-        version: 16.4.2(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        version: 16.4.2(@babel/core@7.29.7)(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       next-auth:
         specifier: 5.0.0-beta.32
-        version: 5.0.0-beta.32(next@16.4.2(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+        version: 5.0.0-beta.32(next@16.4.2(@babel/core@7.29.7)(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -3330,6 +3333,13 @@ packages:
 
   expo-asset@58.0.19:
     resolution: {integrity: sha512-9tYdhiPUJKA3OjnQQJtcP4Yrdc9TPR1JQXTomcLdDSV4XgHSXRpsnp5zsIfM6S/y30QsBFHS6G3WIBaocCiPtA==}
+    peerDependencies:
+      expo: '*'
+      react: '*'
+      react-native: '*'
+
+  expo-blur@58.0.6:
+    resolution: {integrity: sha512-gjcw+pBi/15Qy9L0vD6n+KbEbutz6owvrjbYr+74kSaNgj0DEf2qJ7cEU3EJ8/f8KcZss0/7sUWWO9FtBEg+Wg==}
     peerDependencies:
       expo: '*'
       react: '*'
@@ -9190,6 +9200,12 @@ snapshots:
       - supports-color
       - typescript
 
+  expo-blur@58.0.6(expo@58.0.22)(react-native@0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(react@19.3.0):
+    dependencies:
+      expo: 58.0.22(@babel/core@7.29.7)(@expo/dom-webview@58.0.2)(@expo/metro-runtime@58.0.16)(expo-router@58.0.29)(react-dom@19.2.3(react@19.3.0))(react-native-worklets@0.13.0(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(react-native@0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(react@19.3.0))(react-native@0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
+      react: 19.3.0
+      react-native: 0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0)
+
   expo-constants@58.0.14(expo@58.0.22)(react-native@0.88.1(@babel/core@7.29.7)(@react-native/metro-config@0.86.3(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(typescript@6.0.3):
     dependencies:
       '@expo/env': 2.5.3
@@ -10498,13 +10514,13 @@ snapshots:
     dependencies:
       content-type: 2.1.0
 
-  next-auth@5.0.0-beta.32(next@16.4.2(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
+  next-auth@5.0.0-beta.32(next@16.4.2(@babel/core@7.29.7)(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3):
     dependencies:
       '@auth/core': 0.41.3
-      next: 16.4.2(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      next: 16.4.2(@babel/core@7.29.7)(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react: 19.2.3
 
-  next@16.4.2(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  next@16.4.2(@babel/core@7.29.7)(@types/node@24.19.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
     dependencies:
       '@next/env': 16.4.2
       '@swc/helpers': 0.5.23
@@ -10513,7 +10529,7 @@ snapshots:
       postcss: 8.5.23
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
-      styled-jsx: 5.1.6(react@19.2.3)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.3)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.4.2
       '@next/swc-darwin-x64': 16.4.2
@@ -11364,10 +11380,12 @@ snapshots:
 
   structured-headers@0.4.1: {}
 
-  styled-jsx@5.1.6(react@19.2.3):
+  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.3):
     dependencies:
       client-only: 0.0.1
       react: 19.2.3
+    optionalDependencies:
+      '@babel/core': 7.29.7
 
   sucrase@3.35.1:
     dependencies:

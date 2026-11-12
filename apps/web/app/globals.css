@@ -30,16 +30,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-body:has([data-mobile-primary-navigation]) {
-  padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
-}
-
-@media (min-width: 64rem) {
-  body:has([data-mobile-primary-navigation]) {
-    padding-bottom: 0;
-  }
-}
-
 button,
 input {
   font: inherit;

@@ -48,48 +48,6 @@ export function SearchIcon(props: IconProps) {
   );
 }
 
-export function HomeIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-9Z" />
-    </svg>
-  );
-}
-
-export function PlusCircleIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M12 8v8M8 12h8" />
-    </svg>
-  );
-}
-
-export function SuitcaseIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M4 7h16a1 1 0 0 1 1 1v11H3V8a1 1 0 0 1 1-1ZM3 12h18M9 12v2M15 12v2" />
-    </svg>
-  );
-}
-
-export function MessageCircleIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <path d="M21 11.5a8.5 8.5 0 0 1-9 8.48 9.7 9.7 0 0 1-4-.98l-5 2 1.7-4.5A8.5 8.5 0 1 1 21 11.5Z" />
-    </svg>
-  );
-}
-
-export function UserIcon(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21a8 8 0 0 1 16 0" />
-    </svg>
-  );
-}
-
 export function ArrowRightIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
